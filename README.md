@@ -1,24 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Practice Planner AI
+
+An AI-powered basketball practice plan generator built with Next.js, Tailwind CSS, and OpenAI.
+
+## Features
+
+- Generate structured basketball practice plans from natural language prompts
+- Time-blocked practice schedules with drill categories
+- Uses a curated master drill list to ensure realistic practice plans
+- Clean, modern UI with Tailwind CSS
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18+ installed
+- OpenAI API key ([Get one here](https://platform.openai.com/api-keys))
+
+### Setup
+
+1. Install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Create a `.env.local` file in the root directory:
+```bash
+OPENAI_API_KEY=your_openai_api_key_here
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Run the development server:
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Usage
+
+Enter a practice request in the text area, for example:
+- "Create a 90-minute varsity basketball practice focusing on transition defense and conditioning."
+- "Generate a 60-minute practice plan for shooting and rebounding."
+
+The AI will generate a structured practice plan with time slots, drill names, categories, and notes.
+
+## Deployment
+
+This project is ready to deploy on Vercel:
+
+1. Push your code to GitHub
+2. Import the project in Vercel
+3. Add your `OPENAI_API_KEY` as an environment variable in Vercel's project settings
+4. Deploy!
+
+The app will automatically use the environment variable from Vercel's settings.
 
 ## Learn More
 
