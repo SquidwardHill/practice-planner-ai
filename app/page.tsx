@@ -120,7 +120,36 @@ export default function Home() {
           </div>
         )}
 
-        {practicePlan && (
+        {isLoading && (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6 animate-pulse">
+            <div className="mb-6">
+              <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded mb-3" />
+              <div className="h-4 w-32 bg-gray-100 dark:bg-gray-600 rounded" />
+            </div>
+            <div className="space-y-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="border-l-4 border-blue-200 dark:border-blue-800 pl-4 py-3 bg-gray-50 dark:bg-gray-700/30 rounded-r-lg"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-3">
+                        <span className="h-5 w-24 bg-gray-200 dark:bg-gray-600 rounded" />
+                        <span className="h-4 w-16 bg-gray-200 dark:bg-gray-600 rounded" />
+                        <span className="h-4 w-10 bg-gray-200 dark:bg-gray-600 rounded" />
+                      </div>
+                      <div className="h-5 w-40 bg-gray-200 dark:bg-gray-600 rounded" />
+                    </div>
+                  </div>
+                  <div className="h-4 w-3/4 bg-gray-100 dark:bg-gray-500 rounded" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {practicePlan && !isLoading && (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
