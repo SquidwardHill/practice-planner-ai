@@ -2,6 +2,7 @@ import { openai } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { NextRequest } from 'next/server';
+import { generateMockPracticePlan } from './mock-data';
 
 const DRILL_LIST = `You are an expert basketball coach. You have access to the following library of drills. When generating a plan, YOU MUST ONLY USE DRILLS FROM THIS LIST. Do not hallucinate new drills.
 
@@ -47,6 +48,14 @@ export async function POST(req: NextRequest) {
 
     if (!prompt) {
       return new Response('Prompt is required', { status: 400 });
+    }
+
+    // Use mock data if OPENAI_API_KEY is not set or if USE_MOCK_API is true
+    const useMock = !process.env.OPENAI_API_KEY || process.env.USE_MOCK_API === 'true';
+    
+    if (useMock) {
+      const mockPlan = generateMockPracticePlan(prompt);
+      return Response.json(mockPlan);
     }
 
     const { object } = await generateObject({

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
 interface PracticeBlock {
   time_slot: string;
@@ -20,7 +20,7 @@ export default function Home() {
   const [practicePlan, setPracticePlan] = useState<PracticePlan | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -29,22 +29,26 @@ export default function Home() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/generate', {
-        method: 'POST',
+      const response = await fetch("/api/generate", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ prompt: input }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate practice plan');
+        throw new Error("Failed to generate practice plan");
       }
 
       const data = await response.json();
       setPracticePlan(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred. Please try again.');
+      setError(
+        err instanceof Error
+          ? err.message
+          : "An error occurred. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -86,7 +90,7 @@ export default function Home() {
               disabled={isLoading || !input.trim()}
               className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
             >
-              {isLoading ? 'Generating...' : 'Generate Practice Plan'}
+              {isLoading ? "Generating..." : "Generate Practice Plan"}
             </button>
           </form>
         </div>
