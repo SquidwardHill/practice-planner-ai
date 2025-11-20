@@ -40,10 +40,6 @@ export default function Home() {
       if (!response.ok) {
         throw new Error("Failed to generate practice plan");
       }
-
-      // Handle streamed response - this keeps connection alive during generation
-      // and prevents Vercel timeout (10s limit for blocking calls)
-      // streamObject.toTextStreamResponse() streams the JSON text progressively
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let jsonText = "";
@@ -51,17 +47,44 @@ export default function Home() {
       if (!reader) {
         throw new Error("No response body");
       }
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          jsonText += decoder.decode(value, { stream: true });
+        }
 
-      // Read the stream - this keeps the connection alive during generation
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        jsonText += decoder.decode(value, { stream: true });
+        jsonText += decoder.decode();
+
+        if (!jsonText.trim()) {
+          throw new Error("Empty response from server");
+        }
+
+        // Parse the complete JSON once the stream finishes
+        let data: PracticePlan;
+        try {
+          data = JSON.parse(jsonText) as PracticePlan;
+        } catch (parseError) {
+          // If JSON is incomplete, provide helpful error message
+          console.error("JSON parse error:", parseError, "Received text:", jsonText);
+          throw new Error(
+            "The response was incomplete. This may happen if the generation takes too long. Please try again with a shorter practice duration or simpler request."
+          );
+        }
+
+        // Validate the parsed data has required fields
+        if (!data.practice_title || !data.blocks || !Array.isArray(data.blocks)) {
+          throw new Error("Invalid response format from server");
+        }
+
+        setPracticePlan(data);
+      } catch (streamError) {
+        // Handle stream reading errors
+        if (streamError instanceof Error) {
+          throw streamError;
+        }
+        throw new Error("Failed to read stream response");
       }
-
-      // Parse the complete JSON once the stream finishes
-      const data = JSON.parse(jsonText) as PracticePlan;
-      setPracticePlan(data);
     } catch (err) {
       setError(
         err instanceof Error

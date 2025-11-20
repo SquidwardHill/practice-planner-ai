@@ -4,6 +4,9 @@ import { z } from "zod";
 import { NextRequest } from "next/server";
 import { generateMockPracticePlan } from "./mock-data";
 
+// Edge Runtime (current): Must start response within 25s, can stream for up to 300s
+export const runtime = "edge";
+
 const DRILL_LIST = `You are an expert basketball coach. You have access to the following library of drills. When generating a plan, YOU MUST ONLY USE DRILLS FROM THIS LIST. Do not hallucinate new drills.
 
 The Drill List:
@@ -58,10 +61,7 @@ export async function POST(req: NextRequest) {
       const mockPlan = generateMockPracticePlan(prompt);
       return Response.json(mockPlan);
     }
-
-    // Use streamObject to keep connection alive and avoid Vercel timeout
-    // Streaming keeps the connection alive indefinitely, preventing 10s timeout
-    const result = await streamObject({
+    const result = streamObject({
       model: openai("gpt-4o"),
       system: SYSTEM_PROMPT,
       prompt: `Generate a basketball practice plan based on this request: ${prompt}`,
@@ -69,8 +69,7 @@ export async function POST(req: NextRequest) {
       temperature: 0.7,
     });
 
-    // Return the text stream - this keeps the connection alive during generation
-    // The JSON text will stream progressively, and we parse it on the client
+    // Edge Runtime allows longer execution times for streaming responses
     return result.toTextStreamResponse();
   } catch (error) {
     console.error("Error generating practice plan:", error);
