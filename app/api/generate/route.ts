@@ -1,8 +1,8 @@
-import { openai } from '@ai-sdk/openai';
-import { generateObject } from 'ai';
-import { z } from 'zod';
-import { NextRequest } from 'next/server';
-import { generateMockPracticePlan } from './mock-data';
+import { openai } from "@ai-sdk/openai";
+import { streamObject } from "ai";
+import { z } from "zod";
+import { NextRequest } from "next/server";
+import { generateMockPracticePlan } from "./mock-data";
 
 const DRILL_LIST = `You are an expert basketball coach. You have access to the following library of drills. When generating a plan, YOU MUST ONLY USE DRILLS FROM THIS LIST. Do not hallucinate new drills.
 
@@ -47,29 +47,33 @@ export async function POST(req: NextRequest) {
     const { prompt } = await req.json();
 
     if (!prompt) {
-      return new Response('Prompt is required', { status: 400 });
+      return new Response("Prompt is required", { status: 400 });
     }
 
     // Use mock data if OPENAI_API_KEY is not set or if USE_MOCK_API is true
-    const useMock = !process.env.OPENAI_API_KEY || process.env.USE_MOCK_API === 'true';
-    
+    const useMock =
+      !process.env.OPENAI_API_KEY || process.env.USE_MOCK_API === "true";
+
     if (useMock) {
       const mockPlan = generateMockPracticePlan(prompt);
       return Response.json(mockPlan);
     }
 
-    const { object } = await generateObject({
-      model: openai('gpt-4o'),
+    // Use streamObject to keep connection alive and avoid Vercel timeout
+    // Streaming keeps the connection alive indefinitely, preventing 10s timeout
+    const result = await streamObject({
+      model: openai("gpt-4o"),
       system: SYSTEM_PROMPT,
       prompt: `Generate a basketball practice plan based on this request: ${prompt}`,
       schema: practicePlanSchema,
       temperature: 0.7,
     });
 
-    return Response.json(object);
+    // Return the text stream - this keeps the connection alive during generation
+    // The JSON text will stream progressively, and we parse it on the client
+    return result.toTextStreamResponse();
   } catch (error) {
-    console.error('Error generating practice plan:', error);
-    return new Response('Error generating practice plan', { status: 500 });
+    console.error("Error generating practice plan:", error);
+    return new Response("Error generating practice plan", { status: 500 });
   }
 }
-

@@ -41,7 +41,26 @@ export default function Home() {
         throw new Error("Failed to generate practice plan");
       }
 
-      const data = await response.json();
+      // Handle streamed response - this keeps connection alive during generation
+      // and prevents Vercel timeout (10s limit for blocking calls)
+      // streamObject.toTextStreamResponse() streams the JSON text progressively
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let jsonText = "";
+
+      if (!reader) {
+        throw new Error("No response body");
+      }
+
+      // Read the stream - this keeps the connection alive during generation
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        jsonText += decoder.decode(value, { stream: true });
+      }
+
+      // Parse the complete JSON once the stream finishes
+      const data = JSON.parse(jsonText) as PracticePlan;
       setPracticePlan(data);
     } catch (err) {
       setError(
