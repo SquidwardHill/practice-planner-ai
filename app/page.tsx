@@ -38,8 +38,18 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate practice plan");
+        // Try to get error message from response
+        const errorText = await response.text();
+        let errorMessage = "Failed to generate practice plan";
+        try {
+          const errorJson = JSON.parse(errorText);
+          errorMessage = errorJson.error || errorJson.details || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
+
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let jsonText = "";
@@ -47,17 +57,23 @@ export default function Home() {
       if (!reader) {
         throw new Error("No response body");
       }
+
       try {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-          jsonText += decoder.decode(value, { stream: true });
+          if (value) {
+            jsonText += decoder.decode(value, { stream: true });
+          }
         }
 
+        // Final decode for any remaining bytes
         jsonText += decoder.decode();
 
         if (!jsonText.trim()) {
-          throw new Error("Empty response from server");
+          throw new Error(
+            "Empty response from server - the stream completed but no data was received"
+          );
         }
 
         // Parse the complete JSON once the stream finishes
@@ -66,14 +82,23 @@ export default function Home() {
           data = JSON.parse(jsonText) as PracticePlan;
         } catch (parseError) {
           // If JSON is incomplete, provide helpful error message
-          console.error("JSON parse error:", parseError, "Received text:", jsonText);
+          console.error(
+            "JSON parse error:",
+            parseError,
+            "Received text:",
+            jsonText
+          );
           throw new Error(
             "The response was incomplete. This may happen if the generation takes too long. Please try again with a shorter practice duration or simpler request."
           );
         }
 
         // Validate the parsed data has required fields
-        if (!data.practice_title || !data.blocks || !Array.isArray(data.blocks)) {
+        if (
+          !data.practice_title ||
+          !data.blocks ||
+          !Array.isArray(data.blocks)
+        ) {
           throw new Error("Invalid response format from server");
         }
 

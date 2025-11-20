@@ -4,7 +4,7 @@ import { z } from "zod";
 import { NextRequest } from "next/server";
 import { generateMockPracticePlan } from "./mock-data";
 
-// Edge Runtime (current): Must start response within 25s, can stream for up to 300s
+// - Edge Runtime: 25s to start response, can stream for up to 300s total
 export const runtime = "edge";
 
 const DRILL_LIST = `You are an expert basketball coach. You have access to the following library of drills. When generating a plan, YOU MUST ONLY USE DRILLS FROM THIS LIST. Do not hallucinate new drills.
@@ -61,18 +61,52 @@ export async function POST(req: NextRequest) {
       const mockPlan = generateMockPracticePlan(prompt);
       return Response.json(mockPlan);
     }
-    const result = streamObject({
-      model: openai("gpt-4o"),
-      system: SYSTEM_PROMPT,
-      prompt: `Generate a basketball practice plan based on this request: ${prompt}`,
-      schema: practicePlanSchema,
-      temperature: 0.7,
-    });
 
-    // Edge Runtime allows longer execution times for streaming responses
-    return result.toTextStreamResponse();
+    // Check if API key is actually set
+    if (!process.env.OPENAI_API_KEY) {
+      console.error("OPENAI_API_KEY is not set in environment");
+      return new Response(
+        JSON.stringify({ error: "OpenAI API key not configured" }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    console.log("Starting streamObject generation with Edge Runtime...");
+
+    try {
+      const result = streamObject({
+        model: openai("gpt-4o"),
+        system: SYSTEM_PROMPT,
+        prompt: `Generate a basketball practice plan based on this request: ${prompt}`,
+        schema: practicePlanSchema,
+        temperature: 0.7,
+      });
+
+      console.log("StreamObject created, returning stream response...");
+      // Edge Runtime: Must start response within 25s, can stream for up to 300s
+      const response = result.toTextStreamResponse();
+      console.log("Stream response created successfully");
+      return response;
+    } catch (streamError) {
+      console.error("Error in streamObject:", streamError);
+      throw streamError;
+    }
   } catch (error) {
     console.error("Error generating practice plan:", error);
-    return new Response("Error generating practice plan", { status: 500 });
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    return new Response(
+      JSON.stringify({
+        error: "Error generating practice plan",
+        details: errorMessage,
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
 }
