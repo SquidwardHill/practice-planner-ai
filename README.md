@@ -25,7 +25,11 @@ npm install
 
 2. Create a `.env.local` file in the root directory:
 ```bash
-OPENAI_API_KEY=your_openai_api_key_here
+# For testing without an API key, use mock mode:
+USE_MOCK_API=true
+
+# Or use a real OpenAI API key:
+# OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 3. Run the development server:
@@ -34,6 +38,15 @@ npm run dev
 ```
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Testing
+
+The app includes a mock mode that works without an OpenAI API key. To use it, set `USE_MOCK_API=true` in your `.env.local` file. The mock mode returns sample practice plans based on the master drill list.
+
+Run tests:
+```bash
+npm test
+```
 
 ## Usage
 
