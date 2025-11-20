@@ -3,7 +3,7 @@ import { generateMockPracticePlan } from "@/app/api/generate/mock-data";
 
 // Mock the AI SDK before importing the route
 jest.mock("ai", () => ({
-  generateObject: jest.fn(),
+  streamObject: jest.fn(),
 }));
 
 jest.mock("@ai-sdk/openai", () => ({
@@ -12,15 +12,7 @@ jest.mock("@ai-sdk/openai", () => ({
 
 // Import the route handler after mocks
 import { POST } from "@/app/api/generate/route";
-
-// Mock the AI SDK
-jest.mock("ai", () => ({
-  generateObject: jest.fn(),
-}));
-
-jest.mock("@ai-sdk/openai", () => ({
-  openai: jest.fn(),
-}));
+import { streamObject } from "ai";
 
 describe("/api/generate", () => {
   beforeEach(() => {
@@ -148,6 +140,68 @@ describe("/api/generate", () => {
       const data = await response.json();
 
       expect(data.total_duration_minutes).toBeLessThanOrEqual(90);
+    });
+
+    it("should return streaming response when using real API", async () => {
+      process.env.OPENAI_API_KEY = "test-key";
+      process.env.USE_MOCK_API = "false";
+
+      // Mock streamObject to return a streaming response
+      const mockStreamObject = streamObject as jest.MockedFunction<
+        typeof streamObject
+      >;
+      const mockPracticePlan = {
+        practice_title: "Test Practice",
+        total_duration_minutes: 90,
+        blocks: [
+          {
+            time_slot: "0:00 - 0:10",
+            drill_name: "3-Man Weave",
+            category: "Warmup",
+            duration: 10,
+            notes: "Test notes",
+          },
+        ],
+      };
+
+      // Create a mock ReadableStream that streams the JSON
+      const jsonText = JSON.stringify(mockPracticePlan);
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        start(controller) {
+          // Stream the JSON text in chunks
+          for (let i = 0; i < jsonText.length; i += 10) {
+            controller.enqueue(encoder.encode(jsonText.slice(i, i + 10)));
+          }
+          controller.close();
+        },
+      });
+
+      const mockToTextStreamResponse = jest.fn(() => {
+        return new Response(stream, {
+          headers: { "Content-Type": "text/plain; charset=utf-8" },
+        });
+      });
+
+      // Mock the streamObject return value - using type assertion to satisfy TypeScript
+      // In practice, streamObject returns a complex object, but we only need toTextStreamResponse for this test
+      (mockStreamObject as any).mockResolvedValue({
+        toTextStreamResponse: mockToTextStreamResponse,
+      });
+
+      const req = new NextRequest("http://localhost:3000/api/generate", {
+        method: "POST",
+        body: JSON.stringify({
+          prompt: "Create a 90-minute practice",
+        }),
+      });
+
+      const response = await POST(req);
+      expect(response.status).toBe(200);
+      expect(response.headers.get("Content-Type")).toContain("text/plain");
+
+      // Verify it's a stream (has a body)
+      expect(response.body).toBeDefined();
     });
   });
 });
