@@ -34,8 +34,6 @@ yarn-error.log*
 .env*
 !.env.example
 
-# test files
-__tests__/  
 # vercel
 .vercel
 

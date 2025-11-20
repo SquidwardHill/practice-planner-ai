@@ -185,7 +185,8 @@ describe("/api/generate", () => {
 
       // Mock the streamObject return value - using type assertion to satisfy TypeScript
       // In practice, streamObject returns a complex object, but we only need toTextStreamResponse for this test
-      (mockStreamObject as any).mockResolvedValue({
+      // Note: streamObject is synchronous, so use mockReturnValue, not mockResolvedValue
+      (mockStreamObject as any).mockReturnValue({
         toTextStreamResponse: mockToTextStreamResponse,
       });
 
