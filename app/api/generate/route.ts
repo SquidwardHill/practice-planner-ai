@@ -53,7 +53,6 @@ export async function POST(req: NextRequest) {
       return new Response("Prompt is required", { status: 400 });
     }
 
-    // Use mock data if OPENAI_API_KEY is not set or if USE_MOCK_API is true
     const useMock =
       !process.env.OPENAI_API_KEY || process.env.USE_MOCK_API === "true";
 
@@ -62,7 +61,6 @@ export async function POST(req: NextRequest) {
       return Response.json(mockPlan);
     }
 
-    // Check if API key is actually set
     if (!process.env.OPENAI_API_KEY) {
       console.error("OPENAI_API_KEY is not set in environment");
       return new Response(
@@ -86,7 +84,6 @@ export async function POST(req: NextRequest) {
       });
 
       console.log("StreamObject created, returning stream response...");
-      // Edge Runtime: Must start response within 25s, can stream for up to 300s
       const response = result.toTextStreamResponse();
       console.log("Stream response created successfully");
       return response;
@@ -94,8 +91,27 @@ export async function POST(req: NextRequest) {
       console.error("Error in streamObject:", streamError);
       throw streamError;
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating practice plan:", error);
+
+    if (
+      error?.name === "AI_APICallError" ||
+      error?.data?.error?.code === "invalid_api_key"
+    ) {
+      return new Response(
+        JSON.stringify({
+          error: "Invalid OpenAI API key",
+          details:
+            "The OpenAI API key configured in Vercel is incorrect or expired. Please check your environment variables.",
+          hint: "Go to Vercel Dashboard → Your Project → Settings → Environment Variables and verify OPENAI_API_KEY is set correctly.",
+        }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
     return new Response(
