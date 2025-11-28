@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.69",
+    "@supabase/supabase-js": "^2.86.0",
+    "@vercel/toolbar": "^0.1.41",
     "ai": "^5.0.97",
     "next": "16.0.3",
     "openai": "^6.9.1",
