@@ -1,29 +1,25 @@
-# Database Setup Complete! 🎉
+# Database Dev Documentation
 
-Your Supabase database schema is ready with RLS (Row Level Security) and Shopify integration support.
-
-## What's Been Set Up
-
-### ✅ Database Schema
+### Database Schema
 - **profiles** table - User profiles with Shopify subscription tracking
 - **drills** table - User's drill library with RLS
 - **teams** table - Team branding (logos, colors) with RLS
 - **practice_plans** table - Generated practice plans with RLS
 
-### ✅ Row Level Security (RLS)
+### Row Level Security (RLS)
 All tables have RLS policies that ensure:
 - Users can only access their own data
 - Automatic filtering by `user_id = auth.uid()`
 - Secure data isolation between users
 
-### ✅ Shopify Integration Fields
+### Shopify Integration Fields
 The `profiles` table includes:
 - `shopify_customer_id` - Link to Shopify customer
 - `subscription_status` - 'trial', 'active', 'cancelled', 'expired'
 - `trial_end_date` - Trial expiration
 - `subscription_start_date` / `subscription_end_date` - Subscription dates
 
-### ✅ TypeScript Types & Helpers
+### TypeScript Types & Helpers
 - Full TypeScript types for all database tables
 - Type-safe query helper functions
 - Subscription access control helpers
@@ -32,7 +28,7 @@ The `profiles` table includes:
 
 ### Test Users Seeder
 
-We've included a seeder script to create test users with different subscription statuses:
+Use the seeder script to create test users with different subscription statuses:
 
 ```bash
 npm run seed
@@ -56,7 +52,7 @@ See `scripts/README.md` for more details.
 
 ### Running Tests
 
-We have comprehensive tests for:
+Comprehensive tests for:
 - Subscription access control
 - Database queries
 - RLS policies
