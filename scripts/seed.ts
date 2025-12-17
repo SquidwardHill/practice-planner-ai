@@ -51,19 +51,19 @@ async function seed() {
       }
 
       // Create user (trigger will create profile automatically if migration is run)
-      const { data: authData, error: authError } =
-        await supabase.auth.admin.createUser({
-          email: user.email,
-          password: user.password,
-          email_confirm: true,
-          user_metadata: { full_name: user.full_name },
-        });
+      const { error: authError } = await supabase.auth.admin.createUser({
+        email: user.email,
+        password: user.password,
+        email_confirm: true,
+        user_metadata: { full_name: user.full_name },
+      });
 
       if (authError) throw authError;
 
       console.log(`Created ${user.email}`);
-    } catch (error: any) {
-      console.error(`Error creating ${user.email}:`, error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`Error creating ${user.email}:`, message);
     }
   }
 

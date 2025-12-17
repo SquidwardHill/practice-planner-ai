@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { generateMockPracticePlan } from "@/app/api/generate/mock-data";
+import { PracticeBlock } from "@/app/api/generate/types";
 
 // Mock the AI SDK before importing the route
 jest.mock("ai", () => ({
@@ -66,7 +67,7 @@ describe("/api/generate", () => {
       expect(data.blocks.length).toBeGreaterThan(0);
 
       // Validate block structure
-      data.blocks.forEach((block: any) => {
+      data.blocks.forEach((block: PracticeBlock) => {
         expect(block).toHaveProperty("time_slot");
         expect(block).toHaveProperty("drill_name");
         expect(block).toHaveProperty("category");
@@ -118,7 +119,7 @@ describe("/api/generate", () => {
       expect(data.blocks.length).toBeGreaterThan(0);
 
       // Check time slot format
-      data.blocks.forEach((block: any, index: number) => {
+      data.blocks.forEach((block: PracticeBlock) => {
         expect(block.time_slot).toMatch(/^\d+:\d{2} - \d+:\d{2}$/);
         expect(block.drill_name).toBeTruthy();
         expect(block.category).toBeTruthy();
@@ -186,7 +187,7 @@ describe("/api/generate", () => {
       // Mock the streamObject return value - using type assertion to satisfy TypeScript
       // In practice, streamObject returns a complex object, but we only need toTextStreamResponse for this test
       // Note: streamObject is synchronous, so use mockReturnValue, not mockResolvedValue
-      (mockStreamObject as any).mockReturnValue({
+      (mockStreamObject as jest.Mock).mockReturnValue({
         toTextStreamResponse: mockToTextStreamResponse,
       });
 
@@ -225,7 +226,7 @@ describe("generateMockPracticePlan", () => {
   it("should have valid time slots", () => {
     const plan = generateMockPracticePlan("Create a 90-minute practice");
 
-    plan.blocks.forEach((block, index) => {
+    plan.blocks.forEach((block) => {
       expect(block.time_slot).toMatch(/^\d+:\d{2} - \d+:\d{2}$/);
     });
   });

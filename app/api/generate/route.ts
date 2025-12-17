@@ -91,12 +91,13 @@ export async function POST(req: NextRequest) {
       console.error("Error in streamObject:", streamError);
       throw streamError;
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error generating practice plan:", error);
 
+    const err = error as { name?: string; data?: { error?: { code?: string } } };
     if (
-      error?.name === "AI_APICallError" ||
-      error?.data?.error?.code === "invalid_api_key"
+      err?.name === "AI_APICallError" ||
+      err?.data?.error?.code === "invalid_api_key"
     ) {
       return new Response(
         JSON.stringify({
