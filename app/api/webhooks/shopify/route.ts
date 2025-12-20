@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { supabase } from "@/lib/supabase/server";
+import { SubscriptionStatus, type SubscriptionStatusType } from "@/lib/types";
 
 // Use Node.js runtime for crypto operations (not Edge)
 export const runtime = "nodejs";
@@ -70,7 +71,7 @@ function extractCustomerInfo(payload: any): {
  * For native Shopify, check if order contains subscription product
  */
 function getSubscriptionStatusFromOrder(payload: any): {
-  status: string;
+  status: SubscriptionStatusType | "pending"; // "pending" is temporary, not stored in DB
   startDate?: Date;
   endDate?: Date;
 } {
@@ -94,8 +95,17 @@ function getSubscriptionStatusFromOrder(payload: any): {
       const endDate = new Date(orderDate);
       endDate.setFullYear(endDate.getFullYear() + 1); // 1 year subscription
 
+      // If not paid yet, return "pending" (will be updated when order is paid)
+      if (payload.financial_status !== "paid") {
+        return {
+          status: "pending",
+          startDate: orderDate,
+          endDate: endDate,
+        };
+      }
+
       return {
-        status: payload.financial_status === "paid" ? "active" : "pending",
+        status: SubscriptionStatus.ACTIVE,
         startDate: orderDate,
         endDate: endDate,
       };
@@ -103,7 +113,7 @@ function getSubscriptionStatusFromOrder(payload: any): {
   }
 
   // Default: no subscription found
-  return { status: "trial" };
+  return { status: SubscriptionStatus.UNSET };
 }
 
 /**
@@ -112,7 +122,7 @@ function getSubscriptionStatusFromOrder(payload: any): {
 async function updateUserSubscription(
   shopifyCustomerId: string,
   subscriptionData: {
-    status: string;
+    status: SubscriptionStatusType;
     startDate?: Date;
     endDate?: Date;
   },
@@ -259,23 +269,35 @@ export async function POST(req: NextRequest) {
 
     // Determine subscription status based on webhook topic
     let subscriptionData: {
-      status: string;
+      status: SubscriptionStatusType;
       startDate?: Date;
       endDate?: Date;
     };
 
     if (topic === "orders/paid" || topic === "orders/create") {
-      subscriptionData = getSubscriptionStatusFromOrder(payload);
+      const orderStatus = getSubscriptionStatusFromOrder(payload);
+      // Skip updating for pending orders (will be handled when order is paid)
+      if (orderStatus.status === "pending") {
+        return NextResponse.json({
+          success: true,
+          message: "Order pending payment, will update when paid",
+        });
+      }
+      subscriptionData = {
+        status: orderStatus.status as SubscriptionStatusType,
+        startDate: orderStatus.startDate,
+        endDate: orderStatus.endDate,
+      };
     } else if (topic === "orders/cancelled") {
       subscriptionData = {
-        status: "cancelled",
+        status: SubscriptionStatus.CANCELLED,
         endDate: new Date(),
       };
     } else {
       // Need to verify subscription via API for customer webhooks
       // For now, just store the customer ID and email
       subscriptionData = {
-        status: "trial", // Will be verified when user signs up
+        status: SubscriptionStatus.UNSET,
       };
     }
 

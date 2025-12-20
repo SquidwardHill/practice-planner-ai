@@ -1,6 +1,7 @@
 /**
  * Shopify Webhook Types
  */
+import { type SubscriptionStatusType } from "@/lib/types";
 
 export interface ShopifyWebhookHeaders {
   "x-shopify-hmac-sha256": string;
@@ -40,16 +41,8 @@ export interface ShopifyWebhookPayload {
   [key: string]: any; // Allow additional fields from different subscription apps
 }
 
-export type SubscriptionStatus = 
-  | "trial" 
-  | "active" 
-  | "cancelled" 
-  | "expired" 
-  | "pending";
-
 export interface SubscriptionUpdateData {
-  status: SubscriptionStatus;
+  status: SubscriptionStatusType;
   startDate?: Date;
   endDate?: Date;
 }
-

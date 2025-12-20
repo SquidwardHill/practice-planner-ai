@@ -5,6 +5,7 @@
 
 const SHOPIFY_STORE = process.env.SHOPIFY_STORE_DOMAIN;
 const SHOPIFY_ACCESS_TOKEN = process.env.SHOPIFY_ACCESS_TOKEN;
+export const SHOPIFY_API_VERSION = process.env.SHOPIFY_API_VERSION || "2025-10";
 
 if (!SHOPIFY_STORE || !SHOPIFY_ACCESS_TOKEN) {
   console.warn(
@@ -51,7 +52,9 @@ export async function findCustomerByEmail(
   }
 
   const response = await fetch(
-    `https://${SHOPIFY_STORE}.myshopify.com/admin/api/2024-01/customers/search.json?query=email:${encodeURIComponent(email)}`,
+    `https://${SHOPIFY_STORE}.myshopify.com/admin/api/${SHOPIFY_API_VERSION}/customers/search.json?query=email:${encodeURIComponent(
+      email
+    )}`,
     {
       headers: {
         "X-Shopify-Access-Token": SHOPIFY_ACCESS_TOKEN,
@@ -82,7 +85,7 @@ export async function getCustomerById(
   }
 
   const response = await fetch(
-    `https://${SHOPIFY_STORE}.myshopify.com/admin/api/2024-01/customers/${customerId}.json`,
+    `https://${SHOPIFY_STORE}.myshopify.com/admin/api/${SHOPIFY_API_VERSION}/customers/${customerId}.json`,
     {
       headers: {
         "X-Shopify-Access-Token": SHOPIFY_ACCESS_TOKEN,
@@ -115,7 +118,7 @@ export async function getCustomerOrders(
   }
 
   const response = await fetch(
-    `https://${SHOPIFY_STORE}.myshopify.com/admin/api/2024-01/customers/${customerId}/orders.json?status=any&limit=${limit}`,
+    `https://${SHOPIFY_STORE}.myshopify.com/admin/api/${SHOPIFY_API_VERSION}/customers/${customerId}/orders.json?status=any&limit=${limit}`,
     {
       headers: {
         "X-Shopify-Access-Token": SHOPIFY_ACCESS_TOKEN,
@@ -147,11 +150,13 @@ export function isSubscriptionOrder(order: ShopifyOrder): boolean {
   });
 }
 
+import { SubscriptionStatus, type SubscriptionStatusType } from "@/lib/types";
+
 /**
  * Extract subscription information from orders
  */
 export function getSubscriptionFromOrders(orders: ShopifyOrder[]): {
-  status: "trial" | "active" | "cancelled" | "expired";
+  status: SubscriptionStatusType;
   startDate?: Date;
   endDate?: Date;
 } {
@@ -161,23 +166,23 @@ export function getSubscriptionFromOrders(orders: ShopifyOrder[]): {
     .find(isSubscriptionOrder);
 
   if (!subscriptionOrder) {
-    return { status: "trial" };
+    return { status: SubscriptionStatus.UNSET };
   }
 
   const startDate = new Date(subscriptionOrder.created_at);
   const endDate = new Date(startDate);
   endDate.setFullYear(endDate.getFullYear() + 1); // 1 year subscription
 
-  let status: "trial" | "active" | "cancelled" | "expired" = "active";
+  let status: SubscriptionStatusType = SubscriptionStatus.ACTIVE;
 
   // Check if subscription has expired
   if (endDate < new Date()) {
-    status = "expired";
+    status = SubscriptionStatus.EXPIRED;
   }
 
   // Check if order was cancelled
   if (subscriptionOrder.cancelled_at) {
-    status = "cancelled";
+    status = SubscriptionStatus.CANCELLED;
     const cancelledDate = new Date(subscriptionOrder.cancelled_at);
     return {
       status,
@@ -192,4 +197,3 @@ export function getSubscriptionFromOrders(orders: ShopifyOrder[]): {
     endDate,
   };
 }
-
