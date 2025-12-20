@@ -8,12 +8,14 @@
  * - trial: User has an active Shopify subscription trial
  * - expired: User's subscription has expired
  * - cancelled: User's subscription was cancelled
+ * - unset: User's subscription status is not set (default)
  */
 export enum SubscriptionStatus {
   ACTIVE = "active",
   TRIAL = "trial",
   EXPIRED = "expired",
   CANCELLED = "cancelled",
+  UNSET = "unset",
 }
 
 /**
@@ -23,7 +25,8 @@ export type SubscriptionStatusType =
   | SubscriptionStatus.ACTIVE
   | SubscriptionStatus.TRIAL
   | SubscriptionStatus.EXPIRED
-  | SubscriptionStatus.CANCELLED;
+  | SubscriptionStatus.CANCELLED
+  | SubscriptionStatus.UNSET;
 
 /**
  * Check if a subscription status is valid (allows access to premium features)
@@ -66,7 +69,8 @@ export function isInvalidSubscription(
   if (!status) return true;
   return (
     status === SubscriptionStatus.EXPIRED ||
-    status === SubscriptionStatus.CANCELLED
+    status === SubscriptionStatus.CANCELLED ||
+    status === SubscriptionStatus.UNSET
   );
 }
 
@@ -74,5 +78,5 @@ export function isInvalidSubscription(
  * Get default subscription status (used when profile doesn't exist)
  */
 export function getDefaultSubscriptionStatus(): SubscriptionStatusType {
-  return SubscriptionStatus.TRIAL;
+  return SubscriptionStatus.UNSET;
 }
