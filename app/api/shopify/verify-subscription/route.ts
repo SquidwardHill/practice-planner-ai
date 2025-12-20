@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase/server";
+import { SubscriptionStatus, type SubscriptionStatusType } from "@/lib/types";
+import { SHOPIFY_API_VERSION } from "@/lib/shopify/client";
 
 // Use Node.js runtime for API calls
 export const runtime = "nodejs";
@@ -33,11 +35,11 @@ export async function POST(req: NextRequest) {
 
     // Find customer in Shopify by email or customer ID
     let customer: any = null;
-    
+
     if (shopifyCustomerId) {
       // Fetch customer by ID
       const customerResponse = await fetch(
-        `https://${shopifyStore}.myshopify.com/admin/api/2024-01/customers/${shopifyCustomerId}.json`,
+        `https://${shopifyStore}.myshopify.com/admin/api/${SHOPIFY_API_VERSION}/customers/${shopifyCustomerId}.json`,
         {
           headers: {
             "X-Shopify-Access-Token": shopifyAccessToken,
@@ -53,7 +55,9 @@ export async function POST(req: NextRequest) {
     } else if (email) {
       // Search for customer by email
       const searchResponse = await fetch(
-        `https://${shopifyStore}.myshopify.com/admin/api/2024-01/customers/search.json?query=email:${encodeURIComponent(email)}`,
+        `https://${shopifyStore}.myshopify.com/admin/api/${SHOPIFY_API_VERSION}/customers/search.json?query=email:${encodeURIComponent(
+          email
+        )}`,
         {
           headers: {
             "X-Shopify-Access-Token": shopifyAccessToken,
@@ -73,15 +77,15 @@ export async function POST(req: NextRequest) {
     if (!customer) {
       return NextResponse.json({
         verified: false,
-        status: "trial",
+        status: SubscriptionStatus.UNSET,
         message: "Customer not found in Shopify",
       });
     }
 
     // Check for active orders/subscriptions
-    // For native Shopify, check recent orders for subscription products
+    // TODO: Review this after shopify auth flow is tested
     const ordersResponse = await fetch(
-      `https://${shopifyStore}.myshopify.com/admin/api/2024-01/customers/${customer.id}/orders.json?status=any&limit=10`,
+      `https://${shopifyStore}.myshopify.com/admin/api/${SHOPIFY_API_VERSION}/customers/${customer.id}/orders.json?status=any&limit=10`,
       {
         headers: {
           "X-Shopify-Access-Token": shopifyAccessToken,
@@ -90,7 +94,7 @@ export async function POST(req: NextRequest) {
       }
     );
 
-    let subscriptionStatus = "trial";
+    let subscriptionStatus: SubscriptionStatusType = SubscriptionStatus.UNSET;
     let subscriptionStartDate: Date | undefined;
     let subscriptionEndDate: Date | undefined;
 
@@ -99,12 +103,11 @@ export async function POST(req: NextRequest) {
       const orders = ordersData.orders || [];
 
       // Find the most recent paid order with a subscription product
-      // Adjust this logic based on how you identify subscription products
+      // TODO: Adjust this check based on how you identify subscription products
       const subscriptionOrder = orders
         .filter((order: any) => order.financial_status === "paid")
         .find((order: any) => {
           return order.line_items.some((item: any) => {
-            // Adjust this check based on your subscription product identification
             return (
               item.product_type === "subscription" ||
               item.sku?.includes("subscription") ||
@@ -115,21 +118,21 @@ export async function POST(req: NextRequest) {
         });
 
       if (subscriptionOrder) {
-        subscriptionStatus = "active";
+        subscriptionStatus = SubscriptionStatus.ACTIVE;
         subscriptionStartDate = new Date(subscriptionOrder.created_at);
-        
+
         // Calculate end date (1 year subscription)
         subscriptionEndDate = new Date(subscriptionStartDate);
         subscriptionEndDate.setFullYear(subscriptionEndDate.getFullYear() + 1); // 1 year subscription
-        
+
         // Check if subscription has expired
         if (subscriptionEndDate < new Date()) {
-          subscriptionStatus = "expired";
+          subscriptionStatus = SubscriptionStatus.EXPIRED;
         }
 
         // Check if order was cancelled
         if (subscriptionOrder.cancelled_at) {
-          subscriptionStatus = "cancelled";
+          subscriptionStatus = SubscriptionStatus.CANCELLED;
           subscriptionEndDate = new Date(subscriptionOrder.cancelled_at);
         }
       }
@@ -138,7 +141,7 @@ export async function POST(req: NextRequest) {
     // Update user profile in Supabase
     // First, find the user by email or shopify_customer_id
     let profileQuery = supabase.from("profiles").select("id");
-    
+
     if (shopifyCustomerId) {
       profileQuery = profileQuery.eq("shopify_customer_id", shopifyCustomerId);
     } else {
@@ -157,7 +160,8 @@ export async function POST(req: NextRequest) {
       };
 
       if (subscriptionStartDate) {
-        updateData.subscription_start_date = subscriptionStartDate.toISOString();
+        updateData.subscription_start_date =
+          subscriptionStartDate.toISOString();
       }
       if (subscriptionEndDate) {
         updateData.subscription_end_date = subscriptionEndDate.toISOString();
@@ -192,4 +196,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
