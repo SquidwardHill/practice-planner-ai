@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase/server";
+import { createClient as createServerClient } from "@/lib/supabase/server";
 import {
   findCustomerByEmail,
   getCustomerOrders,
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
     // Verify token and get user
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!;
 
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: {
@@ -90,6 +90,7 @@ export async function POST(req: NextRequest) {
     const shopifyCustomerId = String(customer.id);
 
     // Check if this Shopify customer is already linked to another account
+    const supabase = await createServerClient();
     const { data: existingLink } = await supabase
       .from("profiles")
       .select("id, email")
@@ -138,7 +139,8 @@ export async function POST(req: NextRequest) {
       updateData.subscription_end_date = subscriptionEndDate.toISOString();
     }
 
-    const { error: updateError } = await supabase
+      const supabase = await createServerClient();
+      const { error: updateError } = await supabase
       .from("profiles")
       .update(updateData)
       .eq("id", user.id);
@@ -194,7 +196,7 @@ export async function GET(req: NextRequest) {
 
     // Verify token and get user
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!;
 
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: {
@@ -217,6 +219,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Get user's profile
+    const supabase = await createServerClient();
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select(

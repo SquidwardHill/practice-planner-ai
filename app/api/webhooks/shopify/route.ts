@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
-import { supabase } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { SubscriptionStatus, type SubscriptionStatusType } from "@/lib/types";
 
 // Use Node.js runtime for crypto operations (not Edge)
@@ -42,12 +42,26 @@ function verifyShopifyWebhook(
 
 /**
  * Extract customer ID and email from native Shopify webhook payload
+ * 
+ * Shopify webhook payloads vary by topic:
+ * - customers/create, customers/update: customer object IS the payload (id, email at root)
+ * - orders/*: customer_id and email at root level
  */
-function extractCustomerInfo(payload: any): {
+function extractCustomerInfo(payload: any, topic?: string): {
   customerId: string | null;
   email: string | null;
 } {
-  // Native Shopify webhooks have customer info at the root level
+  // For customers/create and customers/update webhooks, the payload IS the customer object
+  if (topic?.startsWith("customers/")) {
+    if (payload.id) {
+      return {
+        customerId: String(payload.id),
+        email: payload.email || null,
+      };
+    }
+  }
+
+  // For customer webhooks with nested customer object (some formats)
   if (payload.customer) {
     return {
       customerId: payload.customer.id ? String(payload.customer.id) : null,
@@ -55,10 +69,18 @@ function extractCustomerInfo(payload: any): {
     };
   }
 
-  // Orders webhook has customer info nested
+  // For orders webhooks, customer info is at root level
   if (payload.customer_id) {
     return {
       customerId: String(payload.customer_id),
+      email: payload.email || null,
+    };
+  }
+
+  // Fallback: check if payload has id and looks like customer data
+  if (payload.id && (payload.email || payload.first_name || payload.last_name)) {
+    return {
+      customerId: String(payload.id),
       email: payload.email || null,
     };
   }
@@ -68,16 +90,13 @@ function extractCustomerInfo(payload: any): {
 
 /**
  * Determine subscription status from order webhook
- * For native Shopify, check if order contains subscription product
  */
 function getSubscriptionStatusFromOrder(payload: any): {
   status: SubscriptionStatusType | "pending"; // "pending" is temporary, not stored in DB
   startDate?: Date;
   endDate?: Date;
 } {
-  // If this is an order webhook, check if it's a subscription purchase
   if (payload.line_items) {
-    // Check if any line item is a subscription product
     const hasSubscription = payload.line_items.some((item: any) => {
       // TODO:Adjust this check based on how you identify subscription products
       return (
@@ -120,6 +139,7 @@ function getSubscriptionStatusFromOrder(payload: any): {
  * Update user profile with subscription information
  */
 async function updateUserSubscription(
+  supabase: any,
   shopifyCustomerId: string,
   subscriptionData: {
     status: SubscriptionStatusType;
@@ -129,7 +149,6 @@ async function updateUserSubscription(
   email?: string
 ) {
   try {
-    // Find profile by shopify_customer_id
     const { data: existingProfile, error: findError } = await supabase
       .from("profiles")
       .select("id")
@@ -236,6 +255,8 @@ export async function POST(req: NextRequest) {
     }
 
     console.log(`Received Shopify webhook: ${topic} from ${shop}`);
+    console.log("Webhook payload keys:", Object.keys(payload));
+    console.log("Payload sample:", JSON.stringify(payload).substring(0, 200));
 
     // Handle native Shopify webhook topics
     const relevantTopics = [
@@ -257,7 +278,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Extract customer information
-    const { customerId, email } = extractCustomerInfo(payload);
+    const { customerId, email } = extractCustomerInfo(payload, topic);
 
     if (!customerId) {
       console.warn("Could not extract customer ID from webhook payload");
@@ -301,8 +322,12 @@ export async function POST(req: NextRequest) {
       };
     }
 
+    // Create Supabase client for this request
+    const supabase = await createClient();
+    
     // Update user profile with subscription information
     const result = await updateUserSubscription(
+      supabase,
       customerId,
       subscriptionData,
       email || undefined
