@@ -45,7 +45,8 @@ next-env.d.ts
 /references
 /app/**/README.md
 *.md
-
+*.sh
+/⚙️-dev-utils
 
 # supabase
 .supabase
