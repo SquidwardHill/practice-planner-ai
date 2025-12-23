@@ -100,4 +100,3 @@ npm run confirm:user <email>
 **Option 3: Use Mailpit for Testing (Later)**
 - Mailpit is already running at http://localhost:54324
 - Configure SMTP in Supabase Studio: Host `localhost`, Port `1025`
-- See [MAILPIT.md](./MAILPIT.md) for details
