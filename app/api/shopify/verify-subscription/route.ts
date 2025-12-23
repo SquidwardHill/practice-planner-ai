@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { SubscriptionStatus, type SubscriptionStatusType } from "@/lib/types";
 import { SHOPIFY_API_VERSION } from "@/lib/shopify/client";
 
@@ -12,6 +12,9 @@ export const runtime = "nodejs";
  */
 export async function POST(req: NextRequest) {
   try {
+    // Create Supabase client
+    const supabase = await createClient();
+    
     const { email, shopifyCustomerId } = await req.json();
 
     if (!email && !shopifyCustomerId) {

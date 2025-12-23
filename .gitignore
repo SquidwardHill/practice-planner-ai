@@ -44,7 +44,9 @@ next-env.d.ts
 # development and local files
 /references
 /app/**/README.md
-
+*.md
+*.sh
+/⚙️-dev-utils
 
 # supabase
 .supabase

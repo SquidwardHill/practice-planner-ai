@@ -1,51 +1,71 @@
-import { createClient } from "@supabase/supabase-js";
-import { NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
 /**
- * Get Supabase client for middleware
- *
- * Note: For production, install @supabase/ssr for better cookie handling:
- *   npm install @supabase/ssr
- *
- * Then update this to use createServerClient from @supabase/ssr
+ * Create Supabase client for middleware/proxy
+ * Returns both the client and response object for cookie management
  */
 export function createMiddlewareClient(request: NextRequest) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-  // Get access token from cookies
-  const accessToken = request.cookies.get("sb-access-token")?.value;
-  const refreshToken = request.cookies.get("sb-refresh-token")?.value;
-
-  // Create Supabase client with token if available
-  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-      detectSessionInUrl: false,
-    },
-    global: {
-      headers: accessToken
-        ? {
-            Authorization: `Bearer ${accessToken}`,
-          }
-        : {},
-    },
+  let supabaseResponse = NextResponse.next({
+    request,
   });
 
-  // Set session if tokens exist
-  if (accessToken && refreshToken) {
-    supabase.auth.setSession({
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    } as any);
+  // With Fluid compute, don't put this client in a global env. Always create a new one on each request
+  // Support both old and new env variable names for backwards compatibility
+  const supabaseKey =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    supabaseKey!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          );
+          supabaseResponse = NextResponse.next({
+            request,
+          });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  return { supabase, response: supabaseResponse };
+}
+
+/**
+ * Legacy function for backwards compatibility
+ * @deprecated Use createMiddlewareClient instead
+ */
+export async function updateSession(request: NextRequest) {
+  const { supabase, response } = createMiddlewareClient(request);
+
+  // Do not run code between createServerClient and supabase.auth.getClaims() 
+  // Removing getClaims() and using SSR with Supabase client may cause users to randomly logout.
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims;
+
+  if (
+    !user &&
+    !request.nextUrl.pathname.startsWith("/login") &&
+    !request.nextUrl.pathname.startsWith("/auth")
+  ) {
+    // no user, potentially respond by redirecting the user to the login page
+    const url = request.nextUrl.clone();
+    url.pathname = "/auth/login";
+    return NextResponse.redirect(url);
   }
 
-  const response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  });
+  // TODO -> syncing supabase response object with cookie to NextResponse 
 
-  return { supabase, response };
+  return response;
 }

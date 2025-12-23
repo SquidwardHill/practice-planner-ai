@@ -4,7 +4,6 @@ import {
   SubscriptionStatus,
   isValidSubscription,
   isTrialSubscription,
-  getDefaultSubscriptionStatus,
   type SubscriptionStatusType,
 } from "@/lib/types";
 
@@ -49,7 +48,7 @@ async function getSubscriptionStatus(
   status: SubscriptionStatusType;
   isValid: boolean; // true if active or trial (valid Shopify subscription)
   isTrial: boolean;
-  hasLinkedAccount: boolean; 
+  hasLinkedAccount: boolean;
 }> {
   const { data: profile, error } = await supabase
     .from("profiles")
@@ -81,7 +80,7 @@ async function getSubscriptionStatus(
   };
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Allow public routes
@@ -146,9 +145,6 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 
-/**
- * Configure which routes the middleware runs on
- */
 export const config = {
   matcher: [
     /*
