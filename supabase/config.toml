@@ -1,0 +1,9 @@
+[auth.email.smtp]
+enabled = true
+host = "localhost"
+port = 1025
+# Mailpit (included with Supabase local) - no auth needed, but fields are required
+user = "mailpit"
+pass = "mailpit"
+admin_email = "noreply@practice-planner-ai.local"
+sender_name = "Practice Planner AI"
