@@ -1,4 +1,4 @@
-// Simple Supabase exports
-export { supabase as client } from "./client";
-export { supabase as server } from "./server";
+// Supabase exports
+export { createClient as createBrowserClient } from "./client";
+export { createClient as createServerClient } from "./server";
 export * from "./types";
