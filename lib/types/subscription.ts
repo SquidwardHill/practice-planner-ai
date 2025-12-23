@@ -18,9 +18,6 @@ export enum SubscriptionStatus {
   UNSET = "unset",
 }
 
-/**
- * Type for subscription status string values
- */
 export type SubscriptionStatusType =
   | SubscriptionStatus.ACTIVE
   | SubscriptionStatus.TRIAL
@@ -29,7 +26,6 @@ export type SubscriptionStatusType =
   | SubscriptionStatus.UNSET;
 
 /**
- * Check if a subscription status is valid (allows access to premium features)
  * Valid: active or trial
  * Invalid: expired or cancelled
  */
@@ -42,27 +38,18 @@ export function isValidSubscription(
   );
 }
 
-/**
- * Check if subscription status is a trial
- */
 export function isTrialSubscription(
   status: string | null | undefined
 ): boolean {
   return status === SubscriptionStatus.TRIAL;
 }
 
-/**
- * Check if subscription status is active (paid)
- */
 export function isActiveSubscription(
   status: string | null | undefined
 ): boolean {
   return status === SubscriptionStatus.ACTIVE;
 }
 
-/**
- * Check if subscription status is invalid (expired or cancelled)
- */
 export function isInvalidSubscription(
   status: string | null | undefined
 ): boolean {
@@ -74,9 +61,6 @@ export function isInvalidSubscription(
   );
 }
 
-/**
- * Get default subscription status (used when profile doesn't exist)
- */
 export function getDefaultSubscriptionStatus(): SubscriptionStatusType {
   return SubscriptionStatus.UNSET;
 }
