@@ -12,15 +12,10 @@ import {
  */
 const PROTECTED_ROUTES = ["/planner", "/library", "/account"];
 
-/**
- * Premium routes that require Shopify subscription (active or trial)
- * Users must have either an active subscription or a Shopify trial
- */
-const PREMIUM_ROUTES = ["/planner"];
 
-/**
- * Public routes that don't require authentication
- */
+const SUBSCRIPTION_ROUTES = ["/planner"];
+
+
 const PUBLIC_ROUTES = [
   "/",
   "/login",
@@ -35,12 +30,7 @@ function matchesRoute(pathname: string, routes: string[]): boolean {
   return routes.some((route) => pathname.startsWith(route));
 }
 
-/**
- * Get subscription status from profile
- *
- * Valid subscriptions: "active" (paid) or "trial" (Shopify trial)
- * Invalid subscriptions: "expired", "cancelled", "unset", or no profile/link
- */
+
 async function getSubscriptionStatus(
   supabase: any,
   userId: string
@@ -104,7 +94,7 @@ export async function proxy(request: NextRequest) {
 
   // Check if route requires authentication
   const isProtectedRoute = matchesRoute(pathname, PROTECTED_ROUTES);
-  const isPremiumRoute = matchesRoute(pathname, PREMIUM_ROUTES);
+  const isSubscriptionRoute = matchesRoute(pathname, SUBSCRIPTION_ROUTES);
 
   // If route is protected and user is not authenticated, redirect to login
   if (isProtectedRoute && (!user || authError)) {
@@ -118,27 +108,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // Check subscription status for premium routes
-  if (user && isPremiumRoute) {
+  if (user && isSubscriptionRoute) {
     const subscription = await getSubscriptionStatus(supabase, user.id);
 
-    // If user hasn't linked their Shopify account, redirect to account page to link
-    if (!subscription.hasLinkedAccount) {
-      const redirectUrl = new URL("/account", request.url);
-      redirectUrl.searchParams.set("link", "required");
-      return NextResponse.redirect(redirectUrl);
-    }
-
-    // If subscription is invalid (expired or cancelled), redirect to account/subscription page
-    if (!subscription.isValid) {
-      const redirectUrl = new URL("/account", request.url);
-      redirectUrl.searchParams.set("subscription", subscription.status);
-      return NextResponse.redirect(redirectUrl);
-    }
-
-    // Valid subscription (active or trial) - allow access
-    // Add header so frontend can show appropriate UI (trial banner, etc.)
     response.headers.set("X-Subscription-Status", subscription.status);
+    response.headers.set(
+      "X-Has-Subscription",
+      subscription.isValid ? "true" : "false"
+    );
     return response;
   }
 

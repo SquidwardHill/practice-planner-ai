@@ -47,6 +47,7 @@ next-env.d.ts
 *.md
 *.sh
 /⚙️-dev-utils
+/.cursor
 
 # supabase
 .supabase
