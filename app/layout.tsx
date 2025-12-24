@@ -3,6 +3,7 @@ import { Space_Grotesk, Bricolage_Grotesque, Sora } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/navigation";
 import { getAuthState } from "@/lib/supabase/auth-helpers";
+import { DevUserSwitcher } from "@/components/dev-user-switcher";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -32,7 +33,17 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const authState = await getAuthState();
+
+  let authState;
+  try {
+    authState = await getAuthState();
+  } catch (error) {
+    // if auth fails- handle refresh token errors and other auth issues
+    authState = {
+      user: null,
+      subscription: null,
+    };
+  }
 
   return (
     <html lang="en">
@@ -44,6 +55,7 @@ export default async function RootLayout({
           subscription={authState.subscription}
         />
         <main>{children}</main>
+        <DevUserSwitcher />
       </body>
     </html>
   );
