@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Users, LogOut, Code } from "lucide-react";
+import { Users, LogOut, Code, Database } from "lucide-react";
 
 // Test users from seed script
 const TEST_USERS = [
@@ -51,12 +51,14 @@ export function DevUserSwitcher() {
   const router = useRouter();
 
   useEffect(() => {
-    // Only show in development (check hostname or NODE_ENV)
+    // Show in development, localhost, or Vercel preview/staging
+    const hostname =
+      typeof window !== "undefined" ? window.location.hostname : "";
     const isDevelopment =
-      typeof window !== "undefined" &&
-      (window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1" ||
-        process.env.NODE_ENV === "development");
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname.endsWith(".vercel.app") ||
+      process.env.NODE_ENV === "development";
     setIsDev(isDevelopment);
 
     if (isDevelopment) {
@@ -114,6 +116,26 @@ export function DevUserSwitcher() {
     }
   };
 
+  const handleSeedDatabase = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/dev/seed", {
+        method: "POST",
+      });
+      const data = await response.json();
+      if (response.ok) {
+        alert(`✅ ${data.message || "Database seeded successfully!"}`);
+      } else {
+        alert(`❌ Error: ${data.error || "Failed to seed database"}`);
+      }
+    } catch (error) {
+      console.error("Error seeding database:", error);
+      alert("❌ Failed to seed database");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!isDev) {
     return null;
   }
@@ -149,6 +171,11 @@ export function DevUserSwitcher() {
               {user.label}
             </DropdownMenuItem>
           ))}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleSeedDatabase}>
+            <Database className="h-4 w-4 mr-2" />
+            Seed Database
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut}>
             <LogOut className="h-4 w-4 mr-2" />

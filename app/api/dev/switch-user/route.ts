@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { isNonProduction } from "@/lib/utils/dev-helpers";
 
 /**
  * Dev-only API route to switch between test users
- * Only works in development mode
+ * Works in development and staging/preview environments
  */
 export async function POST(request: NextRequest) {
-  // Only allow in development
-  if (process.env.NODE_ENV !== "development") {
+  // Only allow in non-production environments
+  if (!isNonProduction()) {
     return NextResponse.json(
       { error: "Not available in production" },
       { status: 403 }
