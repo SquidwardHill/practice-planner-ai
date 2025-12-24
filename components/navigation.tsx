@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Library, Calendar, User, LogIn } from "lucide-react";
+import { Home, Library, Calendar, User, LogIn, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { LogoutButton } from "@/components/logout-button";
+import { SubscriptionStatusBadge } from "@/components/subscription-status-badge";
 
 interface NavigationProps {
   user: {
@@ -50,7 +51,7 @@ export function Navigation({ user, subscription }: NavigationProps) {
     },
     {
       href: "/profile",
-      label: "Profile",
+      label: "Account",
       icon: User,
       requiresAuth: true,
     },
@@ -95,6 +96,12 @@ export function Navigation({ user, subscription }: NavigationProps) {
                     <Icon className="h-4 w-4" />
                     {item.label}
                     {isLocked && <span className="ml-1 text-xs">🔒</span>}
+                    {item.label === "Account" && subscription && (
+                      <SubscriptionStatusBadge
+                        status={subscription.status}
+                        className="ml-1"
+                      />
+                    )}
                   </Link>
                 );
               })}

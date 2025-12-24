@@ -1,5 +1,3 @@
-// Simple seeder - creates test users
-
 import { config } from "dotenv";
 import { resolve } from "path";
 import { createClient } from "@supabase/supabase-js";
@@ -25,49 +23,129 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
 
 const testUsers = [
   {
-    email: "trial@test.com",
-    password: "test123",
-    full_name: "Trial User",
-  },
-  {
     email: "active@test.com",
     password: "test123",
-    full_name: "Active User",
+    full_name: "Active Subscription User",
+    subscription_status: "active",
+    shopify_customer_id: "shopify_active_123",
+    subscription_start_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
+    subscription_end_date: new Date(Date.now() + 335 * 24 * 60 * 60 * 1000), // 335 days from now
+  },
+  {
+    email: "trial@test.com",
+    password: "test123",
+    full_name: "Trial Subscription User",
+    subscription_status: "trial",
+    shopify_customer_id: "shopify_trial_456",
+    subscription_start_date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+    trial_end_date: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000), // 9 days from now
+  },
+  {
+    email: "unset@test.com",
+    password: "test123",
+    full_name: "No Subscription User",
+    subscription_status: "unset",
+    shopify_customer_id: null,
+    subscription_start_date: null,
+    subscription_end_date: null,
+  },
+  {
+    email: "expired@test.com",
+    password: "test123",
+    full_name: "Expired Subscription User",
+    subscription_status: "expired",
+    shopify_customer_id: "shopify_expired_789",
+    subscription_start_date: new Date(Date.now() - 400 * 24 * 60 * 60 * 1000), // 400 days ago
+    subscription_end_date: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000), // 35 days ago (expired)
+  },
+  {
+    email: "cancelled@test.com",
+    password: "test123",
+    full_name: "Cancelled Subscription User",
+    subscription_status: "cancelled",
+    shopify_customer_id: "shopify_cancelled_101",
+    subscription_start_date: new Date(Date.now() - 200 * 24 * 60 * 60 * 1000), // 200 days ago
+    subscription_end_date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10 days ago (cancelled)
   },
 ];
 
 async function seed() {
-  console.log("Seeding database...\n");
+  console.log("Seeding database with test users...\n");
 
   for (const user of testUsers) {
     try {
       // Check if exists
       const { data: users } = await supabase.auth.admin.listUsers();
-      const exists = users?.users.find((u) => u.email === user.email);
+      const existingUser = users?.users.find((u) => u.email === user.email);
 
-      if (exists) {
-        console.log(`${user.email} already exists`);
-        continue;
+      let userId: string;
+
+      if (existingUser) {
+        console.log(`${user.email} already exists, updating profile...`);
+        userId = existingUser.id;
+      } else {
+        // Create user (trigger will create profile automatically)
+        const { data: newUser, error: authError } =
+          await supabase.auth.admin.createUser({
+            email: user.email,
+            password: user.password,
+            email_confirm: true,
+            user_metadata: { full_name: user.full_name },
+          });
+
+        if (authError) throw authError;
+        if (!newUser.user) throw new Error("User creation failed");
+
+        userId = newUser.user.id;
+        console.log(`Created ${user.email}`);
       }
 
-      // Create user (trigger will create profile automatically if migration is run)
-      const { error: authError } = await supabase.auth.admin.createUser({
-        email: user.email,
-        password: user.password,
-        email_confirm: true,
-        user_metadata: { full_name: user.full_name },
-      });
+      // Update profile with subscription information
+      const profileUpdate: any = {
+        subscription_status: user.subscription_status,
+        shopify_customer_id: user.shopify_customer_id,
+      };
 
-      if (authError) throw authError;
+      if (user.subscription_start_date) {
+        profileUpdate.subscription_start_date =
+          user.subscription_start_date.toISOString();
+      }
+      if (user.subscription_end_date) {
+        profileUpdate.subscription_end_date =
+          user.subscription_end_date.toISOString();
+      }
+      if (user.trial_end_date) {
+        profileUpdate.trial_end_date = user.trial_end_date.toISOString();
+      }
 
-      console.log(`Created ${user.email}`);
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update(profileUpdate)
+        .eq("id", userId);
+
+      if (profileError) {
+        console.error(`Error updating profile for ${user.email}:`, profileError);
+      } else {
+        console.log(
+          `  ✓ Profile updated with subscription_status: ${user.subscription_status}`
+        );
+      }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
-      console.error(`Error creating ${user.email}:`, message);
+      console.error(`Error processing ${user.email}:`, message);
     }
   }
 
-  console.log("\nDone");
+  console.log("\n✅ Seeding complete!");
+  console.log("\nTest users:");
+  console.log("  • active@test.com / test123 - Active subscription");
+  console.log("  • trial@test.com / test123 - Trial subscription");
+  console.log("  • unset@test.com / test123 - No subscription (unset)");
+  console.log("  • expired@test.com / test123 - Expired subscription");
+  console.log("  • cancelled@test.com / test123 - Cancelled subscription");
+  console.log("\n💡 Note: Sessions are configured to last 10 years for test users.");
+  console.log("   If you just updated supabase/config.toml, restart Supabase:");
+  console.log("   npm run supabase:stop && npm run supabase:start");
 }
 
 seed().catch(console.error);

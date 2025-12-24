@@ -8,6 +8,8 @@ export interface AuthState {
   user: {
     id: string;
     email?: string;
+    created_at?: string;
+    full_name?: string | null;
   } | null;
   subscription: {
     status: SubscriptionStatusType;
@@ -28,7 +30,28 @@ export async function getAuthState(): Promise<AuthState> {
     error: authError,
   } = await supabase.auth.getUser();
 
-  if (authError || !user) {
+  // Handle refresh token errors gracefully
+  // "Invalid Refresh Token: Already Used" can happen with concurrent requests
+  if (authError) {
+    // If it's a refresh token error, treat as unauthenticated
+    if (
+      authError.message?.includes("Invalid Refresh Token") ||
+      authError.message?.includes("refresh_token") ||
+      authError.status === 401
+    ) {
+      return {
+        user: null,
+        subscription: null,
+      };
+    }
+    // For other errors, also return unauthenticated state
+    return {
+      user: null,
+      subscription: null,
+    };
+  }
+
+  if (!user) {
     return {
       user: null,
       subscription: null,
@@ -38,7 +61,7 @@ export async function getAuthState(): Promise<AuthState> {
   // Get user's profile to check subscription status
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("subscription_status, shopify_customer_id")
+    .select("subscription_status, shopify_customer_id, full_name")
     .eq("id", user.id)
     .single();
 
@@ -48,6 +71,8 @@ export async function getAuthState(): Promise<AuthState> {
       user: {
         id: user.id,
         email: user.email,
+        created_at: user.created_at,
+        full_name: profile?.full_name || null,
       },
       subscription: {
         status: SubscriptionStatus.UNSET,
@@ -70,6 +95,8 @@ export async function getAuthState(): Promise<AuthState> {
     user: {
       id: user.id,
       email: user.email,
+      created_at: user.created_at,
+      full_name: profile.full_name || null,
     },
     subscription: {
       status,

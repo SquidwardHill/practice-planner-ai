@@ -28,7 +28,8 @@ export async function POST(req: NextRequest) {
 
     // Verify token and get user
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!;
+    const supabaseAnonKey =
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!;
 
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: {
@@ -109,7 +110,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Get customer's orders to verify subscription
-    let orders;
+    let orders: any[] = [];
     try {
       orders = await getCustomerOrders(customer.id, 10);
     } catch (error) {
@@ -139,8 +140,7 @@ export async function POST(req: NextRequest) {
       updateData.subscription_end_date = subscriptionEndDate.toISOString();
     }
 
-      const supabase = await createServerClient();
-      const { error: updateError } = await supabase
+    const { error: updateError } = await supabase
       .from("profiles")
       .update(updateData)
       .eq("id", user.id);
@@ -196,7 +196,8 @@ export async function GET(req: NextRequest) {
 
     // Verify token and get user
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!;
+    const supabaseAnonKey =
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!;
 
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: {

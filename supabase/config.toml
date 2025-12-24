@@ -1,3 +1,8 @@
+[auth]
+# Set JWT expiry to 10 years for test users (in seconds)
+# This keeps test users logged in indefinitely for development
+jwt_expiry = 315360000  # 10 years in seconds
+
 [auth.email.smtp]
 enabled = true
 host = "localhost"
