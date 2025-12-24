@@ -49,8 +49,8 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
       // If email confirmation is disabled, user is already confirmed
       // Otherwise, redirect to success page with instructions
       if (data.user && data.user.email_confirmed_at) {
-        // User is already confirmed, go to protected route
-        router.push('/protected')
+        // User is already confirmed, redirect to welcome page
+        router.push('/welcome')
       } else {
         // Email confirmation required - show instructions
         router.push('/auth/sign-up-success')
