@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { type EmailOtpType } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import { type NextRequest } from 'next/server'
+import { isNewUser } from '@/lib/supabase/user-helpers'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -13,11 +14,16 @@ export async function GET(request: NextRequest) {
   if (token_hash && type) {
     const supabase = await createClient()
 
-    const { error } = await supabase.auth.verifyOtp({
+    const { error, data } = await supabase.auth.verifyOtp({
       type,
       token_hash,
     })
-    if (!error) {
+    if (!error && data.user) {
+      // Check if user is new and redirect to welcome
+      const isNew = isNewUser(data.user.created_at)
+      if (isNew) {
+        redirect('/welcome')
+      }
       // redirect user to specified redirect URL or root of app
       redirect(next)
     } else {
