@@ -88,7 +88,7 @@ export default async function WelcomePage() {
 
       <FeatureGrid
         features={features}
-        hasAccess={hasAccess}
+        hasAccess={hasAccess ?? false}
         buttonText="Get Started"
         disabledButtonText="Unlock Access"
       />

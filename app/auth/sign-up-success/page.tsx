@@ -4,7 +4,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card'
+} from "@/components/ui/card";
 
 export default function Page() {
   return (
@@ -13,12 +13,15 @@ export default function Page() {
         <div className="flex flex-col gap-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl">Thank you for signing up!</CardTitle>
+              <CardTitle className="text-2xl">
+                Thank you for signing up!
+              </CardTitle>
               <CardDescription>Account created successfully</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Your account has been created. If email confirmation is enabled, please check your email.
+                Your account has been created. If email confirmation is enabled,
+                please check your email.
               </p>
               <p className="text-sm text-muted-foreground">
                 For local development, you can confirm your email using:
@@ -27,14 +30,17 @@ export default function Page() {
                 npm run confirm:user &lt;your-email&gt;
               </code>
               <div className="mt-4">
-                <Link href="/auth/login" className="text-sm underline underline-offset-4">
+                <a
+                  href="/auth/login"
+                  className="text-sm underline underline-offset-4"
+                >
                   Go to login →
-                </Link>
+                </a>
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
-  )
+  );
 }
