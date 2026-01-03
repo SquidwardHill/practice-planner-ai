@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
   try {
     // Create Supabase client
     const supabase = await createClient();
-    
+
     const { email, shopifyCustomerId } = await req.json();
 
     if (!email && !shopifyCustomerId) {
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Check for active orders/subscriptions
-    // TODO: Review this after shopify auth flow is tested
+    // 🔌 TODO: Review this after shopify auth flow is tested
     const ordersResponse = await fetch(
       `https://${shopifyStore}.myshopify.com/admin/api/${SHOPIFY_API_VERSION}/customers/${customer.id}/orders.json?status=any&limit=10`,
       {
@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
       const orders = ordersData.orders || [];
 
       // Find the most recent paid order with a subscription product
-      // TODO: Adjust this check based on how you identify subscription products
+      // 🔌 TODO: Adjust condition per published Shopifysubscription properties
       const subscriptionOrder = orders
         .filter((order: any) => order.financial_status === "paid")
         .find((order: any) => {
