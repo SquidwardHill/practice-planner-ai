@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Home, Library, Calendar, User, LogIn, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -64,10 +65,20 @@ export function Navigation({ user, subscription }: NavigationProps) {
     <nav className="border-b bg-background">
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link href="/" className="text-xl font-bold">
-              Practice Planner AI
-            </Link>
+          <Link
+            href="/"
+            className="text-xl font-bold flex items-center gap-2"
+          >
+            <Image
+              src="/rounded-logo.png"
+              alt="Logo"
+              width={48}
+              height={56}
+              className="h-12 w-auto object-contain"
+            />
+          </Link>
+
+          <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
               {navItems.map((item) => {
                 // Skip items that require auth if not authenticated
@@ -81,34 +92,28 @@ export function Navigation({ user, subscription }: NavigationProps) {
                   item.requiresSubscription && !hasActiveSubscription;
 
                 return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      "flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors relative",
-                      isActive
-                        ? "bg-accent text-accent-foreground"
-                        : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
-                      isLocked && "opacity-60"
-                    )}
-                    title={isLocked ? "Subscription required" : undefined}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {item.label}
-                    {isLocked && <span className="ml-1 text-xs">🔒</span>}
-                    {item.label === "Account" && subscription && (
-                      <SubscriptionStatusBadge
-                        status={subscription.status}
-                        className="ml-1"
-                      />
-                    )}
+                  <Link key={item.href} href={item.href}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(isLocked && "opacity-60")}
+                      disabled={isLocked}
+                      title={isLocked ? "Subscription required" : undefined}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {item.label}
+                      {isLocked && <span className="ml-1 text-xs">🔒</span>}
+                      {item.label === "Account" && subscription && (
+                        <SubscriptionStatusBadge
+                          status={subscription.status}
+                          className="ml-1"
+                        />
+                      )}
+                    </Button>
                   </Link>
                 );
               })}
             </div>
-          </div>
-
-          <div className="flex items-center gap-4">
             {isAuthenticated ? (
               <>
                 {subscription?.isTrial && (

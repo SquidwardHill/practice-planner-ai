@@ -6,7 +6,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-space-grotesk);
+  --font-sans: var(--font-bricolage-grotesque);
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
     "Liberation Mono", monospace;
   --color-sidebar-ring: var(--sidebar-ring);
@@ -85,18 +85,18 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
+    --foreground: #7c95c2;
     --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
+    --card-foreground: #b0bcd2;
     --popover: oklch(0.205 0 0);
     --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
+    --primary: #a5b4c3;
     --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
+    --secondary: #4f66f0;
+    --secondary-foreground: #7c95c2;
     --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
+    --muted-foreground: lab(64 -0.63 -8.13);
+    --accent: #7c95c2;
     --accent-foreground: oklch(0.985 0 0);
     --destructive: oklch(0.704 0.191 22.216);
     --border: oklch(1 0 0 / 10%);
@@ -124,6 +124,13 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+    font-family: var(--font-bricolage-grotesque), ui-sans-serif, system-ui,
+      sans-serif;
+  }
+}
+
+@layer utilities {
+  .font-sora {
+    font-family: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
   }
 }

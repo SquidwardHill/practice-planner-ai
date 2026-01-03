@@ -1,15 +1,9 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Bricolage_Grotesque, Sora } from "next/font/google";
+import { Bricolage_Grotesque, Sora } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/navigation";
 import { getAuthState } from "@/lib/supabase/auth-helpers";
 import { DevUserSwitcher } from "@/components/dev-user-switcher";
-
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
 
 const bricolageGrotesque = Bricolage_Grotesque({
   variable: "--font-bricolage-grotesque",
@@ -33,7 +27,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   let authState;
   try {
     authState = await getAuthState();
@@ -48,7 +41,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${spaceGrotesk.variable} ${bricolageGrotesque.variable} ${sora.variable} font-sans antialiased`}
+        className={`${bricolageGrotesque.variable} ${sora.variable} font-sans antialiased text-color-primary`}
       >
         <Navigation
           user={authState.user}
