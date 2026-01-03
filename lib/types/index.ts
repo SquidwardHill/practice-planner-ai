@@ -1,8 +1,5 @@
-/**
- * Shared Types and Enums
- * 
- * Central location for common types used throughout the application
- */
+// Shared Types and Enums
 
 export * from "./subscription";
+export * from "./drill";
 

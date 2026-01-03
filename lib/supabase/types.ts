@@ -1,7 +1,8 @@
 // Simple database types
-import { type SubscriptionStatusType } from "@/lib/types";
+import { type SubscriptionStatusType, type Drill } from "@/lib/types";
 
 export type { SubscriptionStatusType as SubscriptionStatus } from "@/lib/types";
+export type { Drill } from "@/lib/types";
 
 export interface Profile {
   id: string;
