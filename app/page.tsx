@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Calendar, Library, ArrowRight, BookOpen, Upload } from "lucide-react";
+import { Calendar, Library, ArrowRight } from "lucide-react";
 import { Greeting } from "@/components/greeting";
 import { HelpForm } from "@/components/help-form";
 import { FeatureGrid } from "@/components/feature-grid";
@@ -21,6 +21,7 @@ import { publicFeatureCards } from "@/lib/data/features";
 import { publicBenefits } from "@/lib/data/benefits";
 import { FeatureCardsSection } from "@/components/feature-cards-section";
 import { BenefitsSection } from "@/components/benefits-section";
+import { DrillImportActions } from "@/components/drill-import-actions";
 
 export default async function Home() {
   const { user } = await getAuthState();
@@ -64,14 +65,7 @@ export default async function Home() {
             drill data and import here. If you're coming from another system,
             use our CSV template for manual import.
           </p>
-          <Button variant="default" size="lg" className="text-lg px-8 mr-4">
-            Upload Drill List
-            <Upload className="ml-2 h-5 w-5" />
-          </Button>
-          <Button variant="outline" size="lg" className="text-lg px-8">
-            Migration Guide
-            <BookOpen className="ml-2 h-5 w-5" />
-          </Button>
+          <DrillImportActions />
         </div>
 
         <FeatureGrid features={dashboardFeatures} hasAccess={true} />
