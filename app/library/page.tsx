@@ -26,7 +26,7 @@ export default async function LibraryPage() {
             Manage your collection of practice drills
           </p>
         </div>
-        <Button>
+        <Button variant="outline">
           <Plus className="h-4 w-4 mr-2" />
           Create Drill
         </Button>
@@ -47,7 +47,7 @@ export default async function LibraryPage() {
             <p className="text-sm text-muted-foreground mb-6">
               Create your first drill to get started!
             </p>
-            <Button>
+            <Button variant="outline">
               <Plus className="h-4 w-4 mr-2" />
               Create Drill
             </Button>

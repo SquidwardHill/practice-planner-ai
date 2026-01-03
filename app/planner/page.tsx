@@ -54,7 +54,7 @@ export default async function PlannerPage() {
                 continue using this feature.
               </p>
             )}
-            <Button>Manage Subscription</Button>
+            <Button variant="outline">Manage Subscription</Button>
           </CardContent>
         </Card>
       )}
