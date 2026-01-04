@@ -41,13 +41,11 @@ export function DrillImportModal({
   const handleFileSelect = (selectedFile: File | null) => {
     if (!selectedFile) return;
 
-    // Validate file type
+    // Validate file type - only .xls supported
     const validTypes = [
       "application/vnd.ms-excel", // .xls
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
-      "text/csv", // .csv
     ];
-    const validExtensions = [".xls", ".xlsx", ".csv"];
+    const validExtensions = [".xls"];
 
     const fileExtension = selectedFile.name
       .toLowerCase()
@@ -58,7 +56,7 @@ export function DrillImportModal({
       !validExtensions.includes(fileExtension)
     ) {
       alert(
-        "Invalid file type. Please upload a .xls, .xlsx, or .csv file from PracticePlannerLive."
+        "Invalid file type. Please upload a .xls file exported from PracticePlannerLive."
       );
       return;
     }
@@ -121,9 +119,17 @@ export function DrillImportModal({
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (jsonError) {
+          // If response is not JSON, use status text
+          throw new Error(
+            `Upload failed: ${response.statusText || "Unknown error"}`
+          );
+        }
         throw new Error(
-          errorData.error || errorData.message || "Upload failed"
+          errorData.message || errorData.error || "Upload failed"
         );
       }
 
@@ -197,7 +203,7 @@ export function DrillImportModal({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".xls,.xlsx,.csv"
+                accept=".xls,application/vnd.ms-excel"
                 onChange={handleFileInputChange}
                 className="hidden"
                 id="file-upload"
@@ -215,7 +221,7 @@ export function DrillImportModal({
                       Drag and drop your file here, or click to browse
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Supports .xls, .xlsx, and .csv files (max 10MB)
+                      Supports .xls files from PracticePlannerLive (max 10MB)
                     </p>
                   </div>
                   <Button
