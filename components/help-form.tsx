@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Send, CheckCircle2 } from "lucide-react";
 
 export function HelpForm() {
@@ -20,13 +26,13 @@ export function HelpForm() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // TODO: Implement actual API call to submit help request
+    // 🔌 TODO: Implement actual API call to submit help request
     // For now, just simulate a submission
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSubmitted(true);
       setFormData({ subject: "", message: "" });
-      
+
       // Reset success message after 3 seconds
       setTimeout(() => {
         setIsSubmitted(false);
@@ -39,7 +45,7 @@ export function HelpForm() {
       <CardHeader>
         <CardTitle>Need Help?</CardTitle>
         <CardDescription>
-          Send us a message and we'll get back to you as soon as possible
+          Send us a message and we'll get back to you as soon as possible.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -94,4 +100,3 @@ export function HelpForm() {
     </Card>
   );
 }
-
