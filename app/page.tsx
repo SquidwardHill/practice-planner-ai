@@ -63,7 +63,7 @@ export default async function Home() {
             </strong>
             &nbsp; We support migrations from PracticePlannerLive! Download your
             drill data and import here. If you're coming from another system,
-            use our CSV template for manual import.
+            use our XLS template for manual import.
           </p>
           <DrillImportActions />
         </div>
