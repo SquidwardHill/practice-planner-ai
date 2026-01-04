@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -54,7 +54,6 @@ const PREVIEW_ROWS = 10; // Show first 10 rows for review
 
 export default function ImportReviewPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [reviewData, setReviewData] = useState<ImportReviewData | null>(null);
   const [editingRow, setEditingRow] = useState<number | null>(null);
   const [editedRows, setEditedRows] = useState<Map<number, DrillImportRow>>(
@@ -141,7 +140,9 @@ export default function ImportReviewPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || errorData.message || "Failed to confirm import");
+        throw new Error(
+          errorData.error || errorData.message || "Failed to confirm import"
+        );
       }
 
       const result = await response.json();
@@ -149,7 +150,11 @@ export default function ImportReviewPage() {
       sessionStorage.removeItem("importReviewData");
 
       // Redirect to success page with import stats
-      router.push(`/import/success?imported=${result.imported || 0}&skipped=${result.skipped || 0}`);
+      router.push(
+        `/import/success?imported=${result.imported || 0}&skipped=${
+          result.skipped || 0
+        }`
+      );
     } catch (error) {
       console.error("Import confirmation error:", error);
       const errorMessage =
@@ -201,7 +206,9 @@ export default function ImportReviewPage() {
             <CardTitle className="text-sm font-medium">Total Rows</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{reviewData.summary.totalRows}</div>
+            <div className="text-2xl font-bold">
+              {reviewData.summary.totalRows}
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -255,9 +262,10 @@ export default function ImportReviewPage() {
                 Review Sample Data
               </p>
               <p className="text-sm text-blue-800">
-                We're showing the first {PREVIEW_ROWS} rows of your import. Please
-                review and edit any rows that need correction. If the sample looks
-                correct, you can confirm the import for all {reviewData.summary.totalRows} rows.
+                We're showing the first {PREVIEW_ROWS} rows of your import.
+                Please review and edit any rows that need correction. If the
+                sample looks correct, you can confirm the import for all{" "}
+                {reviewData.summary.totalRows} rows.
               </p>
             </div>
           </div>
@@ -269,8 +277,8 @@ export default function ImportReviewPage() {
         <CardHeader>
           <CardTitle>Preview Data (First {PREVIEW_ROWS} Rows)</CardTitle>
           <CardDescription>
-            Click the edit icon to modify any row. Changes will be applied to the
-            full import.
+            Click the edit icon to modify any row. Changes will be applied to
+            the full import.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -296,10 +304,7 @@ export default function ImportReviewPage() {
                 );
 
                 return (
-                  <TableRow
-                    key={index}
-                    className={hasError ? "bg-red-50" : ""}
-                  >
+                  <TableRow key={index} className={hasError ? "bg-red-50" : ""}>
                     <TableCell className="font-medium">{index + 1}</TableCell>
                     <TableCell>
                       {isEditing ? (
@@ -452,7 +457,11 @@ export default function ImportReviewPage() {
 
       {/* Action Buttons */}
       <div className="flex gap-4 justify-end">
-        <Button variant="outline" onClick={handleCancel} disabled={isConfirming}>
+        <Button
+          variant="outline"
+          onClick={handleCancel}
+          disabled={isConfirming}
+        >
           Cancel Import
         </Button>
         <Button
@@ -475,4 +484,3 @@ export default function ImportReviewPage() {
     </div>
   );
 }
-
