@@ -12,7 +12,6 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
 
-    // Check authentication
     const {
       data: { user },
       error: authError,
@@ -25,7 +24,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get file from form data
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
 
@@ -36,16 +34,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file type
+    // Validate file type - only .xls supported
     const fileName = file.name.toLowerCase();
-    const validExtensions = [".xls", ".xlsx", ".csv"];
-    const isValidExtension = validExtensions.some((ext) =>
-      fileName.endsWith(ext)
-    );
+    const isValidExtension = fileName.endsWith(".xls");
 
     if (!isValidExtension) {
       return NextResponse.json(
-        { error: "Invalid file type. Please upload a .xls, .xlsx, or .csv file." },
+        { error: "Invalid file type. Please upload a .xls file exported from PracticePlannerLive." },
         { status: 400 }
       );
     }
@@ -130,11 +125,8 @@ export async function POST(request: NextRequest) {
         }
       }
     });
-
-    // Combine validation errors and duplicate errors
     const allErrors = [...errors, ...duplicateErrors];
 
-    // Return parsed data for review
     return NextResponse.json({
       success: true,
       rows: uniqueRows,
