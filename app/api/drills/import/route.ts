@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { parseDrillFile, validateDrillRow, normalizeDrillRow } from "@/lib/utils/drill-parser";
+import {
+  parseDrillFile,
+  validateDrillRow,
+  normalizeDrillRow,
+} from "@/lib/utils/drill-parser";
 import { type DrillImportRow } from "@/lib/types/drill";
 
 /**
@@ -18,20 +22,14 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
 
     if (!file) {
-      return NextResponse.json(
-        { error: "No file provided" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
     // Validate file type - only .xls supported
@@ -40,7 +38,10 @@ export async function POST(request: NextRequest) {
 
     if (!isValidExtension) {
       return NextResponse.json(
-        { error: "Invalid file type. Please upload a .xls file exported from PracticePlannerLive." },
+        {
+          error:
+            "Invalid file type. Please upload a .xls file exported from PracticePlannerLive.",
+        },
         { status: 400 }
       );
     }
@@ -59,13 +60,17 @@ export async function POST(request: NextRequest) {
     try {
       rawRows = await parseDrillFile(file);
     } catch (parseError) {
+      const errorMessage =
+        parseError instanceof Error
+          ? parseError.message
+          : "Unknown parsing error";
+
+      console.error("File parsing error:", errorMessage, parseError);
+
       return NextResponse.json(
         {
           error: "Failed to parse file",
-          message:
-            parseError instanceof Error
-              ? parseError.message
-              : "Unknown parsing error",
+          message: errorMessage,
         },
         { status: 422 }
       );
@@ -149,4 +154,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
