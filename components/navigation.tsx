@@ -64,18 +64,31 @@ export function Navigation({ user, subscription }: NavigationProps) {
   return (
     <nav className="border-b bg-background">
       <div className="container mx-auto px-4 max-w-6xl">
-        <div className="flex h-16 items-center justify-between">
-          <Link
-            href="/"
-            className="text-xl font-bold flex items-center gap-2"
-          >
+        <div className="flex h-16 items-center justify-between m-2">
+          <Link href="/" className="text-xl font-bold flex items-center gap-2">
             <Image
-              src="/rounded-logo.png"
+              src="/planner-ai-full-logo-light-mode-a.svg"
+              alt="Logo"
+              width={359}
+              height={148}
+              className="h-11 w-auto object-contain dark:hidden"
+              suppressHydrationWarning
+            />
+            <Image
+              src="/planner-ai-full-logo-dark-mode-a.svg"
+              alt="Logo"
+              width={359}
+              height={148}
+              className="h-11 w-auto object-contain hidden dark:block"
+              suppressHydrationWarning
+            />
+            {/* <Image
+              src="/planner-ai-logo-icon-blue.svg"
               alt="Logo"
               width={48}
               height={56}
               className="h-12 w-auto object-contain"
-            />
+            /> */}
           </Link>
 
           <div className="flex items-center gap-4">
