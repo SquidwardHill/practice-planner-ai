@@ -39,9 +39,10 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${bricolageGrotesque.variable} ${sora.variable} font-sans antialiased text-color-primary`}
+        suppressHydrationWarning
       >
         <Navigation
           user={authState.user}
