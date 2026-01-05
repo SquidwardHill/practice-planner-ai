@@ -26,7 +26,7 @@ export function BenefitsSection({
               <Icon className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium">{benefit.title}</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-base text-muted-foreground">
                   {benefit.description}
                 </p>
               </div>

@@ -18,6 +18,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { H1, H3, P, Small } from "@/components/typography";
 
 interface ImportSuccessPageProps {
   searchParams: Promise<{ imported?: string; skipped?: string }>;
@@ -53,44 +54,39 @@ export default async function ImportSuccessPage({
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="text-center mb-8">
+      <div className="text-center mb-12">
         <div className="flex justify-center mb-4">
-          <div className="rounded-full bg-green-100 p-4">
-            <CheckCircle2 className="h-12 w-12 text-green-600" />
+          <div className="rounded-full bg-primary/10 p-4">
+            <CheckCircle2 className="h-12 w-12 text-primary" />
           </div>
         </div>
-        <h1 className="text-4xl font-bold mb-2">Import Successful!</h1>
-        <p className="text-muted-foreground text-lg">
+        <H1 className="mb-2">Import Successful!</H1>
+        <P className="text-muted-foreground">
           {imported > 0
-            ? `${imported} drill${imported !== 1 ? "s" : ""} ${imported === 1 ? "has" : "have"} been successfully imported into your library`
+            ? `${imported} drill${imported !== 1 ? "s" : ""} ${
+                imported === 1 ? "has" : "have"
+              } been successfully imported into your library`
             : "Your import has been processed"}
-        </p>
+        </P>
         {skipped > 0 && (
-          <p className="text-sm text-amber-600 mt-2">
-            {skipped} drill{skipped !== 1 ? "s were" : " was"} skipped (duplicates or errors)
-          </p>
+          <Small className="text-muted-foreground mt-2">
+            {skipped} drill{skipped !== 1 ? "s were" : " was"} skipped
+            (duplicates or errors)
+          </Small>
         )}
       </div>
 
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>What's Next?</CardTitle>
-          <CardDescription>
-            Your drills are now available in your library
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-start gap-4">
-            <Library className="h-5 w-5 text-primary mt-0.5" />
-            <div>
-              <p className="font-medium mb-1">View Your Drill Library</p>
-              <p className="text-sm text-muted-foreground">
-                Browse, edit, and organize your imported drills
-              </p>
-            </div>
+      <div className="mb-12">
+        <div className="flex items-start gap-3 p-4 bg-muted/50 rounded-lg border">
+          <Library className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+          <div>
+            <P className="font-medium mb-1">View Your Drill Library</P>
+            <Small className="text-muted-foreground">
+              Browse, edit, and organize your imported drills
+            </Small>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <div className="flex gap-4 justify-center">
         <Link href="/library">
@@ -109,4 +105,3 @@ export default async function ImportSuccessPage({
     </div>
   );
 }
-

@@ -78,7 +78,7 @@ export default async function WelcomePage() {
           <div className="aspect-video bg-muted flex items-center justify-center">
             <div className="text-center p-8">
               <Calendar className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-              <p className="text-sm text-muted-foreground">
+              <p className="text-base text-muted-foreground">
                 Graphic placeholder
               </p>
             </div>

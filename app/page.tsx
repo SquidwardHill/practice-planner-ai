@@ -22,6 +22,7 @@ import { publicBenefits } from "@/lib/data/benefits";
 import { FeatureCardsSection } from "@/components/feature-cards-section";
 import { BenefitsSection } from "@/components/benefits-section";
 import { DrillImportActions } from "@/components/drill-import-actions";
+import { H1, H2, Lead, P } from "@/components/typography";
 
 export default async function Home() {
   const { user } = await getAuthState();
@@ -51,20 +52,17 @@ export default async function Home() {
     ];
 
     return (
-      // Active Subscription content
-      <div className="container mx-auto px-4 py-12 max-w-6xl">
-        <div className="mb-20 text-center">
-          <h1 className="text-4xl font-bold mb-4">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="mb-16 text-center">
+          <H1 className="mb-3">
             <Greeting firstName={user.full_name} />
-          </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-4">
-            <strong>
-              Do you have an existing library of drills from another system?
-            </strong>
-            &nbsp; We support migrations from PracticePlannerLive! Download your
-            drill data and import here. If you're coming from another system,
-            use our XLS template for manual import.
-          </p>
+          </H1>
+          <Lead className="max-w-2xl mx-auto mb-6">
+            Do you have an existing library of drills from another system? We
+            support migrations from PracticePlannerLive! Download your drill
+            data and import here. If you're coming from another system, use our
+            XLS template for manual import.
+          </Lead>
           <DrillImportActions />
         </div>
 
@@ -81,25 +79,23 @@ export default async function Home() {
   // Public marketing page for unauthenticated users
 
   return (
-    <div className="container mx-auto px-4 py-12 max-w-6xl">
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
       {/* Hero Section */}
       <div className="text-center mb-16">
-        <h1 className="text-5xl font-bold mb-6">
-          AI-Powered Basketball Practice Planning
-        </h1>
-        <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+        <H1 className="mb-4">AI-Powered Basketball Practice Planning</H1>
+        <Lead className="mb-8 max-w-2xl mx-auto">
           Generate structured practice plans, manage your drill library, and
           streamline your coaching workflow with AI assistance.
-        </p>
+        </Lead>
         <div className="flex gap-4 justify-center">
           <Link href="/auth/sign-up">
-            <Button size="lg" className="text-lg px-8">
+            <Button size="lg">
               Get Started
-              <ArrowRight className="ml-2 h-5 w-5" />
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </Link>
           <Link href="/auth/login">
-            <Button variant="outline" size="lg" className="text-lg px-8">
+            <Button variant="outline" size="lg">
               Sign In
             </Button>
           </Link>
@@ -110,34 +106,24 @@ export default async function Home() {
       <FeatureCardsSection features={publicFeatureCards} className="mb-16" />
 
       {/* Benefits Section */}
-      <div className="bg-muted/50 rounded-xl border shadow-sm p-8 mb-16">
-        <h2 className="text-3xl font-bold text-center mb-8">
-          Why Practice Planner AI?
-        </h2>
+      <div className="mb-16">
+        <H2 className="text-center mb-6">Why Practice Planner AI?</H2>
         <BenefitsSection benefits={publicBenefits} variant="public" />
       </div>
 
       {/* CTA Section */}
       <div className="text-center">
-        <Card className="border-transparent bg-transparent">
-          <CardHeader>
-            <CardTitle className="text-3xl font-bold text-foreground mb-3">
-              Ready to get started?
-            </CardTitle>
-            <CardDescription className="text-lg">
-              Join coaches who are already using AI to streamline their practice
-              planning
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/auth/sign-up">
-              <Button size="lg" className="text-lg px-8">
-                Create Your Account
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+        <H2 className="mb-2">Ready to get started?</H2>
+        <P className="text-muted-foreground mb-6">
+          Join coaches who are already using AI to streamline their practice
+          planning
+        </P>
+        <Link href="/auth/sign-up">
+          <Button size="lg">
+            Create Your Account
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </Link>
       </div>
     </div>
   );

@@ -39,6 +39,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import Link from "next/link";
+import { H1, H2, H3, P, Small } from "@/components/typography";
 
 interface ImportReviewData {
   rows: DrillImportRow[];
@@ -176,8 +177,7 @@ export default function ImportReviewPage() {
   const hasMoreRows = reviewData.rows.length > PREVIEW_ROWS;
 
   return (
-    <div className="container mx-auto px-4 py-12 max-w-6xl">
-      {/* Breadcrumbs */}
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
       <Breadcrumb className="mb-6">
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -192,96 +192,66 @@ export default function ImportReviewPage() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Review Your Import</h1>
-        <p className="text-muted-foreground text-lg">
+      <div className="mb-12">
+        <H1 className="mb-2">Review Your Import</H1>
+        <P className="text-muted-foreground">
           Review and verify your drill data before finalizing the import
-        </p>
+        </P>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-4 mb-6">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium">Total Rows</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {reviewData.summary.totalRows}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-              Valid Rows
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {reviewData.summary.validRows}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <XCircle className="h-4 w-4 text-red-600" />
-              Invalid Rows
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              {reviewData.summary.invalidRows}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-amber-600" />
-              Errors
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-amber-600">
-              {reviewData.summary.errors.length}
-            </div>
-          </CardContent>
-        </Card>
+      {/* Summary Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+        <div>
+          <Small className="mb-1">Total Rows</Small>
+          <H2>{reviewData.summary.totalRows}</H2>
+        </div>
+        <div>
+          <Small className="mb-1 flex items-center gap-1">
+            <CheckCircle2 className="h-3 w-3" />
+            Valid
+          </Small>
+          <H2>{reviewData.summary.validRows}</H2>
+        </div>
+        <div>
+          <Small className="mb-1 flex items-center gap-1">
+            <XCircle className="h-3 w-3" />
+            Invalid
+          </Small>
+          <H2>{reviewData.summary.invalidRows}</H2>
+        </div>
+        <div>
+          <Small className="mb-1 flex items-center gap-1">
+            <AlertCircle className="h-3 w-3" />
+            Errors
+          </Small>
+          <H2>{reviewData.summary.errors.length}</H2>
+        </div>
       </div>
 
-      {/* Info Banner */}
-      <Card className="mb-6 border-blue-200 bg-blue-50/50">
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
-            <div className="flex-1">
-              <p className="text-sm font-medium text-blue-900 mb-1">
-                Review Sample Data
-              </p>
-              <p className="text-sm text-blue-800">
-                We're showing the first {PREVIEW_ROWS} rows of your import.
-                Please review and edit any rows that need correction. If the
-                sample looks correct, you can confirm the import for all{" "}
-                {reviewData.summary.totalRows} rows.
-              </p>
-            </div>
+      {/* Info Note */}
+      <div className="mb-12 p-4 bg-muted/50 rounded-lg border">
+        <div className="flex items-start gap-3">
+          <AlertCircle className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+          <div>
+            <Small className="font-medium mb-1">Review Sample Data</Small>
+            <Small className="text-muted-foreground">
+              Showing the first {PREVIEW_ROWS} rows. Review and edit as needed,
+              then confirm to import all {reviewData.summary.totalRows} rows.
+            </Small>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Preview Table */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Preview Data (First {PREVIEW_ROWS} Rows)</CardTitle>
-          <CardDescription>
+      <div className="mb-12">
+        <div className="mb-4">
+          <H3 className="mb-1">Preview Data</H3>
+          <Small className="text-muted-foreground">
             Click the edit icon to modify any row. Changes will be applied to
             the full import.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          </Small>
+        </div>
+        <div className="border rounded-lg overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
@@ -304,8 +274,11 @@ export default function ImportReviewPage() {
                 );
 
                 return (
-                  <TableRow key={index} className={hasError ? "bg-red-50" : ""}>
-                    <TableCell className="font-medium">{index + 1}</TableCell>
+                  <TableRow
+                    key={index}
+                    className={hasError ? "bg-destructive/5" : ""}
+                  >
+                    <TableCell>{index + 1}</TableCell>
                     <TableCell>
                       {isEditing ? (
                         <Input
@@ -417,42 +390,33 @@ export default function ImportReviewPage() {
             </TableBody>
           </Table>
           {hasMoreRows && (
-            <div className="mt-4 text-sm text-muted-foreground text-center">
+            <div className="p-4 text-base text-muted-foreground text-center border-t">
               Showing {PREVIEW_ROWS} of {reviewData.summary.totalRows} rows. The
               remaining rows will be imported with the same format.
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Errors Section */}
       {reviewData.summary.errors.length > 0 && (
-        <Card className="mb-6 border-red-200">
-          <CardHeader>
-            <CardTitle className="text-red-900">Import Errors</CardTitle>
-            <CardDescription>
-              The following rows had errors and will be skipped
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {reviewData.summary.errors.map((error, index) => (
-                <div
-                  key={index}
-                  className="flex items-start gap-3 p-3 rounded-lg bg-red-50 border border-red-200"
-                >
-                  <XCircle className="h-4 w-4 text-red-600 mt-0.5 shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-red-900">
-                      Row {error.row}
-                    </p>
-                    <p className="text-sm text-red-800">{error.error}</p>
-                  </div>
+        <div className="mb-12">
+          <H3 className="mb-3">Import Errors</H3>
+          <div className="space-y-2">
+            {reviewData.summary.errors.map((error, index) => (
+              <div
+                key={index}
+                className="flex items-start gap-3 p-3 rounded-lg border border-destructive/20 bg-destructive/5"
+              >
+                <XCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                <div>
+                  <Small className="font-medium">Row {error.row}</Small>
+                  <Small className="text-muted-foreground">{error.error}</Small>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* Action Buttons */}

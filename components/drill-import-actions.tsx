@@ -14,20 +14,19 @@ export function DrillImportActions() {
       <Button
         variant="default"
         size="lg"
-        className="text-lg px-8 mr-4"
+        className="mr-4"
         onClick={() => setIsModalOpen(true)}
       >
         Upload Drill List
-        <Upload className="ml-2 h-5 w-5" />
+        <Upload className="ml-2 h-4 w-4" />
       </Button>
       <Link href="/docs">
-        <Button variant="outline" size="lg" className="text-lg px-8">
+        <Button variant="outline" size="lg">
           Documentation
-          <BookOpen className="ml-2 h-5 w-5" />
+          <BookOpen className="ml-2 h-4 w-4" />
         </Button>
       </Link>
       <DrillImportModal open={isModalOpen} onOpenChange={setIsModalOpen} />
     </>
   );
 }
-

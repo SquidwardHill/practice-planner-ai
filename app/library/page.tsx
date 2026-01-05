@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { DrillsDataTable } from "@/components/drills-data-table";
 import { Plus } from "lucide-react";
 import { type Drill } from "@/lib/types/drill";
+import { H1, P } from "@/components/typography";
 
 export default async function LibraryPage() {
   const { user } = await getAuthState();
@@ -41,12 +42,16 @@ export default async function LibraryPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-12 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Drill Library</h1>
-          <p className="text-muted-foreground mt-2">
-            Manage your collection of practice drills
-          </p>
+          <H1>Drill Library</H1>
+          <P className="text-muted-foreground mt-1">
+            {totalDrills === 0
+              ? "Your drill library is empty"
+              : `${totalDrills} drill${
+                  totalDrills !== 1 ? "s" : ""
+                } in your library`}
+          </P>
         </div>
         <Button variant="outline">
           <Plus className="h-4 w-4 mr-2" />
@@ -54,33 +59,20 @@ export default async function LibraryPage() {
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Your Drills</CardTitle>
-          <CardDescription>
-            All drills you've created or imported ({totalDrills} total)
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {totalDrills === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground mb-4">
-                Your drill library is empty
-              </p>
-              <p className="text-sm text-muted-foreground mb-6">
-                Import drills from PracticePlannerLive or create your first
-                drill to get started!
-              </p>
-              <Button variant="outline">
-                <Plus className="h-4 w-4 mr-2" />
-                Create Drill
-              </Button>
-            </div>
-          ) : (
-            <DrillsDataTable data={drillList} totalRows={totalDrills} />
-          )}
-        </CardContent>
-      </Card>
+      {totalDrills === 0 ? (
+        <div className="text-center py-16">
+          <P className="text-muted-foreground mb-2">
+            Import drills from PracticePlannerLive or create your first drill to
+            get started
+          </P>
+          <Button variant="outline" className="mt-4">
+            <Plus className="h-4 w-4 mr-2" />
+            Create Drill
+          </Button>
+        </div>
+      ) : (
+        <DrillsDataTable data={drillList} totalRows={totalDrills} />
+      )}
     </div>
   );
 }

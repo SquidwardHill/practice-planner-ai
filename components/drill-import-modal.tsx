@@ -173,7 +173,7 @@ export function DrillImportModal({
             Download your drill data from PracticePlannerLive. Your drills will
             be automatically formatted and imported into your library.
           </DialogDescription>
-          <p className="text-sm text-muted-foreground/75 pt-2">
+          <p className="text-base text-muted-foreground/75 pt-2">
             {" "}
             Need more details? Check out our{" "}
             <Link
@@ -217,7 +217,7 @@ export function DrillImportModal({
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium">
+                    <p className="text-base font-medium">
                       Drag and drop your file here, or click to browse
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -240,7 +240,7 @@ export function DrillImportModal({
                       <FileText className="h-6 w-6 text-primary" />
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="text-sm font-medium">{file.name}</p>
+                      <p className="text-base font-medium">{file.name}</p>
                       <p className="text-xs text-muted-foreground">
                         {(file.size / 1024).toFixed(2)} KB
                       </p>

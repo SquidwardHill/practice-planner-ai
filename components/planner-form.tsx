@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { H2, P, Small } from "@/components/typography";
 
 interface PracticeBlock {
   time_slot: string;
@@ -112,14 +112,14 @@ export function PlannerForm() {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Generate Practice Plan</CardTitle>
-          <CardDescription>
+      <div className="p-6 border rounded-lg">
+        <div className="mb-4">
+          <H2 className="mb-1">Generate Practice Plan</H2>
+          <P className="text-muted-foreground">
             Create a custom practice plan based on your preferences
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          </P>
+        </div>
+        <div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="prompt">Practice Request</Label>
@@ -137,22 +137,17 @@ export function PlannerForm() {
               {isLoading ? "Generating..." : "Generate Practice Plan"}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {error && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
-              <p className="text-sm text-destructive">{error}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="p-4 border border-destructive/50 rounded-lg bg-destructive/5">
+          <Small className="text-destructive">{error}</Small>
+        </div>
       )}
 
       {isLoading && (
-        <Card>
-          <CardContent className="pt-6">
+        <div className="p-6 border rounded-lg">
             <div className="space-y-4 animate-pulse">
               <div className="space-y-2">
                 <div className="h-6 w-48 bg-muted rounded" />
@@ -179,19 +174,20 @@ export function PlannerForm() {
                 ))}
               </div>
             </div>
-          </CardContent>
-        </Card>
+        </div>
       )}
 
       {practicePlan && !isLoading && (
-        <Card>
-          <CardHeader>
-            <CardTitle>{practicePlan.practice_title}</CardTitle>
-            <CardDescription>
+        <div className="p-6 border rounded-lg">
+          <div className="mb-4">
+            <H2 className="mb-1">
+              {practicePlan.practice_title}
+            </H2>
+            <P className="text-muted-foreground">
               Total Duration: {practicePlan.total_duration_minutes} minutes
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+            </P>
+          </div>
+          <div>
             <div className="space-y-4">
               {practicePlan.blocks.map((block, index) => (
                 <div
@@ -201,7 +197,7 @@ export function PlannerForm() {
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-1">
-                        <span className="text-sm font-mono text-muted-foreground bg-background px-2 py-1 rounded">
+                        <span className="text-base font-mono text-muted-foreground bg-background px-2 py-1 rounded">
                           {block.time_slot}
                         </span>
                         <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded">
@@ -211,17 +207,21 @@ export function PlannerForm() {
                           {block.duration} min
                         </span>
                       </div>
-                      <h3 className="text-lg font-semibold">{block.drill_name}</h3>
+                      <P className="font-medium">
+                        {block.drill_name}
+                      </P>
                     </div>
                   </div>
                   {block.notes && (
-                    <p className="text-sm text-muted-foreground mt-2">{block.notes}</p>
+                    <Small className="text-muted-foreground mt-2">
+                      {block.notes}
+                    </Small>
                   )}
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
     </div>
   );

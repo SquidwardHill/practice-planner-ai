@@ -19,11 +19,11 @@ export default function Page() {
               <CardDescription>Account created successfully</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-base text-muted-foreground mb-4">
                 Your account has been created. If email confirmation is enabled,
                 please check your email.
               </p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-base text-muted-foreground">
                 For local development, you can confirm your email using:
               </p>
               <code className="text-xs bg-muted p-2 rounded mt-2 block">

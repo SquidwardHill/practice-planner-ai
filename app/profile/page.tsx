@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { SubscriptionStatusBadge } from "@/components/subscription-status-badge";
 import { SubscriptionStatus } from "@/lib/types/subscription";
+import { H1, H3, P, Small } from "@/components/typography";
 
 export default async function ProfilePage() {
   const { user, subscription } = await getAuthState();
@@ -19,43 +20,41 @@ export default async function ProfilePage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Profile</h1>
-        <p className="text-muted-foreground mt-2">
+      <div className="mb-12">
+        <H1>Profile</H1>
+        <P className="text-muted-foreground mt-1">
           Manage your account and subscription settings
-        </p>
+        </P>
       </div>
 
       <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Account Information</CardTitle>
-            <CardDescription>Your account details</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <div className="p-6 border rounded-lg">
+          <H3 className="mb-1">Account Information</H3>
+          <Small className="text-muted-foreground mb-4">
+            Your account details
+          </Small>
+          <div className="space-y-4">
             <div>
               <label className="text-sm font-medium text-muted-foreground">
                 Email
               </label>
-              <p className="text-sm mt-1">{user.email || "Not set"}</p>
+              <P className="mt-1">{user.email || "Not set"}</P>
             </div>
             <div>
               <label className="text-sm font-medium text-muted-foreground">
                 User ID
               </label>
-              <p className="text-sm mt-1 font-mono">{user.id}</p>
+              <Small className="mt-1 font-mono">{user.id}</Small>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Subscription Status</CardTitle>
-            <CardDescription>
-              Your current subscription information
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <div className="p-6 border rounded-lg">
+          <H3 className="mb-1">Subscription Status</H3>
+          <Small className="text-muted-foreground mb-4">
+            Your current subscription information
+          </Small>
+          <div className="space-y-4">
             <div>
               <label className="text-sm font-medium text-muted-foreground">
                 Status
@@ -68,36 +67,36 @@ export default async function ProfilePage() {
               <label className="text-sm font-medium text-muted-foreground">
                 Shopify Account Linked
               </label>
-              <p className="text-sm mt-1">
+              <P className="mt-1">
                 {subscription?.hasLinkedAccount ? "Yes" : "No"}
-              </p>
+              </P>
             </div>
             {subscription?.isValid && (
-              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-md">
-                <p className="text-sm text-green-800 dark:text-green-200">
+              <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
+                <Small>
                   ✓ You have access to all features
-                </p>
+                </Small>
               </div>
             )}
             {!subscription?.isValid &&
               subscription?.status !== SubscriptionStatus.UNSET && (
-                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-md">
-                  <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                <div className="p-4 bg-muted/50 rounded-lg border">
+                  <Small>
                     Your subscription is not active. Please renew to access all
                     features.
-                  </p>
+                  </Small>
                 </div>
               )}
             {subscription?.status === SubscriptionStatus.UNSET && (
-              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md">
-                <p className="text-sm text-blue-800 dark:text-blue-200">
+              <div className="p-4 bg-muted/50 rounded-lg border">
+                <Small>
                   No subscription found. Please link your Shopify account to get
                   started.
-                </p>
+                </Small>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

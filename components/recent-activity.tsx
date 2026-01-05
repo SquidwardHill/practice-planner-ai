@@ -1,13 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { History, Clock, LucideIcon } from "lucide-react";
+import { H3, P, Small } from "@/components/typography";
 
 export interface ActivityItem {
   type: string;
@@ -32,56 +26,53 @@ export function RecentActivity({
   viewAllText = "View All Activity",
 }: RecentActivityProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+    <div className="flex flex-col gap-6 rounded-xl border shadow-sm py-6">
+      <div className="px-6">
+        <H3 className="flex items-center gap-2">
           <History className="h-5 w-5" />
           Recent Activity
-        </CardTitle>
-        <CardDescription>
+        </H3>
+        <Small className="text-muted-foreground mt-1">
           Your recently created practice plans and drills
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {activities.length > 0 ? (
-          <div className="space-y-4">
-            {activities.map((activity, index) => {
-              const Icon = activity.icon;
-              return (
-                <div
-                  key={index}
-                  className="flex items-start gap-3 p-3 rounded-lg border hover:bg-accent/50 transition-colors"
-                >
-                  <Icon className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm">{activity.title}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Clock className="h-3 w-3 text-muted-foreground" />
-                      <p className="text-xs text-muted-foreground">
-                        {activity.date}
-                      </p>
-                    </div>
+        </Small>
+      </div>
+      {activities.length > 0 ? (
+        <div className="space-y-2 px-6">
+          {activities.map((activity, index) => {
+            const Icon = activity.icon;
+            return (
+              <div
+                key={index}
+                className="flex items-start gap-3 p-3 rounded-lg border hover:bg-accent/50 transition-colors"
+              >
+                <Icon className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <P>{activity.title}</P>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <Clock className="h-3 w-3 text-muted-foreground" />
+                    <Small className="text-muted-foreground">
+                      {activity.date}
+                    </Small>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            <History className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-sm">{emptyStateTitle}</p>
-            <p className="text-xs mt-1">{emptyStateDescription}</p>
-          </div>
-        )}
-        <div className="pt-4 border-t mt-4">
-          <Link href={viewAllHref}>
-            <Button variant="outline" className="w-full">
-              {viewAllText}
-            </Button>
-          </Link>
+              </div>
+            );
+          })}
         </div>
-      </CardContent>
-    </Card>
+      ) : (
+        <div className="text-center py-8 text-muted-foreground px-6">
+          <History className="h-10 w-10 mx-auto mb-3 opacity-50" />
+          <P>{emptyStateTitle}</P>
+          <Small className="mt-1">{emptyStateDescription}</Small>
+        </div>
+      )}
+      <div className="px-6">
+        <Link href={viewAllHref}>
+          <Button variant="outline" className="w-full">
+            {viewAllText}
+          </Button>
+        </Link>
+      </div>
+    </div>
   );
 }
-
