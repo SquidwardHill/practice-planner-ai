@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Home, Library, Calendar, User, LogIn, Info } from "lucide-react";
+import { Home, Library, Calendar, User, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { LogoutButton } from "@/components/logout-button";
@@ -62,37 +62,37 @@ export function Navigation({ user, subscription }: NavigationProps) {
   const hasActiveSubscription = subscription?.isValid ?? false;
 
   return (
-    <nav className="border-b bg-background">
-      <div className="container mx-auto px-4 max-w-6xl">
-        <div className="flex h-16 items-center justify-between m-2">
-          <Link href="/" className="text-xl font-bold flex items-center gap-2">
+    <nav className="sticky top-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container max-w-6xl mx-auto px-6">
+        <div className="flex h-14 items-center justify-between">
+          {/* Logo */}
+          <Link
+            href="/"
+            className="flex items-center gap-2 transition-opacity hover:opacity-80"
+          >
             <Image
-              src="/planner-ai-full-logo-light-mode-a.svg"
-              alt="Logo"
-              width={359}
-              height={148}
-              className="h-11 w-auto object-contain dark:hidden"
+              src="/logo/planner-ai-light-mode.svg"
+              alt="Practice Planner AI"
+              width={218}
+              height={100}
+              className="h-8 w-auto object-contain dark:hidden"
               suppressHydrationWarning
+              priority
             />
             <Image
-              src="/planner-ai-full-logo-dark-mode-a.svg"
-              alt="Logo"
-              width={359}
-              height={148}
-              className="h-11 w-auto object-contain hidden dark:block"
+              src="/logo/planner-ai-dark-mode.svg"
+              alt="Practice Planner AI"
+              width={218}
+              height={100}
+              className="h-8 w-auto object-contain hidden dark:block"
               suppressHydrationWarning
+              priority
             />
-            {/* <Image
-              src="/planner-ai-logo-icon-blue.svg"
-              alt="Logo"
-              width={48}
-              height={56}
-              className="h-12 w-auto object-contain"
-            /> */}
           </Link>
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1">
+          {/* Navigation Items */}
+          <div className="flex items-center gap-8">
+            <div className="hidden md:flex items-center gap-6">
               {navItems.map((item) => {
                 // Skip items that require auth if not authenticated
                 if (item.requiresAuth && !isAuthenticated) {
@@ -105,60 +105,83 @@ export function Navigation({ user, subscription }: NavigationProps) {
                   item.requiresSubscription && !hasActiveSubscription;
 
                 return (
-                  <Link key={item.href} href={item.href}>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className={cn(isLocked && "opacity-60")}
-                      disabled={isLocked}
-                      title={isLocked ? "Subscription required" : undefined}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {item.label}
-                      {isLocked && <span className="ml-1 text-xs">🔒</span>}
-                      {item.label === "Account" && subscription && (
-                        <SubscriptionStatusBadge
-                          status={subscription.status}
-                          className="ml-1"
-                        />
-                      )}
-                    </Button>
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-2 text-base font-medium transition-colors",
+                      isActive
+                        ? "text-foreground"
+                        : "text-muted-foreground hover:text-foreground",
+                      isLocked && "opacity-50 cursor-not-allowed"
+                    )}
+                    title={isLocked ? "Subscription required" : undefined}
+                    onClick={(e) => {
+                      if (isLocked) {
+                        e.preventDefault();
+                      }
+                    }}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span>{item.label}</span>
+                    {isLocked && <span className="text-xs opacity-60">🔒</span>}
+                    {item.label === "Account" && subscription && (
+                      <SubscriptionStatusBadge
+                        status={subscription.status}
+                        className="ml-1"
+                      />
+                    )}
                   </Link>
                 );
               })}
             </div>
-            {isAuthenticated ? (
-              <>
-                {subscription?.isTrial && (
-                  <span className="text-xs text-muted-foreground bg-yellow-100 dark:bg-yellow-900/20 px-2 py-1 rounded">
-                    Trial
-                  </span>
-                )}
-                {subscription?.status === "unset" && (
-                  <span className="text-xs text-muted-foreground bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-                    No Subscription
-                  </span>
-                )}
-                {subscription?.status === "expired" && (
-                  <span className="text-xs text-muted-foreground bg-red-100 dark:bg-red-900/20 px-2 py-1 rounded">
-                    Expired
-                  </span>
-                )}
-                {subscription?.status === "cancelled" && (
-                  <span className="text-xs text-muted-foreground bg-red-100 dark:bg-red-900/20 px-2 py-1 rounded">
-                    Cancelled
-                  </span>
-                )}
-                <LogoutButton />
-              </>
-            ) : (
-              <Link href="/auth/login">
-                <Button variant="outline" size="sm">
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Sign In
-                </Button>
-              </Link>
-            )}
+
+            {/* Right Side Actions */}
+            <div className="flex items-center gap-4">
+              {isAuthenticated ? (
+                <>
+                  {/* Subscription Status - Minimal Badge */}
+                  {subscription?.isTrial && (
+                    <span className="hidden sm:inline-flex text-xs text-muted-foreground px-2 py-1 rounded-md bg-muted/50">
+                      Trial
+                    </span>
+                  )}
+                  {subscription?.status === "unset" && (
+                    <span className="hidden sm:inline-flex text-xs text-muted-foreground px-2 py-1 rounded-md bg-muted/50">
+                      No Subscription
+                    </span>
+                  )}
+                  {subscription?.status === "expired" && (
+                    <span className="hidden sm:inline-flex text-xs text-muted-foreground px-2 py-1 rounded-md bg-destructive/10 text-destructive">
+                      Expired
+                    </span>
+                  )}
+                  {subscription?.status === "cancelled" && (
+                    <span className="hidden sm:inline-flex text-xs text-muted-foreground px-2 py-1 rounded-md bg-destructive/10 text-destructive">
+                      Cancelled
+                    </span>
+                  )}
+                  <LogoutButton />
+                </>
+              ) : (
+                <Link href="/auth/login">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-base font-medium"
+                  >
+                    Log in
+                  </Button>
+                </Link>
+              )}
+              {!isAuthenticated && (
+                <Link href="/auth/sign-up">
+                  <Button size="sm" className="text-base font-medium">
+                    Sign up
+                  </Button>
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>
