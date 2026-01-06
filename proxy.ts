@@ -8,19 +8,23 @@ import {
 } from "@/lib/types";
 
 /**
- * Auth protected routes
+ * Routes that require user authentication
  */
 const PROTECTED_ROUTES = ["/planner", "/library", "/account"];
 
-
+/**
+ * Routes that require an active subscription (in addition to authentication)
+ */
 const SUBSCRIPTION_ROUTES = ["/planner"];
 
-
+/**
+ * Routes that are publicly accessible without authentication
+ */
 const PUBLIC_ROUTES = [
   "/",
   "/login",
   "/signup",
-  "/api", // API routes are handled separately
+  "/api", // API routes handle their own authentication
 ];
 
 /**
@@ -30,13 +34,16 @@ function matchesRoute(pathname: string, routes: string[]): boolean {
   return routes.some((route) => pathname.startsWith(route));
 }
 
-
+/**
+ * Get the user's subscription status information
+ * @returns Object describing the subscription status, including whether the user has a valid subscription
+ */
 async function getSubscriptionStatus(
   supabase: any,
   userId: string
 ): Promise<{
   status: SubscriptionStatusType;
-  isValid: boolean; // true if active or trial (valid Shopify subscription)
+  isValid: boolean; // Whether the subscription status itself is valid (active or trial)
   isTrial: boolean;
   hasLinkedAccount: boolean;
 }> {
@@ -92,29 +99,31 @@ export async function proxy(request: NextRequest) {
     error: authError,
   } = await supabase.auth.getUser();
 
-  // Check if route requires authentication
-  const isProtectedRoute = matchesRoute(pathname, PROTECTED_ROUTES);
-  const isSubscriptionRoute = matchesRoute(pathname, SUBSCRIPTION_ROUTES);
+  // Check if route requires authentication or subscription
+  const requiresAuth = matchesRoute(pathname, PROTECTED_ROUTES);
+  const requiresSubscription = matchesRoute(pathname, SUBSCRIPTION_ROUTES);
 
-  // If route is protected and user is not authenticated, redirect to login
-  if (isProtectedRoute && (!user || authError)) {
+  // If route requires authentication and user is not authenticated, redirect to login
+  if (requiresAuth && (!user || authError)) {
     const redirectUrl = new URL("/login", request.url);
     redirectUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(redirectUrl);
   }
 
-  // If user is authenticated and trying to access login/signup, redirect to home
+  // If user is already authenticated and trying to access login/signup, redirect to home
   if (user && (pathname === "/login" || pathname === "/signup")) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  if (user && isSubscriptionRoute) {
-    const subscription = await getSubscriptionStatus(supabase, user.id);
+  // If route requires subscription, check if user has a valid subscription
+  if (user && requiresSubscription) {
+    const subscriptionStatus = await getSubscriptionStatus(supabase, user.id);
+    const hasValidSubscription = subscriptionStatus.isValid;
 
-    response.headers.set("X-Subscription-Status", subscription.status);
+    response.headers.set("X-Subscription-Status", subscriptionStatus.status);
     response.headers.set(
       "X-Has-Subscription",
-      subscription.isValid ? "true" : "false"
+      hasValidSubscription ? "true" : "false"
     );
     return response;
   }
