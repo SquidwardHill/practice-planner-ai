@@ -62,7 +62,7 @@ export function Navigation({ user, subscription }: NavigationProps) {
   const hasActiveSubscription = subscription?.isValid ?? false;
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="container max-w-6xl mx-auto px-6 py-1">
         <div className="flex h-14 items-center justify-between">
           {/* Logo */}
@@ -75,7 +75,7 @@ export function Navigation({ user, subscription }: NavigationProps) {
               alt="Practice Planner AI"
               width={218}
               height={100}
-              className="h-8 w-auto object-contain dark:hidden p-2"
+              className="h-8 w-auto object-contain dark:hidden"
               suppressHydrationWarning
               priority
             />
@@ -111,8 +111,8 @@ export function Navigation({ user, subscription }: NavigationProps) {
                     className={cn(
                       "flex items-center gap-2 text-sm font-medium transition-colors",
                       isActive
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground",
+                        ? "text-active-nav"
+                        : "text-muted-foreground hover:text-active-nav-hover",
                       isLocked && "opacity-50 cursor-not-allowed"
                     )}
                     title={isLocked ? "Subscription required" : undefined}

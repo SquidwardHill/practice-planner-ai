@@ -39,7 +39,7 @@ function getStatusLabel(status: string): string {
       return "Cancelled";
     case SubscriptionStatus.UNSET:
     default:
-      return "Not Set";
+      return "Inactive";
   }
 }
 
