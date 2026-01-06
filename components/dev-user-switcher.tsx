@@ -155,7 +155,7 @@ export function DevUserSwitcher() {
             className="border-green-400 bg-white backdrop-blur-sm border shadow-[0_0_10px_rgba(34,197,94,0.6)]"
             disabled={isLoading}
           >
-            <Users className="h-4 w-4 mr-2" />
+            <Users className="h-4 w-4  " />
             {isLoading ? "Switching..." : currentUserLabel}
           </Button>
         </DropdownMenuTrigger>
@@ -173,12 +173,12 @@ export function DevUserSwitcher() {
           ))}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSeedDatabase}>
-            <Database className="h-4 w-4 mr-2" />
+            <Database className="h-4 w-4  " />
             Seed Database
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleSignOut}>
-            <LogOut className="h-4 w-4 mr-2" />
+            <LogOut className="h-4 w-4  " />
             Sign Out
           </DropdownMenuItem>
         </DropdownMenuContent>

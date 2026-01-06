@@ -1,14 +1,7 @@
 import { getAuthState } from "@/lib/supabase/auth-helpers";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Calendar, Library, ArrowRight } from "lucide-react";
+import { Calendar, Library, ArrowRight, BookOpen } from "lucide-react";
 import { Greeting } from "@/components/greeting";
 import { HelpForm } from "@/components/help-form";
 import { FeatureGrid } from "@/components/feature-grid";
@@ -63,7 +56,14 @@ export default async function Home() {
             data and import here. If you're coming from another system, use our
             XLS template for manual import.
           </Lead>
-          <DrillImportActions />
+
+          <DrillImportActions variant="default" />
+          <Link href="/docs">
+            <Button variant="outline" size="lg">
+              Documentation
+              <BookOpen className="h-4 w-4" />
+            </Button>
+          </Link>
         </div>
 
         <FeatureGrid features={dashboardFeatures} hasAccess={true} />
@@ -91,7 +91,7 @@ export default async function Home() {
           <Link href="/auth/sign-up">
             <Button size="lg">
               Get Started
-              <ArrowRight className="ml-2 h-4 w-4" />
+              <ArrowRight className="   h-4 w-4" />
             </Button>
           </Link>
           <Link href="/auth/login">
@@ -121,7 +121,7 @@ export default async function Home() {
         <Link href="/auth/sign-up">
           <Button size="lg">
             Create Your Account
-            <ArrowRight className="ml-2 h-4 w-4" />
+            <ArrowRight className="   h-4 w-4" />
           </Button>
         </Link>
       </div>

@@ -59,12 +59,12 @@ export function SortableTableHeader({
         <span>{children}</span>
         {isSorted ? (
           isAsc ? (
-            <ArrowUp className="ml-2 h-4 w-4" />
+            <ArrowUp className="   h-4 w-4" />
           ) : (
-            <ArrowDown className="ml-2 h-4 w-4" />
+            <ArrowDown className="   h-4 w-4" />
           )
         ) : (
-          <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
+          <ArrowUpDown className="   h-4 w-4 opacity-50" />
         )}
       </Button>
     </TableHead>

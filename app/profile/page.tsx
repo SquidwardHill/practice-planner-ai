@@ -1,12 +1,6 @@
 import { redirect } from "next/navigation";
 import { getAuthState } from "@/lib/supabase/auth-helpers";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
 import { SubscriptionStatusBadge } from "@/components/subscription-status-badge";
 import { SubscriptionStatus } from "@/lib/types/subscription";
 import { H1, H3, P, Small } from "@/components/typography";

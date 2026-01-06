@@ -3,6 +3,7 @@ import {
   SubscriptionStatus,
   type SubscriptionStatusType,
 } from "@/lib/types/subscription";
+import { User } from "lucide-react";
 
 interface SubscriptionStatusBadgeProps {
   status: SubscriptionStatusType | string | null | undefined;
@@ -52,9 +53,12 @@ export function SubscriptionStatusBadge({
   return (
     <Badge
       variant={getStatusBadgeVariant(normalizedStatus)}
-      className={className}
+      className={"text-xs" + className}
     >
-      {getStatusLabel(normalizedStatus)}
+      <User className="h-3 w-3 mr-1" />
+      <span className="font-medium font-mono tracking-tighter">
+        {getStatusLabel(normalizedStatus)}
+      </span>
     </Badge>
   );
 }

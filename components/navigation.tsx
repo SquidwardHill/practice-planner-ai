@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Home, Library, Calendar, User, LogIn } from "lucide-react";
+import { Home, Library, Calendar, User, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { LogoutButton } from "@/components/logout-button";
@@ -33,7 +33,7 @@ export function Navigation({ user, subscription }: NavigationProps) {
   const navItems = [
     {
       href: "/",
-      label: "Home",
+      label: "Dashboard",
       icon: Home,
       requiresAuth: false,
     },
@@ -63,19 +63,19 @@ export function Navigation({ user, subscription }: NavigationProps) {
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container max-w-6xl mx-auto px-6">
+      <div className="container max-w-6xl mx-auto px-6 py-1">
         <div className="flex h-14 items-center justify-between">
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 transition-opacity hover:opacity-80"
+            className="flex items-center gap-2 transition-opacity hover:opacity-80 py-4"
           >
             <Image
               src="/logo/planner-ai-light-mode.svg"
               alt="Practice Planner AI"
               width={218}
               height={100}
-              className="h-8 w-auto object-contain dark:hidden"
+              className="h-8 w-auto object-contain dark:hidden p-2"
               suppressHydrationWarning
               priority
             />
@@ -109,7 +109,7 @@ export function Navigation({ user, subscription }: NavigationProps) {
                     key={item.href}
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-2 text-base font-medium transition-colors",
+                      "flex items-center gap-2 text-sm font-medium transition-colors",
                       isActive
                         ? "text-foreground"
                         : "text-muted-foreground hover:text-foreground",
@@ -122,9 +122,13 @@ export function Navigation({ user, subscription }: NavigationProps) {
                       }
                     }}
                   >
-                    <Icon className="h-4 w-4" />
-                    <span>{item.label}</span>
-                    {isLocked && <span className="text-xs opacity-60">🔒</span>}
+                    <div className="flex items-center justify-center gap-1">
+                      {/* <Icon className="h-4 w-4" /> */}
+                      <span>{item.label}</span>
+                      {isLocked && (
+                        <Lock className="h-4 w-4 opacity-100 color-red-500 mb-1" />
+                      )}
+                    </div>
                     {item.label === "Account" && subscription && (
                       <SubscriptionStatusBadge
                         status={subscription.status}
@@ -140,27 +144,6 @@ export function Navigation({ user, subscription }: NavigationProps) {
             <div className="flex items-center gap-4">
               {isAuthenticated ? (
                 <>
-                  {/* Subscription Status - Minimal Badge */}
-                  {subscription?.isTrial && (
-                    <span className="hidden sm:inline-flex text-xs text-muted-foreground px-2 py-1 rounded-md bg-muted/50">
-                      Trial
-                    </span>
-                  )}
-                  {subscription?.status === "unset" && (
-                    <span className="hidden sm:inline-flex text-xs text-muted-foreground px-2 py-1 rounded-md bg-muted/50">
-                      No Subscription
-                    </span>
-                  )}
-                  {subscription?.status === "expired" && (
-                    <span className="hidden sm:inline-flex text-xs text-muted-foreground px-2 py-1 rounded-md bg-destructive/10 text-destructive">
-                      Expired
-                    </span>
-                  )}
-                  {subscription?.status === "cancelled" && (
-                    <span className="hidden sm:inline-flex text-xs text-muted-foreground px-2 py-1 rounded-md bg-destructive/10 text-destructive">
-                      Cancelled
-                    </span>
-                  )}
                   <LogoutButton />
                 </>
               ) : (
@@ -168,7 +151,7 @@ export function Navigation({ user, subscription }: NavigationProps) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-base font-medium"
+                    className="text-sm font-medium"
                   >
                     Log in
                   </Button>
@@ -176,7 +159,7 @@ export function Navigation({ user, subscription }: NavigationProps) {
               )}
               {!isAuthenticated && (
                 <Link href="/auth/sign-up">
-                  <Button size="sm" className="text-base font-medium">
+                  <Button size="sm" className="text-sm font-medium">
                     Sign up
                   </Button>
                 </Link>

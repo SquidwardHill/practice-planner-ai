@@ -91,14 +91,14 @@ export default async function ImportSuccessPage({
       <div className="flex gap-4 justify-center">
         <Link href="/library">
           <Button size="lg">
-            <Library className="mr-2 h-4 w-4" />
+            <Library className=" h-4 w-4" />
             Go to Library
           </Button>
         </Link>
         <Link href="/">
           <Button variant="outline" size="lg">
             Back to Dashboard
-            <ArrowRight className="ml-2 h-4 w-4" />
+            <ArrowRight className="   h-4 w-4" />
           </Button>
         </Link>
       </div>
