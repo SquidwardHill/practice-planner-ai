@@ -150,9 +150,9 @@ export default function ImportReviewPage() {
 
       sessionStorage.removeItem("importReviewData");
 
-      // Redirect to success page with import stats
+      // Redirect directly to library page with import stats
       router.push(
-        `/import/success?imported=${result.imported || 0}&skipped=${
+        `/library?imported=${result.imported || 0}&skipped=${
           result.skipped || 0
         }`
       );
@@ -434,12 +434,12 @@ export default function ImportReviewPage() {
         >
           {isConfirming ? (
             <>
-              <Save className="mr-2 h-4 w-4 animate-pulse" />
+              <Save className=" h-4 w-4 animate-pulse" />
               Confirming...
             </>
           ) : (
             <>
-              <CheckCircle2 className="mr-2 h-4 w-4" />
+              <CheckCircle2 className=" h-4 w-4" />
               Confirm Import ({reviewData.summary.validRows} drills)
             </>
           )}
