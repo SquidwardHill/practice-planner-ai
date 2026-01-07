@@ -21,9 +21,11 @@ import { dashboardFeatures } from "@/lib/data/features";
 import { FeatureCardsSection } from "@/components/molecules/feature-cards-section";
 import { DrillImportActions } from "@/components/molecules/drill-import-actions";
 import { H1, H2, Lead, P } from "@/components/atoms/typography";
-import Image from "next/image";
 import { type Drill } from "@/lib/types/drill";
 import { HeroSection } from "@/components/molecules/section-hero";
+import { SectionPitch } from "@/components/molecules/section-pitch";
+import { TitleWithAccent } from "@/components/molecules/title-with-accent";
+import { SectionCta } from "@/components/molecules/section-cta";
 
 export default async function Home({
   data: drills,
@@ -101,60 +103,39 @@ export default async function Home({
   return (
     <div className="container mx-auto px-4 py-10 max-w-6xl mt-6">
       {/* Hero Section */}
-      <HeroSection
-        hasLogo={true}
-        title="Coaches, ai-powered planning is here"
-        description="Generate drills and organize your practice plans using natural, conversational prompts. You can focus on the big picture while planner ai handles the details."
-        buttonText="Give it a whirl"
-        buttonHref="/auth/sign-up"
-        buttonIcon={Balloon}
-      />
+      <div className="mb-16">
+        <HeroSection
+          hasLogo={true}
+          title="Coaches, ai-powered planning is here"
+          description="Generate drills and organize your practice plans using natural, conversational prompts. You can focus on the big picture while planner ai handles the details."
+          buttonText="Give it a whirl"
+          buttonHref="/auth/sign-up"
+          buttonIcon={Balloon}
+        />
+      </div>
 
       {/* Features Section */}
-      <div className="my-12 glow-primary-muted rounded-3xl">
-        <div className="max-w-6xl mx-auto rounded-2xl p-px bg-linear-to-b from-primary-muted/70 via-primary-muted/40 to-background/50">
-          <div className="rounded-[calc(1.2rem-1px)] p-10 bg-background text-center">
-            <H2 className="max-w-3xl mx-auto pt-6">
-              <span>Let</span>
-              <div className="text-primary-muted items-center gap-1 inline-flex px-2">
-                <Image
-                  src="/logo/sparkle-trio.svg"
-                  alt="Sparkle Duo"
-                  width={22}
-                  height={22}
-                  className="contrast-75 rotate-180"
-                />
-                <span className="text-primary-muted">planner ai</span>
-              </div>
-              <span>lighten your load</span>
-            </H2>
-            <P className="text-muted-foreground text-xl pt-4 max-w-3xl mx-auto pb-2">
-              Import YouTube videos and digital content to quickly generate
-              drills, or use planner ai like a sidekick to build and manage your
-              training plans. Learn how planner ai can help you streamline your
-              practice planning below.
-            </P>
-          </div>
-        </div>
-      </div>
+      <SectionPitch
+        title={
+          <TitleWithAccent
+            prefix="Let"
+            accent="planner ai"
+            suffix="lighten your load"
+            className="max-w-3xl mx-auto"
+          />
+        }
+        description="Generate drills in seconds by importing YouTube videos, articles, or websites. If you prefer a collaborative approach, share your goals and ideas with AI and let it do the heavy lifting."
+      />
       <FeatureCardsSection features={dashboardFeatures} className="mb-20" />
 
       {/* CTA Section */}
-      <div className="text-center bg-linear-to-b from-background via-primary/5 to-primary/40 rounded-2xl pt-4 mt-42 ">
-        <div className="flex flex-col items-center justify-center bg-linear-to-b from-background via-background/65 to-primary/45 rounded-2xl pb-12">
-          <H2 className="mb-2">Ready to get started?</H2>
-          <P className="text-muted-foreground mb-6">
-            Join coaches who are already using AI to streamline their practice
-            planning
-          </P>
-          <Link href="/auth/sign-up" className="pb-6">
-            <Button variant="light" size="lg">
-              Create Your Account
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-      </div>
+      <SectionCta
+        title="Transform your practice planning"
+        description="Try plannerAI free for 14 days. Create unlimited drills, instantly convert media to drills, and streamline your practice planning with plannerAI."
+        buttonText="Try for free"
+        buttonHref="/auth/sign-up"
+        buttonIcon={ArrowRight}
+      />
     </div>
   );
 }
