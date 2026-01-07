@@ -6,11 +6,10 @@ import {
   Library,
   ArrowRight,
   BookOpen,
-  Balloon,
+  Dribbble,
   type LucideIcon,
 } from "lucide-react";
 import { Greeting } from "@/components/atoms/greeting";
-import { Logo } from "@/components/atoms/logo";
 import { HelpForm } from "@/components/molecules/help-form";
 import { FeatureGrid } from "@/components/organisms/feature-grid";
 import {
@@ -26,6 +25,7 @@ import { HeroSection } from "@/components/molecules/section-hero";
 import { SectionPitch } from "@/components/molecules/section-pitch";
 import { TitleWithAccent } from "@/components/molecules/title-with-accent";
 import { SectionCta } from "@/components/molecules/section-cta";
+import { AI_NAME } from "@/lib/config/branding";
 
 export default async function Home({
   data: drills,
@@ -72,7 +72,7 @@ export default async function Home({
             What's on the docket today?
             {count === 0 ? (
               <>
-                Import your drills and let PlannerAI do the rest.. or create
+                Import your drills and let {AI_NAME} do the rest.. or create
                 something new.
               </>
             ) : (
@@ -106,11 +106,11 @@ export default async function Home({
       <div className="mb-16">
         <HeroSection
           hasLogo={true}
-          title="Coaches, ai-powered planning is here"
-          description="Generate drills and organize your practice plans using natural, conversational prompts. You can focus on the big picture while planner ai handles the details."
-          buttonText="Give it a whirl"
+          title="AI-powered planning has arrived"
+          description={`Generate drills and organize your practice plans using natural, conversational prompts. You can focus on the big picture while ${AI_NAME} handles the details.`}
+          buttonText="Give it a shot"
           buttonHref="/auth/sign-up"
-          buttonIcon={Balloon}
+          buttonIcon={Dribbble}
         />
       </div>
 
@@ -118,20 +118,22 @@ export default async function Home({
       <SectionPitch
         title={
           <TitleWithAccent
-            prefix="Let"
-            accent="planner ai"
-            suffix="lighten your load"
+            prefix="Meet "
+            accent={AI_NAME}
+            suffix=", your new AI assitant coach"
             className="max-w-3xl mx-auto"
           />
         }
-        description="Generate drills in seconds by importing YouTube videos, articles, or websites. If you prefer a collaborative approach, share your goals and ideas with AI and let it do the heavy lifting."
+        description={`${AI_NAME} generates drills in seconds from YouTube videos, digital content, drill list uploads, and user prompts. Practice planning has never been easier.`}
+        ctaLink="/auth/sign-up"
+        ctaText="Get started"
       />
-      <FeatureCardsSection features={dashboardFeatures} className="mb-20" />
+      <FeatureCardsSection features={dashboardFeatures} className="mb-10" />
 
       {/* CTA Section */}
       <SectionCta
         title="Transform your practice planning"
-        description="Try plannerAI free for 14 days. Create unlimited drills, instantly convert media to drills, and streamline your practice planning with plannerAI."
+        description={`Try ${AI_NAME} free for 14 days. Create unlimited drills, instantly convert media to drills, and streamline your practice planning with ${AI_NAME}.`}
         buttonText="Try for free"
         buttonHref="/auth/sign-up"
         buttonIcon={ArrowRight}

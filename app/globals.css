@@ -148,6 +148,6 @@
     box-shadow: 0 0 20px rgb(27 105 255 / 0.3), 0 0 40px rgb(27 105 255 / 0.15);
   }
   .glow-primary-muted {
-    box-shadow: 0px -12px 15px #4886ff1f, 0px -20px 20px #1b69ff17;
+    box-shadow: 1px -5px 5px #4886ff17, 0px -16px 20px #1b69ff0a;
   }
 }

@@ -4,6 +4,7 @@ import { PlannerForm } from "@/components/molecules/planner-form";
 import { AppFeature } from "@/components/organisms/access-control";
 import { useUserAccess } from "@/hooks/useUserAccess";
 import { SubscriptionRequired } from "@/components/molecules/subscription-required";
+import { PRODUCT_NAME_BASE } from "@/lib/config/branding";
 
 export function PlannerContent() {
   const { subscriptionStatus } = useUserAccess();
@@ -17,7 +18,7 @@ export function PlannerContent() {
     <AppFeature
       subscribePrompt={
         <SubscriptionRequired
-          message="Subscribe to unlock the AI Practice Planner"
+          message={`Subscribe to unlock the AI ${PRODUCT_NAME_BASE}`}
           additionalMessage={additionalMessage}
         />
       }

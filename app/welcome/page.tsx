@@ -13,8 +13,9 @@ import { isValidSubscription } from "@/lib/types/subscription";
 import { FeatureGrid } from "@/components/organisms/feature-grid";
 import { allFeatures } from "@/lib/data/features";
 import { welcomeBenefits } from "@/lib/data/benefits";
-import { BenefitsSection } from "@/components/molecules/benefits-section";
+import { BenefitsSection } from "@/components/molecules/section-benefits";
 import { ShopifyLinkAccount } from "@/components/organisms/shopify-link-account";
+import { PRODUCT_NAME } from "@/lib/config/branding";
 
 export default async function WelcomePage() {
   const { user, subscription } = await getAuthState();
@@ -27,7 +28,7 @@ export default async function WelcomePage() {
       <div className="mb-12 text-center">
         <h1 className="text-4xl font-bold mb-4">
           {hasAccess
-            ? "Welcome to Practice Planner AI"
+            ? `Welcome to ${PRODUCT_NAME}`
             : "Unlock Your Coaching Potential"}
         </h1>
         <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
@@ -47,7 +48,7 @@ export default async function WelcomePage() {
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Why Practice Planner AI?</CardTitle>
+            <CardTitle>Why {PRODUCT_NAME}?</CardTitle>
             <CardDescription>
               Discover how this tool can transform your coaching workflow
             </CardDescription>

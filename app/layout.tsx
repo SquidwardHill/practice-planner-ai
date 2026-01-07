@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navigation } from "@/components/organisms/navigation";
 import { DevUserSwitcher } from "@/components/organisms/dev-user-switcher";
 import { UserAccessProvider } from "@/contexts/UserAccessContext";
+import { PRODUCT_NAME } from "@/lib/config/branding";
 
 const bricolageGrotesque = Bricolage_Grotesque({
   variable: "--font-bricolage-grotesque",
@@ -18,7 +19,7 @@ const sora = Sora({
 });
 
 export const metadata: Metadata = {
-  title: "Practice Planner AI",
+  title: PRODUCT_NAME,
   description: "AI-powered basketball practice plan generator",
 };
 

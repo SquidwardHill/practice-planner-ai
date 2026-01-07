@@ -27,6 +27,7 @@ import Link from "next/link";
 import { MigrationGuideCTA } from "@/components/molecules/migration-guide-cta";
 import { XLSTemplateDownload } from "@/components/organisms/xls-template-download";
 import { DocsTableOfContents } from "@/components/organisms/docs-table-of-contents";
+import { PRODUCT_NAME } from "@/lib/config/branding";
 
 const tocItems = [
   { id: "overview", title: "Overview", level: 2 },
@@ -98,7 +99,7 @@ export default function MigrationGuidePage() {
               <p className="text-base text-muted-foreground">
                 This migration tool is specifically designed for coaches who
                 have been using PracticePlannerLive and want to bring their
-                existing drill library into Practice Planner AI. We've formatted
+                existing drill library into {PRODUCT_NAME}. We've formatted
                 our import system to work seamlessly with PracticePlannerLive's
                 export format.
               </p>

@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { type Feature } from "@/components/organisms/feature-grid";
 import { LucideIcon } from "lucide-react";
+import { AI_NAME, PRODUCT_NAME_BASE } from "@/lib/config/branding";
 
 // Full feature list for authenticated users (with hrefs)
 export const allFeatures: Feature[] = [
@@ -41,7 +42,7 @@ export const allFeatures: Feature[] = [
   },
   {
     icon: Calendar,
-    title: "Practice Planner",
+    title: PRODUCT_NAME_BASE,
     description:
       "Generate AI-powered practice plans based on duration, age group, and focus areas. Plans are built from your drill library.",
     href: "/planner",
@@ -74,18 +75,18 @@ export const dashboardFeatures: Feature[] = [
     icon: Upload,
     title: "Import from YouTube",
     description:
-      "PlannerAI will automatically extract drill information from YouTube videos.",
+      `${AI_NAME} will automatically extract drill information from YouTube videos.`,
     href: "/library",
   },
   {
     icon: BookOpen,
     title: "Import from Web",
-    description: "PlannerAI will import drills from articles and websites.",
+    description: `${AI_NAME} will import drills from articles and websites.`,
     href: "/library",
   },
   {
     icon: Calendar,
-    title: "Practice Planner",
+    title: PRODUCT_NAME_BASE,
     description:
       "Use your drill library to efficiently create your practice plans.",
     href: "/planner",

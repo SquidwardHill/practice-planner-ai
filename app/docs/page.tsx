@@ -33,11 +33,10 @@ export default function DocsPage() {
     <div>
       <div className="mb-16">
         <h1 className="text-4xl font-bold mb-4 tracking-tight">
-          Practice Planner AI Docs
+          {PRODUCT_NAME} Docs
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl">
-          Get an overview of features, guides, and how to use Practice Planner
-          AI.
+          Get an overview of features, guides, and how to use {PRODUCT_NAME}.
         </p>
       </div>
 
