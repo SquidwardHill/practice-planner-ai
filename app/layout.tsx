@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Bricolage_Grotesque, Sora } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/organisms/navigation";
-import { getAuthState } from "@/lib/supabase/auth-helpers";
-import { DevUserSwitcher } from "@/components/dev-user-switcher";
+import { DevUserSwitcher } from "@/components/organisms/dev-user-switcher";
+import { UserAccessProvider } from "@/contexts/UserAccessContext";
 
 const bricolageGrotesque = Bricolage_Grotesque({
   variable: "--font-bricolage-grotesque",
@@ -27,29 +27,17 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let authState;
-  try {
-    authState = await getAuthState();
-  } catch (error) {
-    // if auth fails- handle refresh token errors and other auth issues
-    authState = {
-      user: null,
-      subscription: null,
-    };
-  }
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${bricolageGrotesque.variable} ${sora.variable} font-sans antialiased text-color-primary`}
         suppressHydrationWarning
       >
-        <Navigation
-          user={authState.user}
-          subscription={authState.subscription}
-        />
-        <main>{children}</main>
-        <DevUserSwitcher />
+        <UserAccessProvider>
+          <Navigation />
+          <main>{children}</main>
+          <DevUserSwitcher />
+        </UserAccessProvider>
       </body>
     </html>
   );
