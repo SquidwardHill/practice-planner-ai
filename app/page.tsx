@@ -1,7 +1,14 @@
 import { getAuthState } from "@/lib/supabase/auth-helpers";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Calendar, Library, ArrowRight, BookOpen, Balloon } from "lucide-react";
+import {
+  Calendar,
+  Library,
+  ArrowRight,
+  BookOpen,
+  Balloon,
+  type LucideIcon,
+} from "lucide-react";
 import { Greeting } from "@/components/atoms/greeting";
 import { Logo } from "@/components/atoms/logo";
 import { HelpForm } from "@/components/molecules/help-form";
@@ -16,6 +23,7 @@ import { DrillImportActions } from "@/components/molecules/drill-import-actions"
 import { H1, H2, Lead, P } from "@/components/atoms/typography";
 import Image from "next/image";
 import { type Drill } from "@/lib/types/drill";
+import { HeroSection } from "@/components/molecules/section-hero";
 
 export default async function Home({
   data: drills,
@@ -93,23 +101,14 @@ export default async function Home({
   return (
     <div className="container mx-auto px-4 py-10 max-w-6xl mt-6">
       {/* Hero Section */}
-      <div className="text-center mb-16 border border-primary/90 rounded-2xl px-10 pt-10 pb-14 bg-background glow-primary">
-        <div className="max-w-3xl mx-auto">
-          <Logo className="mb-6 mx-auto w-11 h-auto" />
-          <H1>Coaches, ai-powered planning is here</H1>
-          <Lead className="mb-8 mx-auto mt-4 text-xl max-w-4xl">
-            Generate drills and organize your practice plans using natural,
-            conversational prompts. You can focus on the big picture while
-            planner ai handles the details.
-          </Lead>
-          <Link href="/auth/sign-up">
-            <Button size="lg">
-              Give it a whirl
-              <Balloon className="h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-      </div>
+      <HeroSection
+        hasLogo={true}
+        title="Coaches, ai-powered planning is here"
+        description="Generate drills and organize your practice plans using natural, conversational prompts. You can focus on the big picture while planner ai handles the details."
+        buttonText="Give it a whirl"
+        buttonHref="/auth/sign-up"
+        buttonIcon={Balloon}
+      />
 
       {/* Features Section */}
       <div className="my-12 glow-primary-muted rounded-3xl">
