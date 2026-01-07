@@ -87,7 +87,7 @@ export default function ImportReviewPage() {
     return (
       <div className="container mx-auto px-4 py-12 max-w-6xl">
         <div className="text-center">
-          <p className="text-muted-foreground">Loading import review...</p>
+          <P className="text-muted-foreground">Loading import review...</P>
         </div>
       </div>
     );

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,8 +6,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { LucideIcon } from "lucide-react";
-import { Lock } from "lucide-react";
+import { LucideIcon, ArrowRight, Lock } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface FeatureCardProps {
   icon: LucideIcon;
@@ -16,8 +15,6 @@ interface FeatureCardProps {
   description: string;
   href: string;
   hasAccess?: boolean;
-  buttonText?: string;
-  disabledButtonText?: string;
 }
 
 export function FeatureCard({
@@ -26,32 +23,42 @@ export function FeatureCard({
   description,
   href,
   hasAccess = true,
-  buttonText = "Get Started",
-  disabledButtonText = "Unlock Access",
 }: FeatureCardProps) {
-  return (
-    <Card className="flex flex-col">
-      <CardHeader>
+  const cardContent = (
+    <Card className={cn(
+      "flex flex-col relative group transition-all cursor-pointer",
+      hasAccess 
+        ? "hover:border-primary/50 hover:shadow-md" 
+        : "opacity-60 cursor-not-allowed"
+    )}>
+      <CardHeader className="flex-1">
         <CardTitle className="flex items-center gap-2">
           <Icon className="h-5 w-5" />
           {title}
         </CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardContent className="mt-auto">
-        {hasAccess ? (
-          <Link href={href}>
-            <Button variant="outline" className="w-full">
-              {buttonText}
-            </Button>
-          </Link>
-        ) : (
-          <Button variant="outline" className="w-full" disabled>
-            {disabledButtonText}
-            <Lock className=" h-4 w-4" />
-          </Button>
-        )}
+      <CardContent className="mt-auto pt-0">
+        <div className="flex items-center justify-end">
+          {hasAccess ? (
+            <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-all group-hover:translate-x-1" />
+          ) : (
+            <div className="flex items-center gap-1 text-muted-foreground">
+              <Lock className="h-4 w-4" />
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
+
+  if (hasAccess) {
+    return (
+      <Link href={href} className="block h-full">
+        {cardContent}
+      </Link>
+    );
+  }
+
+  return cardContent;
 }

@@ -1,6 +1,5 @@
 import { H2, P } from "@/components/atoms/typography";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { CtaButton } from "@/components/atoms/cta-button";
 import { ArrowRight, type LucideIcon } from "lucide-react";
 import Image from "next/image";
 
@@ -26,12 +25,13 @@ export function SectionCta({
         <P className="text-muted-foreground mb-8 text-xl max-w-3xl mx-auto">
           {description}
         </P>
-        <Link href={buttonHref} className="pb-6">
-          <Button variant="light" size="lg">
-            {buttonText}
-            <ButtonIcon className="h-4 w-4" />
-          </Button>
-        </Link>
+        <CtaButton
+          href={buttonHref}
+          text={buttonText}
+          icon={ButtonIcon}
+          variant="light"
+          linkClassName="pb-6"
+        />
       </div>
     </div>
   );

@@ -6,6 +6,8 @@ import {
 } from "@/components/ui/card";
 import { Upload } from "lucide-react";
 import Link from "next/link";
+import { H1, H2, P } from "@/components/atoms/typography";
+import { PRODUCT_NAME } from "@/lib/config/branding";
 
 interface DocCard {
   title: string;
@@ -32,18 +34,18 @@ export default function DocsPage() {
   return (
     <div>
       <div className="mb-16">
-        <h1 className="text-4xl font-bold mb-4 tracking-tight">
+        <H1 className="mb-4">
           {PRODUCT_NAME} Docs
-        </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl">
+        </H1>
+        <P className="text-lg text-muted-foreground max-w-2xl">
           Get an overview of features, guides, and how to use {PRODUCT_NAME}.
-        </p>
+        </P>
       </div>
 
       {/* Category Sections */}
       {Object.entries(categoryDocs).map(([category, docs]) => (
         <div key={category} className="mb-16">
-          <h2 className="text-2xl font-semibold mb-6">{category}</h2>
+          <H2 className="mb-6">{category}</H2>
           <div className="grid gap-4 md:grid-cols-2">
             {docs.map((doc) => {
               const Icon = doc.icon;

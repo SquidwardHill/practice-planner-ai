@@ -28,6 +28,7 @@ import { MigrationGuideCTA } from "@/components/molecules/migration-guide-cta";
 import { XLSTemplateDownload } from "@/components/organisms/xls-template-download";
 import { DocsTableOfContents } from "@/components/organisms/docs-table-of-contents";
 import { PRODUCT_NAME } from "@/lib/config/branding";
+import { H1, H3, H4, P, Small } from "@/components/atoms/typography";
 
 const tocItems = [
   { id: "overview", title: "Overview", level: 2 },
@@ -80,10 +81,10 @@ export default function MigrationGuidePage() {
         </Breadcrumb>
 
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Migration Guide</h1>
-          <p className="text-muted-foreground text-lg">
+          <H1 className="mb-2">Migration Guide</H1>
+          <P className="text-muted-foreground text-lg">
             Import your drill library from PracticePlannerLive
-          </p>
+          </P>
         </div>
 
         <div className="space-y-6">
@@ -96,25 +97,25 @@ export default function MigrationGuidePage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-base text-muted-foreground">
+              <P className="text-muted-foreground">
                 This migration tool is specifically designed for coaches who
                 have been using PracticePlannerLive and want to bring their
-                existing drill library into {PRODUCT_NAME}. We've formatted
-                our import system to work seamlessly with PracticePlannerLive's
+                existing drill library into {PRODUCT_NAME}. We've formatted our
+                import system to work seamlessly with PracticePlannerLive's
                 export format.
-              </p>
+              </P>
               <div className="rounded-lg bg-muted/50 p-4">
                 <div className="flex items-start gap-3">
                   <AlertCircle className="h-5 w-5 text-primary mt-0.5" />
                   <div>
-                    <p className="font-medium text-sm mb-1">
+                    <Small className="font-medium mb-1">
                       PracticePlannerLive Format Only
-                    </p>
-                    <p className="text-base text-muted-foreground">
+                    </Small>
+                    <P className="text-muted-foreground">
                       This import tool is optimized for PracticePlannerLive
                       exported data. If you're coming from another system,
                       please use our XLS template for manual import.
-                    </p>
+                    </P>
                   </div>
                 </div>
               </div>
@@ -133,12 +134,10 @@ export default function MigrationGuidePage() {
             <AccordionItem value="instructions">
               <AccordionTrigger className="text-left">
                 <div>
-                  <h3 id="instructions" className="font-semibold text-lg">
-                    Step-by-Step Instructions
-                  </h3>
-                  <p className="text-base text-muted-foreground font-normal">
+                  <H3 id="instructions">Step-by-Step Instructions</H3>
+                  <P className="text-muted-foreground font-normal">
                     Follow these steps to import your drill library
-                  </p>
+                  </P>
                 </div>
               </AccordionTrigger>
               <AccordionContent>
@@ -150,15 +149,13 @@ export default function MigrationGuidePage() {
                       </div>
                     </div>
                     <div className="flex-1 space-y-2">
-                      <h4 className="font-semibold">
-                        Export from PracticePlannerLive
-                      </h4>
-                      <p className="text-base text-muted-foreground">
+                      <H4>Export from PracticePlannerLive</H4>
+                      <P className="text-muted-foreground">
                         Log into your PracticePlannerLive account and export
                         your drill list. The export will be in .xls format. Make
                         sure you download the complete drill list with all
                         categories.
-                      </p>
+                      </P>
                     </div>
                   </div>
 
@@ -169,11 +166,11 @@ export default function MigrationGuidePage() {
                       </div>
                     </div>
                     <div className="flex-1 space-y-2">
-                      <h4 className="font-semibold">Prepare Your File</h4>
-                      <p className="text-base text-muted-foreground">
+                      <H4>Prepare Your File</H4>
+                      <P className="text-muted-foreground">
                         Ensure your exported file includes the following
                         columns:
-                      </p>
+                      </P>
                       <ul className="text-base text-muted-foreground list-disc list-inside space-y-1 ml-4">
                         <li>Category (required)</li>
                         <li>Name (required)</li>
@@ -191,13 +188,13 @@ export default function MigrationGuidePage() {
                       </div>
                     </div>
                     <div className="flex-1 space-y-2">
-                      <h4 className="font-semibold">Upload Your File</h4>
-                      <p className="text-base text-muted-foreground">
+                      <H4>Upload Your File</H4>
+                      <P className="text-muted-foreground">
                         Click the "Upload Drill List" button on your dashboard.
                         You can either drag and drop your file or click to
                         browse and select it. The file must be under 10MB in
                         size.
-                      </p>
+                      </P>
                     </div>
                   </div>
 
@@ -208,13 +205,13 @@ export default function MigrationGuidePage() {
                       </div>
                     </div>
                     <div className="flex-1 space-y-2">
-                      <h4 className="font-semibold">Review & Import</h4>
-                      <p className="text-base text-muted-foreground">
+                      <H4>Review & Import</H4>
+                      <P className="text-muted-foreground">
                         Once uploaded, we'll process your file and import all
                         valid drills into your library. Duplicate drills (same
                         name) will be automatically skipped. You'll receive a
                         summary of how many drills were imported.
-                      </p>
+                      </P>
                     </div>
                   </div>
                 </div>
@@ -225,12 +222,10 @@ export default function MigrationGuidePage() {
             <AccordionItem value="imported-data">
               <AccordionTrigger className="text-left">
                 <div>
-                  <h3 id="imported-data" className="font-semibold text-lg">
-                    What Gets Imported
-                  </h3>
-                  <p className="text-base text-muted-foreground font-normal">
+                  <H3 id="imported-data">What Gets Imported</H3>
+                  <P className="text-muted-foreground font-normal">
                     Data that will be preserved during migration
-                  </p>
+                  </P>
                 </div>
               </AccordionTrigger>
               <AccordionContent>
@@ -238,48 +233,48 @@ export default function MigrationGuidePage() {
                   <div className="flex items-start gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
                     <div>
-                      <p className="font-medium text-sm">Drill Categories</p>
-                      <p className="text-xs text-muted-foreground">
+                      <Small className="font-medium">Drill Categories</Small>
+                      <Small className="text-muted-foreground">
                         All category names are preserved
-                      </p>
+                      </Small>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
                     <div>
-                      <p className="font-medium text-sm">Drill Names</p>
-                      <p className="text-xs text-muted-foreground">
+                      <Small className="font-medium">Drill Names</Small>
+                      <Small className="text-muted-foreground">
                         All drill names are imported as-is
-                      </p>
+                      </Small>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
                     <div>
-                      <p className="font-medium text-sm">Duration (Minutes)</p>
-                      <p className="text-xs text-muted-foreground">
+                      <Small className="font-medium">Duration (Minutes)</Small>
+                      <Small className="text-muted-foreground">
                         Time estimates are preserved
-                      </p>
+                      </Small>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
                     <div>
-                      <p className="font-medium text-sm">
+                      <Small className="font-medium">
                         Notes & Instructions
-                      </p>
-                      <p className="text-xs text-muted-foreground">
+                      </Small>
+                      <Small className="text-muted-foreground">
                         All drill notes are imported
-                      </p>
+                      </Small>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
                     <div>
-                      <p className="font-medium text-sm">Media Links</p>
-                      <p className="text-xs text-muted-foreground">
+                      <Small className="font-medium">Media Links</Small>
+                      <Small className="text-muted-foreground">
                         Video and image links are preserved
-                      </p>
+                      </Small>
                     </div>
                   </div>
                 </div>
@@ -290,12 +285,10 @@ export default function MigrationGuidePage() {
             <AccordionItem value="important-notes">
               <AccordionTrigger className="text-left">
                 <div>
-                  <h3 id="important-notes" className="font-semibold text-lg">
-                    Important Notes
-                  </h3>
-                  <p className="text-base text-muted-foreground font-normal">
+                  <H3 id="important-notes">Important Notes</H3>
+                  <P className="text-muted-foreground font-normal">
                     Things to keep in mind during migration
-                  </p>
+                  </P>
                 </div>
               </AccordionTrigger>
               <AccordionContent>
@@ -303,39 +296,39 @@ export default function MigrationGuidePage() {
                   <div className="flex items-start gap-3">
                     <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
                     <div>
-                      <p className="font-medium text-sm mb-1">
+                      <Small className="font-medium mb-1">
                         Duplicate Handling
-                      </p>
-                      <p className="text-base text-muted-foreground">
+                      </Small>
+                      <P className="text-muted-foreground">
                         If you import a drill with the same name as an existing
                         drill, the duplicate will be skipped automatically. You
                         can manually edit or delete drills after import if
                         needed.
-                      </p>
+                      </P>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
                     <div>
-                      <p className="font-medium text-sm mb-1">
+                      <Small className="font-medium mb-1">
                         File Size Limits
-                      </p>
-                      <p className="text-base text-muted-foreground">
+                      </Small>
+                      <P className="text-muted-foreground">
                         Maximum file size is 10MB. If your drill list is larger,
                         you may need to split it into multiple files or contact
                         support for assistance.
-                      </p>
+                      </P>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
                     <div>
-                      <p className="font-medium text-sm mb-1">Other Systems</p>
-                      <p className="text-base text-muted-foreground">
+                      <Small className="font-medium mb-1">Other Systems</Small>
+                      <P className="text-muted-foreground">
                         If you're migrating from a system other than
                         PracticePlannerLive, please use our XLS template for
                         manual import. Contact support if you need assistance.
-                      </p>
+                      </P>
                     </div>
                   </div>
                 </div>
@@ -346,13 +339,11 @@ export default function MigrationGuidePage() {
             <AccordionItem value="xls-template">
               <AccordionTrigger className="text-left">
                 <div>
-                  <h3 id="xls-template" className="font-semibold text-lg">
-                    XLS Template for Other Systems
-                  </h3>
-                  <p className="text-base text-muted-foreground font-normal">
+                  <H3 id="xls-template">XLS Template for Other Systems</H3>
+                  <P className="text-muted-foreground font-normal">
                     Download a template to manually import drills from other
                     systems
-                  </p>
+                  </P>
                 </div>
               </AccordionTrigger>
               <AccordionContent>

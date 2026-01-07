@@ -1,26 +1,10 @@
 import { getAuthState } from "@/lib/supabase/auth-helpers";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import {
-  Calendar,
-  Library,
-  ArrowRight,
-  BookOpen,
-  Dribbble,
-  type LucideIcon,
-} from "lucide-react";
+import { Library, ArrowRight, Dribbble } from "lucide-react";
 import { Greeting } from "@/components/atoms/greeting";
-import { HelpForm } from "@/components/molecules/help-form";
-import { FeatureGrid } from "@/components/organisms/feature-grid";
-import {
-  RecentActivity,
-  type ActivityItem,
-} from "@/components/organisms/recent-activity";
 import { dashboardFeatures } from "@/lib/data/features";
 import { FeatureCardsSection } from "@/components/molecules/feature-cards-section";
-import { DrillImportActions } from "@/components/molecules/drill-import-actions";
-import { H1, H2, Lead, P } from "@/components/atoms/typography";
 import { type Drill } from "@/lib/types/drill";
+import { H2 } from "@/components/atoms/typography";
 import { HeroSection } from "@/components/molecules/section-hero";
 import { SectionPitch } from "@/components/molecules/section-pitch";
 import { TitleWithAccent } from "@/components/molecules/title-with-accent";
@@ -40,61 +24,22 @@ export default async function Home({
 
   // If authenticated AND has access, show internal dashboard
   if (user && access.hasAccess) {
-    // TODO: [mocked data] replace recent activities with persisted user data
-    const recentActivity: ActivityItem[] = [
-      {
-        type: "practice_plan",
-        title: "Varsity Transition Defense Practice",
-        date: "2 hours ago",
-        icon: Calendar,
-      },
-      {
-        type: "drill",
-        title: "3-Man Weave",
-        date: "1 day ago",
-        icon: Library,
-      },
-      {
-        type: "practice_plan",
-        title: "Shooting Fundamentals Plan",
-        date: "3 days ago",
-        icon: Calendar,
-      },
-    ];
-
     return (
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="mb-16 text-center">
-          <H1 className="mb-3">
-            <Greeting firstName={user.full_name} />
-          </H1>
-          <Lead className="max-w-2xl mx-auto mb-6">
-            What's on the docket today?
-            {count === 0 ? (
-              <>
-                Import your drills and let {AI_NAME} do the rest.. or create
-                something new.
-              </>
-            ) : (
-              <>Create something new</>
-            )}
-          </Lead>
+      <div className="container mx-auto px-4 py-10 max-w-6xl mt-6">
+        {/* Features Section */}
+        <SectionPitch
+          title={
+            <H2>
+              <Greeting firstName={user.full_name} />
+            </H2>
+          }
+          description={`What's on the docket today? ${AI_NAME} is on stand-by whenever you're ready to start planning.`}
+          ctaLink="/library"
+          ctaText="Start building"
+          ctaButtonVariant="default"
+        />
 
-          <DrillImportActions variant="default" />
-          <Link href="/docs">
-            <Button variant="outline" size="lg">
-              Documentation
-              <BookOpen className="h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-
-        <FeatureGrid features={dashboardFeatures} hasAccess={true} />
-
-        <div className="grid gap-6 md:grid-cols-2">
-          <RecentActivity activities={recentActivity} />
-          <HelpForm />
-        </div>
+        <FeatureCardsSection features={dashboardFeatures} hasAccess={true} />
       </div>
     );
   }

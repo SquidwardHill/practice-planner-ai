@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { P } from "@/components/atoms/typography";
 
 export default function Page() {
   return (
@@ -19,13 +20,13 @@ export default function Page() {
               <CardDescription>Account created successfully</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-base text-muted-foreground mb-4">
+              <P className="text-muted-foreground mb-4">
                 Your account has been created. If email confirmation is enabled,
                 please check your email.
-              </p>
-              <p className="text-base text-muted-foreground">
+              </P>
+              <P className="text-muted-foreground">
                 For local development, you can confirm your email using:
-              </p>
+              </P>
               <code className="text-xs bg-muted p-2 rounded mt-2 block">
                 npm run confirm:user &lt;your-email&gt;
               </code>

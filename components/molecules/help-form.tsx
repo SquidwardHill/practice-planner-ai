@@ -77,7 +77,7 @@ export function HelpForm() {
               required
             />
           </div>
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
+          <Button type="submit" size="default" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? (
               "Sending..."
             ) : (

@@ -144,6 +144,7 @@ export function PlannerForm() {
             </div>
             <Button
               type="submit"
+              size="default"
               disabled={isLoading || !input.trim()}
               className="w-full"
             >

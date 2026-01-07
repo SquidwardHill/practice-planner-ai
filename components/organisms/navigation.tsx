@@ -76,7 +76,7 @@ export function Navigation({ useLogoFull = false }: { useLogoFull?: boolean }) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-2 text-sm font-medium transition-colors",
+                    "flex items-center gap-2 text-base font-medium transition-colors",
                     isActive
                       ? "text-primary saturate-75"
                       : "text-muted-foreground hover:text-primary saturate-105",
@@ -96,6 +96,7 @@ export function Navigation({ useLogoFull = false }: { useLogoFull?: boolean }) {
                   {item.label === "Account" && subscriptionStatus && (
                     <SubscriptionStatusBadge
                       status={subscriptionStatus}
+                      iconOnly={true}
                       className="ml-1"
                     />
                   )}

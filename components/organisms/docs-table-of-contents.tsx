@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { H3 } from "@/components/atoms/typography";
 
 interface TOCItem {
   id: string;
@@ -54,9 +55,9 @@ export function DocsTableOfContents({ items, onItemClick }: DocsTableOfContentsP
   return (
     <div className="sticky top-20 hidden xl:block w-64 shrink-0">
       <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-foreground mb-4">
+        <H3 className="text-sm text-foreground mb-4">
           On this page
-        </h3>
+        </H3>
         <nav className="space-y-1">
           {items.map((item) => (
             <Link

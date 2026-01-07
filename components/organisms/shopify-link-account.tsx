@@ -169,6 +169,7 @@ export function ShopifyLinkAccount({
 
       <Button
         onClick={handleLinkAccount}
+        size="default"
         disabled={isLoading || (!showEmailInput && !userEmail)}
         variant={buttonVariant}
         size={buttonSize}

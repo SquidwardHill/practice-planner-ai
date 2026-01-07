@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { P, Small } from "@/components/atoms/typography";
 
 interface DrillImportModalProps {
   open: boolean;
@@ -173,7 +174,7 @@ export function DrillImportModal({
             Download your drill data from PracticePlannerLive. Your drills will
             be automatically formatted and imported into your library.
           </DialogDescription>
-          <p className="text-base text-muted-foreground/75 pt-2">
+          <P className="text-muted-foreground/75 pt-2">
             {" "}
             Need more details? Check out our{" "}
             <Link
@@ -182,7 +183,7 @@ export function DrillImportModal({
             >
               migration guide.
             </Link>
-          </p>
+          </P>
         </DialogHeader>
 
         <div className="space-y-6 py-2">
@@ -217,12 +218,12 @@ export function DrillImportModal({
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-base font-medium">
+                    <P className="font-medium">
                       Drag and drop your file here, or click to browse
-                    </p>
-                    <p className="text-xs text-muted-foreground">
+                    </P>
+                    <Small>
                       Supports .xls files from PracticePlannerLive (max 10MB)
-                    </p>
+                    </Small>
                   </div>
                   <Button
                     type="button"
@@ -240,10 +241,10 @@ export function DrillImportModal({
                       <FileText className="h-6 w-6 text-primary" />
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="text-base font-medium">{file.name}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <P className="font-medium">{file.name}</P>
+                      <Small>
                         {(file.size / 1024).toFixed(2)} KB
-                      </p>
+                      </Small>
                     </div>
                     <Button
                       type="button"

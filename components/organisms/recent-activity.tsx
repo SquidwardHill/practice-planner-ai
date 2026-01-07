@@ -68,7 +68,7 @@ export function RecentActivity({
       )}
       <div className="px-6">
         <Link href={viewAllHref}>
-          <Button variant="outline" className="w-full">
+          <Button variant="outline" size="default" className="w-full">
             {viewAllText}
           </Button>
         </Link>

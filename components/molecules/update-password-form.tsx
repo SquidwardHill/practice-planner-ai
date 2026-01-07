@@ -67,7 +67,7 @@ export function UpdatePasswordForm({
                 />
               </div>
               {error && <Small className="text-destructive">{error}</Small>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" size="default" className="w-full" disabled={isLoading}>
                 {isLoading ? "Saving..." : "Save new password"}
               </Button>
             </div>

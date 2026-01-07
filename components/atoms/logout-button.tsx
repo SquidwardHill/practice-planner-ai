@@ -18,7 +18,7 @@ export function LogoutButton() {
       variant="ghost"
       size="sm"
       onClick={logout}
-      className="text-sm font-medium"
+      className="text-base font-medium"
     >
       Logout
     </Button>

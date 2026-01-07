@@ -36,7 +36,7 @@ export function SubscriptionRequired({
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Button>
+          <Button size="default">
             View Plans
             <ExternalLink className="h-4 w-4" />
           </Button>

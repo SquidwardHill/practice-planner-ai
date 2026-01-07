@@ -118,7 +118,7 @@ export function SignUpForm({
                 />
               </div>
               {error && <Small className="text-destructive">{error}</Small>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" size="default" className="w-full" disabled={isLoading}>
                 {isLoading ? "Creating an account..." : "Sign up"}
               </Button>
             </div>

@@ -16,6 +16,7 @@ import { welcomeBenefits } from "@/lib/data/benefits";
 import { BenefitsSection } from "@/components/molecules/section-benefits";
 import { ShopifyLinkAccount } from "@/components/organisms/shopify-link-account";
 import { PRODUCT_NAME } from "@/lib/config/branding";
+import { H1, Lead, P } from "@/components/atoms/typography";
 
 export default async function WelcomePage() {
   const { user, subscription } = await getAuthState();
@@ -26,23 +27,21 @@ export default async function WelcomePage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="mb-12 text-center">
-        <h1 className="text-4xl font-bold mb-4">
+        <H1 className="mb-4">
           {hasAccess
             ? `Welcome to ${PRODUCT_NAME}`
             : "Unlock Your Coaching Potential"}
-        </h1>
-        <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+        </H1>
+        <Lead className="max-w-2xl mx-auto">
           {hasAccess
             ? "Your AI-powered assistant for creating structured basketball practice plans. Get started by exploring the features below."
             : "Get access to AI-powered practice planning, drill library management, and more. Start your free trial today."}
-        </p>
+        </Lead>
       </div>
 
       <FeatureGrid
         features={allFeatures}
         hasAccess={hasAccess ?? false}
-        buttonText="Get Started"
-        disabledButtonText="Unlock Access"
       />
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -67,7 +66,7 @@ export default async function WelcomePage() {
                 )}
                 {subscription?.hasLinkedAccount && (
                   <Link href="/profile">
-                    <Button variant="outline" className="w-full">
+                    <Button variant="outline" size="default" className="w-full">
                       Get Started with Free Trial
                     </Button>
                   </Link>
@@ -77,7 +76,7 @@ export default async function WelcomePage() {
             {hasAccess && (
               <div className="pt-4">
                 <Link href="/">
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" size="default" className="w-full">
                     Go to Home
                   </Button>
                 </Link>
@@ -90,9 +89,9 @@ export default async function WelcomePage() {
           <div className="aspect-video bg-muted flex items-center justify-center">
             <div className="text-center p-8">
               <Calendar className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-              <p className="text-base text-muted-foreground">
+              <P className="text-muted-foreground">
                 Graphic placeholder
-              </p>
+              </P>
             </div>
           </div>
         </Card>

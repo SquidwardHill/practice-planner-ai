@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useState } from "react";
-import { Small } from "@/components/atoms/typography";
+import { Small, P } from "@/components/atoms/typography";
 
 export function ForgotPasswordForm({
   className,
@@ -54,10 +54,10 @@ export function ForgotPasswordForm({
             <CardDescription>Password reset instructions sent</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
+            <Small>
               If you registered using your email and password, you will receive
               a password reset email.
-            </p>
+            </Small>
           </CardContent>
         </Card>
       ) : (
@@ -84,7 +84,7 @@ export function ForgotPasswordForm({
                   />
                 </div>
                 {error && <Small className="text-destructive">{error}</Small>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" size="default" className="w-full" disabled={isLoading}>
                   {isLoading ? "Sending..." : "Send reset email"}
                 </Button>
               </div>

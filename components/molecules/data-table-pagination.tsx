@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Small } from "@/components/atoms/typography";
 
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
@@ -43,7 +44,7 @@ export function DataTablePagination<TData>({
       </div>
       <div className="flex items-center space-x-6 lg:space-x-8">
         <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">Rows per page</p>
+          <Small className="font-medium">Rows per page</Small>
           <Select
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => {

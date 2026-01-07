@@ -1,8 +1,6 @@
 import { CheckCircle2 } from "lucide-react";
-import {
-  type Benefit,
-  type SimpleBenefit,
-} from "@/lib/data/benefits";
+import { type Benefit, type SimpleBenefit } from "@/lib/data/benefits";
+import { H3, P } from "@/components/atoms/typography";
 
 interface BenefitsSectionProps {
   benefits: Benefit[] | SimpleBenefit[];
@@ -25,10 +23,8 @@ export function BenefitsSection({
             <div key={benefit.title} className="flex gap-3">
               <Icon className="h-5 w-5 text-primary shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium">{benefit.title}</p>
-                <p className="text-base text-muted-foreground">
-                  {benefit.description}
-                </p>
+                <P className="font-medium">{benefit.title}</P>
+                <P className="text-muted-foreground">{benefit.description}</P>
               </div>
             </div>
           );
@@ -45,16 +41,11 @@ export function BenefitsSection({
         <div key={benefit.title} className="flex gap-3">
           <CheckCircle2 className="h-6 w-6 text-primary shrink-0 mt-0.5" />
           <div>
-            <h3 className="font-semibold mb-1 text-lg text-card-foreground">
-              {benefit.title}
-            </h3>
-            <p className="text-base text-muted-foreground">
-              {benefit.description}
-            </p>
+            <H3 className="mb-1 text-card-foreground">{benefit.title}</H3>
+            <P className="text-muted-foreground">{benefit.description}</P>
           </div>
         </div>
       ))}
     </div>
   );
 }
-

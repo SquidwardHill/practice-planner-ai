@@ -90,7 +90,7 @@ export function LoginForm({
                 />
               </div>
               {error && <Small className="text-destructive">{error}</Small>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" size="default" className="w-full" disabled={isLoading}>
                 {isLoading ? "Logging in..." : "Login"}
               </Button>
             </div>

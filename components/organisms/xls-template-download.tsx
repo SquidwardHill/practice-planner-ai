@@ -78,7 +78,7 @@ export function XLSTemplateDownload() {
               download our XLS template and fill it in with your drill data. The
               template includes 5 example drills to guide you.
             </Small>
-            <Button onClick={handleDownload} variant="outline">
+            <Button onClick={handleDownload} variant="outline" size="default">
               <Download className="  h-4 w-4" />
               Download XLS Template
             </Button>

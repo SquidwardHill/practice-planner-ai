@@ -1,14 +1,17 @@
 import { P } from "@/components/atoms/typography";
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { CtaButton } from "@/components/atoms/cta-button";
+import { ArrowRight, type LucideIcon } from "lucide-react";
 import { type ReactNode } from "react";
+import { type VariantProps } from "class-variance-authority";
+import { buttonVariants } from "@/components/ui/button";
 
 interface SectionPitchProps {
   title: ReactNode;
   description: string;
   ctaLink?: string;
   ctaText?: string;
+  ctaButtonVariant?: VariantProps<typeof buttonVariants>["variant"];
+  ctaIcon?: LucideIcon;
 }
 
 export function SectionPitch({
@@ -16,6 +19,8 @@ export function SectionPitch({
   description,
   ctaLink,
   ctaText = "Get started",
+  ctaButtonVariant = "default",
+  ctaIcon: CtaIcon = ArrowRight,
 }: SectionPitchProps) {
   return (
     <div>
@@ -27,12 +32,14 @@ export function SectionPitch({
               {description}
             </P>
             {ctaLink && (
-              <Link href={ctaLink} className="block text-center pb-4">
-                <Button variant="outline" size="lg">
-                  {ctaText}
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
+              <div className="block text-center pb-4">
+                <CtaButton
+                  href={ctaLink}
+                  text={ctaText}
+                  icon={CtaIcon}
+                  variant={ctaButtonVariant}
+                />
+              </div>
             )}
           </div>
         </div>

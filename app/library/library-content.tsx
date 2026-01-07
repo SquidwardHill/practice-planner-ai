@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { DrillsDataTable } from "@/components/organisms/drills-data-table";
 import { Plus, Lock, HeartCrack } from "lucide-react";
 import { type Drill } from "@/lib/types/drill";
-import { H1, P } from "@/components/atoms/typography";
+import { H1, H4, Lead, P } from "@/components/atoms/typography";
 import { DrillImportActions } from "@/components/molecules/drill-import-actions";
 import { RequireAccess } from "@/components/organisms/access-control";
 import { useUserAccess } from "@/hooks/useUserAccess";
@@ -22,11 +22,12 @@ export function LibraryContent({ drills, totalDrills }: LibraryContentProps) {
     <>
       <div className="mb-12 flex items-center justify-between">
         <div>
-          <H1>Drill Library</H1>
+          <H1 className="mb-2">Drill Library</H1>
           {totalDrills === 0 ? (
-            <P className="text-muted-foreground mt-1 flex gap-2 items-center">
-              Your drill library is empty. <HeartCrack className="w-5 h-5" />
-            </P>
+            <Lead>
+              <span>Your drill library is empty</span>{" "}
+              <HeartCrack className="w-5 h-5 inline-block ml-1" />
+            </Lead>
           ) : (
             <P className="text-muted-foreground mt-1 flex gap-2 items-center">
               {totalDrills} drills in your library
@@ -36,13 +37,13 @@ export function LibraryContent({ drills, totalDrills }: LibraryContentProps) {
         <div className="flex gap-4">
           <RequireAccess
             fallback={
-              <Button variant="default" disabled>
+              <Button variant="default" size="default" disabled>
                 <span>Create Drill</span>
                 <Lock />
               </Button>
             }
           >
-            <Button variant="default">
+            <Button variant="default" size="default">
               Create Drill
               <Plus className="h-4 w-4" />
             </Button>
@@ -63,7 +64,7 @@ export function LibraryContent({ drills, totalDrills }: LibraryContentProps) {
                 Import drills from PracticePlannerLive or create your first
                 drill to get started
               </P>
-              <Button variant="default" className="mt-4">
+              <Button variant="default" size="default" className="mt-4">
                 Create Drill
                 <Plus className="h-4 w-4" />
               </Button>

@@ -12,6 +12,7 @@ import { useUserAccess } from "@/hooks/useUserAccess";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { ExternalLink } from "lucide-react";
+import { H2, H3, P, Small } from "@/components/atoms/typography";
 
 // Get Shopify subscription URL from environment
 const SHOPIFY_SUBSCRIPTION_URL =
@@ -143,19 +144,19 @@ export function AppFeature({ children, subscribePrompt }: AppFeatureProps) {
       {subscribePrompt || (
         <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6 p-8 text-center">
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold">
+            <H2>
               Subscribe to Access This Feature
-            </h2>
-            <p className="text-muted-foreground max-w-md">
+            </H2>
+            <P className="text-muted-foreground max-w-md">
               {isAuthenticated
                 ? "Get full access to all features with a subscription"
                 : "Sign up and subscribe to unlock all features"}
-            </p>
+            </P>
           </div>
           <div className="flex gap-4">
             {!isAuthenticated && (
               <Link href="/auth/signup">
-                <Button>Sign Up</Button>
+                <Button size="default">Sign Up</Button>
               </Link>
             )}
             <a
@@ -163,7 +164,7 @@ export function AppFeature({ children, subscribePrompt }: AppFeatureProps) {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Button variant={isAuthenticated ? "default" : "outline"}>
+              <Button variant={isAuthenticated ? "default" : "outline"} size="default">
                 View Plans
                 <ExternalLink className="h-4 w-4" />
               </Button>
@@ -201,16 +202,16 @@ export function MarketingWrapper({ children, preview }: MarketingWrapperProps) {
           </div>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="bg-background/95 backdrop-blur-sm border rounded-lg p-6 space-y-4 text-center max-w-md">
-              <h3 className="text-xl font-semibold">Subscribe to Unlock</h3>
-              <p className="text-sm text-muted-foreground">
+              <H3>Subscribe to Unlock</H3>
+              <Small>
                 Get full access to all features with a free trial
-              </p>
+              </Small>
               <a
                 href={SHOPIFY_SUBSCRIPTION_URL}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Button>
+                <Button size="default">
                   Start Free Trial
                   <ExternalLink className="h-4 w-4" />
                 </Button>

@@ -20,8 +20,7 @@ export function DrillImportActions({
     <>
       <Button
         variant={variant}
-        size="lg"
-        className="mr-4"
+        size="default"
         guarded={guarded}
         onClick={() => {
           if (!guarded) {
