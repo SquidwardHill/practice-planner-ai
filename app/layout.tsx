@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bricolage_Grotesque, Sora } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/organisms/navigation";
+import { Footer } from "@/components/organisms/footer";
 import { DevUserSwitcher } from "@/components/organisms/dev-user-switcher";
 import { UserAccessProvider } from "@/contexts/UserAccessContext";
 import { PRODUCT_NAME } from "@/lib/config/branding";
@@ -37,6 +38,7 @@ export default async function RootLayout({
         <UserAccessProvider>
           <Navigation />
           <main>{children}</main>
+          <Footer />
           <DevUserSwitcher />
         </UserAccessProvider>
       </body>
