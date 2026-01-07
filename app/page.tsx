@@ -1,255 +1,88 @@
 import { getAuthState } from "@/lib/supabase/auth-helpers";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Calendar,
-  Library,
-  Sparkles,
-  CheckCircle2,
-  ArrowRight,
-  BookOpen,
-  Upload,
-  FileText,
-} from "lucide-react";
-import { Greeting } from "@/components/greeting";
-import { HelpForm } from "@/components/help-form";
-import { FeatureGrid, type Feature } from "@/components/feature-grid";
-import { RecentActivity, type ActivityItem } from "@/components/recent-activity";
+import { Library, ArrowRight, Dribbble } from "lucide-react";
+import { Greeting } from "@/components/atoms/greeting";
+import { dashboardFeatures } from "@/lib/data/features";
+import { FeatureCardsSection } from "@/components/molecules/feature-cards-section";
+import { type Drill } from "@/lib/types/drill";
+import { H2 } from "@/components/atoms/typography";
+import { HeroSection } from "@/components/molecules/section-hero";
+import { SectionPitch } from "@/components/molecules/section-pitch";
+import { TitleWithAccent } from "@/components/molecules/title-with-accent";
+import { SectionCta } from "@/components/molecules/section-cta";
+import { AI_NAME } from "@/lib/config/branding";
 
-export default async function Home() {
-  const { user } = await getAuthState();
+export default async function Home({
+  data: drills,
+  error,
+  count,
+}: {
+  data: Drill[];
+  error: Error | null;
+  count: number;
+}) {
+  const { user, access } = await getAuthState();
 
-  // If authenticated, show internal dashboard
-  if (user) {
-    const features: Feature[] = [
-      {
-        icon: Library,
-        title: "Drill Library",
-        description:
-          "Build and manage your collection of practice drills. Create drills manually, use AI, or import from YouTube and websites.",
-        href: "/library",
-      },
-      {
-        icon: Sparkles,
-        title: "AI Drill Creator",
-        description:
-          "Generate custom drills using natural language prompts. Describe what you need and AI creates structured drills for you.",
-        href: "/library",
-      },
-      {
-        icon: Upload,
-        title: "Import from YouTube",
-        description:
-          "Import drills from YouTube videos. Our AI extracts drill information from video transcripts automatically.",
-        href: "/library",
-      },
-      {
-        icon: BookOpen,
-        title: "Import from Web",
-        description:
-          "Import drills from articles and websites. AI extracts drill content with 70-85% accuracy for you to review.",
-        href: "/library",
-      },
-      {
-        icon: Calendar,
-        title: "Practice Planner",
-        description:
-          "Generate AI-powered practice plans based on duration, age group, and focus areas. Plans are built from your drill library.",
-        href: "/planner",
-      },
-      {
-        icon: FileText,
-        title: "Save & Organize",
-        description:
-          "Save practice plans to your calendar, edit them, duplicate for future sessions, and organize your coaching workflow.",
-        href: "/planner",
-      },
-    ];
-
-    // Mock recent activity data - replace with actual data from database
-    const recentActivity: ActivityItem[] = [
-      {
-        type: "practice_plan",
-        title: "Varsity Transition Defense Practice",
-        date: "2 hours ago",
-        icon: Calendar,
-      },
-      {
-        type: "drill",
-        title: "3-Man Weave",
-        date: "1 day ago",
-        icon: Library,
-      },
-      {
-        type: "practice_plan",
-        title: "Shooting Fundamentals Plan",
-        date: "3 days ago",
-        icon: Calendar,
-      },
-    ];
-
+  // If authenticated AND has access, show internal dashboard
+  if (user && access.hasAccess) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="mb-12 text-center">
-          <h1 className="text-4xl font-bold mb-4">
-            <Greeting firstName={user.full_name} />
-          </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Continue building your practice plans and managing your drill library
-          </p>
-        </div>
+      <div className="container mx-auto px-4 py-10 max-w-6xl mt-6">
+        {/* Features Section */}
+        <SectionPitch
+          title={
+            <H2>
+              <Greeting firstName={user.full_name} />
+            </H2>
+          }
+          description={`What's on the docket today? ${AI_NAME} is on stand-by whenever you're ready to start planning.`}
+          ctaLink="/library"
+          ctaText="Start building"
+          ctaButtonVariant="default"
+        />
 
-        <FeatureGrid features={features} hasAccess={true} />
-
-        <div className="grid gap-6 md:grid-cols-2">
-          <RecentActivity activities={recentActivity} />
-          <HelpForm />
-        </div>
+        <FeatureCardsSection features={dashboardFeatures} hasAccess={true} />
       </div>
     );
   }
 
-  // Public marketing page for unauthenticated users
+  // Unauthenticated content
   return (
-    <div className="container mx-auto px-4 py-12 max-w-6xl">
+    <div className="container mx-auto px-4 py-10 max-w-6xl mt-6">
       {/* Hero Section */}
-      <div className="text-center mb-16">
-        <h1 className="text-5xl font-bold mb-6">
-          AI-Powered Basketball Practice Planning
-        </h1>
-        <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-          Generate structured practice plans, manage your drill library, and
-          streamline your coaching workflow with AI assistance.
-        </p>
-        <div className="flex gap-4 justify-center">
-          <Link href="/auth/sign-up">
-            <Button size="lg" className="text-lg px-8">
-              Get Started
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
-          <Link href="/auth/login">
-            <Button variant="outline" size="lg" className="text-lg px-8">
-              Sign In
-            </Button>
-          </Link>
-        </div>
+      <div className="mb-16">
+        <HeroSection
+          hasLogo={true}
+          title="AI-powered planning has arrived"
+          description={`Generate drills and organize your practice plans using natural, conversational prompts. You can focus on the big picture while ${AI_NAME} handles the details.`}
+          buttonText="Give it a shot"
+          buttonHref="/auth/sign-up"
+          buttonIcon={Dribbble}
+        />
       </div>
 
       {/* Features Section */}
-      <div className="grid gap-8 md:grid-cols-3 mb-16">
-        <Card>
-          <CardHeader>
-            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-              <Sparkles className="h-6 w-6 text-primary" />
-            </div>
-            <CardTitle>AI-Powered Generation</CardTitle>
-            <CardDescription>
-              Generate practice plans and drills using natural language. Describe
-              what you need and AI creates structured content for you.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-              <Library className="h-6 w-6 text-primary" />
-            </div>
-            <CardTitle>Comprehensive Drill Library</CardTitle>
-            <CardDescription>
-              Build and organize your drill collection. Import from YouTube,
-              websites, create manually, or use AI to generate new drills.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-              <Calendar className="h-6 w-6 text-primary" />
-            </div>
-            <CardTitle>Smart Practice Planning</CardTitle>
-            <CardDescription>
-              Create practice plans tailored to your team's needs. Set duration,
-              age group, focus areas, and let AI build the perfect plan.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
-
-      {/* Benefits Section */}
-      <div className="bg-muted/50 rounded-lg p-8 mb-16">
-        <h2 className="text-3xl font-bold text-center mb-8">
-          Why Practice Planner AI?
-        </h2>
-        <div className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto">
-          <div className="flex gap-3">
-            <CheckCircle2 className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-semibold mb-1">Save Time</h3>
-              <p className="text-sm text-muted-foreground">
-                Generate practice plans in minutes instead of hours
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <CheckCircle2 className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-semibold mb-1">Organize Everything</h3>
-              <p className="text-sm text-muted-foreground">
-                Keep all your drills and plans in one centralized location
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <CheckCircle2 className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-semibold mb-1">AI Assistance</h3>
-              <p className="text-sm text-muted-foreground">
-                Get AI-powered suggestions and content generation
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <CheckCircle2 className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-semibold mb-1">Easy Import</h3>
-              <p className="text-sm text-muted-foreground">
-                Import drills from YouTube videos and websites automatically
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <SectionPitch
+        title={
+          <TitleWithAccent
+            prefix="Meet "
+            accent={AI_NAME}
+            suffix=", your new AI assitant coach"
+            className="max-w-3xl mx-auto"
+          />
+        }
+        description={`${AI_NAME} generates drills in seconds from YouTube videos, digital content, drill list uploads, and user prompts. Practice planning has never been easier.`}
+        ctaLink="/auth/sign-up"
+        ctaText="Get started"
+      />
+      <FeatureCardsSection features={dashboardFeatures} className="mb-10" />
 
       {/* CTA Section */}
-      <div className="text-center">
-        <Card className="border-primary/20">
-          <CardHeader>
-            <CardTitle className="text-2xl">Ready to get started?</CardTitle>
-            <CardDescription className="text-base">
-              Join coaches who are already using AI to streamline their practice
-              planning
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link href="/auth/sign-up">
-              <Button size="lg" className="text-lg px-8">
-                Create Your Account
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
+      <SectionCta
+        title="Transform your practice planning"
+        description={`Try ${AI_NAME} free for 14 days. Create unlimited drills, instantly convert media to drills, and streamline your practice planning with ${AI_NAME}.`}
+        buttonText="Try for free"
+        buttonHref="/auth/sign-up"
+        buttonIcon={ArrowRight}
+      />
     </div>
   );
 }

@@ -3,6 +3,10 @@ import {
   SubscriptionStatus,
   type SubscriptionStatusType,
 } from "@/lib/types/subscription";
+import {
+  computeUserAccess,
+  type UserAccess,
+} from "@/lib/types/access-control";
 
 export interface AuthState {
   user: {
@@ -17,6 +21,8 @@ export interface AuthState {
     isTrial: boolean;
     hasLinkedAccount: boolean;
   } | null;
+  // New: Simplified access control state
+  access: UserAccess;
 }
 
 /**
@@ -42,12 +48,14 @@ export async function getAuthState(): Promise<AuthState> {
       return {
         user: null,
         subscription: null,
+        access: computeUserAccess(false, SubscriptionStatus.UNSET, false),
       };
     }
     // For other errors, also return unauthenticated state
     return {
       user: null,
       subscription: null,
+      access: computeUserAccess(false, SubscriptionStatus.UNSET, false),
     };
   }
 
@@ -55,6 +63,7 @@ export async function getAuthState(): Promise<AuthState> {
     return {
       user: null,
       subscription: null,
+      access: computeUserAccess(false, SubscriptionStatus.UNSET, false),
     };
   }
 
@@ -80,6 +89,7 @@ export async function getAuthState(): Promise<AuthState> {
         isTrial: false,
         hasLinkedAccount: false,
       },
+      access: computeUserAccess(true, SubscriptionStatus.UNSET, false),
     };
   }
 
@@ -104,5 +114,6 @@ export async function getAuthState(): Promise<AuthState> {
       isTrial,
       hasLinkedAccount: true,
     },
+    access: computeUserAccess(true, status, true),
   };
 }

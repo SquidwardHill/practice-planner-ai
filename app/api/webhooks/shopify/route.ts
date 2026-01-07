@@ -41,13 +41,14 @@ function verifyShopifyWebhook(
 }
 
 /**
- * Extract customer ID and email from native Shopify webhook payload
- * 
- * Shopify webhook payloads vary by topic:
- * - customers/create, customers/update: customer object IS the payload (id, email at root)
- * - orders/*: customer_id and email at root level
- */
-function extractCustomerInfo(payload: any, topic?: string): {
+ Extract customer ID and email from native Shopify webhook payload
+ Shopify webhook payloads vary by topic: 
+ —> customers/create, customers/update: customer object IS the payload (id, email at root level)—> orders/*: customer_id and email at root level
+  */
+function extractCustomerInfo(
+  payload: any,
+  topic?: string
+): {
   customerId: string | null;
   email: string | null;
 } {
@@ -78,7 +79,10 @@ function extractCustomerInfo(payload: any, topic?: string): {
   }
 
   // Fallback: check if payload has id and looks like customer data
-  if (payload.id && (payload.email || payload.first_name || payload.last_name)) {
+  if (
+    payload.id &&
+    (payload.email || payload.first_name || payload.last_name)
+  ) {
     return {
       customerId: String(payload.id),
       email: payload.email || null,
@@ -92,13 +96,14 @@ function extractCustomerInfo(payload: any, topic?: string): {
  * Determine subscription status from order webhook
  */
 function getSubscriptionStatusFromOrder(payload: any): {
-  status: SubscriptionStatusType | "pending"; // "pending" is temporary, not stored in DB
+  status: SubscriptionStatusType | "pending";
+  // Pending status is ephemeral (no DB storage)
   startDate?: Date;
   endDate?: Date;
 } {
   if (payload.line_items) {
     const hasSubscription = payload.line_items.some((item: any) => {
-      // TODO:Adjust this check based on how you identify subscription products
+      // 🔌 TODO: Adjust condition per published Shopifysubscription properties
       return (
         item.product_type === "subscription" ||
         item.sku?.includes("subscription") ||
@@ -324,7 +329,7 @@ export async function POST(req: NextRequest) {
 
     // Create Supabase client for this request
     const supabase = await createClient();
-    
+
     // Update user profile with subscription information
     const result = await updateUserSubscription(
       supabase,

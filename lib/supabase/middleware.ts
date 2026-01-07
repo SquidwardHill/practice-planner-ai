@@ -49,7 +49,7 @@ export function createMiddlewareClient(request: NextRequest) {
 export async function updateSession(request: NextRequest) {
   const { supabase, response } = createMiddlewareClient(request);
 
-  // Do not run code between createServerClient and supabase.auth.getClaims() 
+  // Do not run code between createServerClient and supabase.auth.getClaims()
   // Removing getClaims() and using SSR with Supabase client may cause users to randomly logout.
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
@@ -65,7 +65,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // TODO -> syncing supabase response object with cookie to NextResponse 
+  // 🔌 TODO -> syncing supabase response object with cookie to NextResponse
 
   return response;
 }
