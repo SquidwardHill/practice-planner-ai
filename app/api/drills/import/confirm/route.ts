@@ -50,6 +50,11 @@ export async function POST(request: NextRequest) {
     }));
 
     // Check for duplicates before inserting
+    // TODO: POST-MVP - Implement duplicate handling strategies:
+    //   - Skip (current): Filter out duplicates
+    //   - Overwrite: Update existing drills with new data
+    //   - Rename: Auto-append suffix to make unique
+    //   - Merge: Combine data from both versions
     const existingDrills = await supabase
       .from("drills")
       .select("name")
@@ -59,7 +64,7 @@ export async function POST(request: NextRequest) {
       (existingDrills.data || []).map((d) => d.name.toLowerCase())
     );
 
-    // Filter out duplicates (based on name)
+    // Filter out duplicates (based on name) - current MVP behavior: skip duplicates
     const uniqueDrills = drillsToInsert.filter((drill) => {
       const nameLower = drill.name.toLowerCase();
       if (existingNames.has(nameLower)) {
@@ -134,5 +139,6 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
 
 

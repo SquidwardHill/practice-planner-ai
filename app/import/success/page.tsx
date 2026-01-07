@@ -18,7 +18,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { H1, H3, P, Small } from "@/components/typography";
+import { H1, H3, P, Small } from "@/components/atoms/typography";
 
 interface ImportSuccessPageProps {
   searchParams: Promise<{ imported?: string; skipped?: string }>;
@@ -91,8 +91,8 @@ export default async function ImportSuccessPage({
       <div className="flex gap-4 justify-center">
         <Link href="/library">
           <Button size="lg">
-            <Library className=" h-4 w-4" />
             Go to Library
+            <Library className=" h-4 w-4" />
           </Button>
         </Link>
         <Link href="/">

@@ -84,7 +84,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate and normalize rows
-    const validatedRows: DrillImportRow[] = [];
+    // Store both the normalized row and its original index
+    const validatedRows: Array<{ row: DrillImportRow; originalIndex: number }> =
+      [];
     const errors: Array<{ row: number; error: string }> = [];
 
     rawRows.forEach((row, index) => {
@@ -92,7 +94,7 @@ export async function POST(request: NextRequest) {
       const validation = validateDrillRow(normalized, index);
 
       if (validation.valid) {
-        validatedRows.push(normalized);
+        validatedRows.push({ row: normalized, originalIndex: index });
       } else {
         errors.push({
           row: index + 1,
@@ -102,6 +104,11 @@ export async function POST(request: NextRequest) {
     });
 
     // Check for duplicates (same name for this user)
+    // TODO: POST-MVP - Add duplicate handling options:
+    //   - Skip duplicates (current behavior)
+    //   - Overwrite existing drills
+    //   - Auto-rename duplicates (e.g., "Drill Name (2)")
+    //   - Allow user to choose per-duplicate in UI
     const existingDrills = await supabase
       .from("drills")
       .select("name")
@@ -114,8 +121,8 @@ export async function POST(request: NextRequest) {
     const duplicateErrors: Array<{ row: number; error: string }> = [];
     const uniqueRows: DrillImportRow[] = [];
 
-    validatedRows.forEach((row, index) => {
-      const rowNumber = rawRows.findIndex((r) => r === row) + 1;
+    validatedRows.forEach(({ row, originalIndex }) => {
+      const rowNumber = originalIndex + 1; // Convert 0-based index to 1-based row number
       const nameLower = row.Name?.toLowerCase();
 
       if (nameLower && existingNames.has(nameLower)) {
