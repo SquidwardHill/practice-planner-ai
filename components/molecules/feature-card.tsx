@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { LucideIcon } from "lucide-react";
+import { Lock } from "lucide-react";
 
 interface FeatureCardProps {
   icon: LucideIcon;
@@ -47,10 +48,10 @@ export function FeatureCard({
         ) : (
           <Button variant="outline" className="w-full" disabled>
             {disabledButtonText}
+            <Lock className=" h-4 w-4" />
           </Button>
         )}
       </CardContent>
     </Card>
   );
 }
-

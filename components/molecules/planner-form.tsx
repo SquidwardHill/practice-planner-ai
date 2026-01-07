@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { H2, P, Small } from "@/components/typography";
+import { H2, P, Small } from "@/components/atoms/typography";
 
 interface PracticeBlock {
   time_slot: string;
@@ -82,13 +82,22 @@ export function PlannerForm() {
         try {
           data = JSON.parse(jsonText) as PracticePlan;
         } catch (parseError) {
-          console.error("JSON parse error:", parseError, "Received text:", jsonText);
+          console.error(
+            "JSON parse error:",
+            parseError,
+            "Received text:",
+            jsonText
+          );
           throw new Error(
             "The response was incomplete. This may happen if the generation takes too long. Please try again with a shorter practice duration or simpler request."
           );
         }
 
-        if (!data.practice_title || !data.blocks || !Array.isArray(data.blocks)) {
+        if (
+          !data.practice_title ||
+          !data.blocks ||
+          !Array.isArray(data.blocks)
+        ) {
           throw new Error("Invalid response format from server");
         }
 
@@ -133,7 +142,11 @@ export function PlannerForm() {
                 disabled={isLoading}
               />
             </div>
-            <Button type="submit" disabled={isLoading || !input.trim()} className="w-full">
+            <Button
+              type="submit"
+              disabled={isLoading || !input.trim()}
+              className="w-full"
+            >
               {isLoading ? "Generating..." : "Generate Practice Plan"}
             </Button>
           </form>
@@ -148,41 +161,39 @@ export function PlannerForm() {
 
       {isLoading && (
         <div className="p-6 border rounded-lg">
-            <div className="space-y-4 animate-pulse">
-              <div className="space-y-2">
-                <div className="h-6 w-48 bg-muted rounded" />
-                <div className="h-4 w-32 bg-muted rounded" />
-              </div>
-              <div className="space-y-4">
-                {Array.from({ length: 4 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="border-l-4 border-primary/20 pl-4 py-3 bg-muted/30 rounded-r-lg"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-center gap-3">
-                          <span className="h-5 w-24 bg-muted rounded" />
-                          <span className="h-4 w-16 bg-muted rounded" />
-                          <span className="h-4 w-10 bg-muted rounded" />
-                        </div>
-                        <div className="h-5 w-40 bg-muted rounded" />
-                      </div>
-                    </div>
-                    <div className="h-4 w-3/4 bg-muted rounded" />
-                  </div>
-                ))}
-              </div>
+          <div className="space-y-4 animate-pulse">
+            <div className="space-y-2">
+              <div className="h-6 w-48 bg-muted rounded" />
+              <div className="h-4 w-32 bg-muted rounded" />
             </div>
+            <div className="space-y-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="border-l-4 border-primary/20 pl-4 py-3 bg-muted/30 rounded-r-lg"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center gap-3">
+                        <span className="h-5 w-24 bg-muted rounded" />
+                        <span className="h-4 w-16 bg-muted rounded" />
+                        <span className="h-4 w-10 bg-muted rounded" />
+                      </div>
+                      <div className="h-5 w-40 bg-muted rounded" />
+                    </div>
+                  </div>
+                  <div className="h-4 w-3/4 bg-muted rounded" />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
       {practicePlan && !isLoading && (
         <div className="p-6 border rounded-lg">
           <div className="mb-4">
-            <H2 className="mb-1">
-              {practicePlan.practice_title}
-            </H2>
+            <H2 className="mb-1">{practicePlan.practice_title}</H2>
             <P className="text-muted-foreground">
               Total Duration: {practicePlan.total_duration_minutes} minutes
             </P>
@@ -207,9 +218,7 @@ export function PlannerForm() {
                           {block.duration} min
                         </span>
                       </div>
-                      <P className="font-medium">
-                        {block.drill_name}
-                      </P>
+                      <P className="font-medium">{block.drill_name}</P>
                     </div>
                   </div>
                   {block.notes && (
@@ -226,4 +235,3 @@ export function PlannerForm() {
     </div>
   );
 }
-

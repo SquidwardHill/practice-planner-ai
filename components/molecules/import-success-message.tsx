@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { CheckCircle2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { P, Small } from "@/components/typography";
+import { P, Small } from "@/components/atoms/typography";
 
 export function ImportSuccessMessage() {
   const searchParams = useSearchParams();
@@ -84,4 +84,3 @@ export function ImportSuccessMessage() {
     </div>
   );
 }
-

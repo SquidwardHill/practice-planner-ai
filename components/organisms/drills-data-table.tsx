@@ -19,8 +19,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DataTableColumnHeader } from "@/components/data-table-column-header";
-import { DataTablePagination } from "@/components/data-table-pagination";
+import { DataTableColumnHeader } from "@/components/molecules/data-table-column-header";
+import { DataTablePagination } from "@/components/molecules/data-table-pagination";
 
 interface DrillsDataTableProps {
   data: Drill[];

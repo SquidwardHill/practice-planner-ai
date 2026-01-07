@@ -1,5 +1,5 @@
 import { LucideIcon } from "lucide-react";
-import { FeatureCard } from "./feature-card";
+import { FeatureCard } from "../molecules/feature-card";
 
 export interface Feature {
   icon: LucideIcon;
@@ -38,4 +38,3 @@ export function FeatureGrid({
     </div>
   );
 }
-

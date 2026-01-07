@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { History, Clock, LucideIcon } from "lucide-react";
-import { H3, P, Small } from "@/components/typography";
+import { H3, P, Small } from "@/components/atoms/typography";
 
 export interface ActivityItem {
   type: string;
@@ -26,7 +26,7 @@ export function RecentActivity({
   viewAllText = "View All Activity",
 }: RecentActivityProps) {
   return (
-    <div className="flex flex-col gap-6 rounded-xl border shadow-sm py-6">
+    <div className="flex flex-col gap-6 rounded-2xl border shadow-sm py-6">
       <div className="px-6">
         <H3 className="flex items-center gap-2">
           <History className="h-5 w-5" />

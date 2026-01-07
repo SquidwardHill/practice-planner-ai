@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Small } from "@/components/typography";
+import { Small } from "@/components/atoms/typography";
 
 export function SignUpForm({
   className,

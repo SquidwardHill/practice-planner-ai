@@ -229,8 +229,8 @@ export function DrillImportModal({
                     variant="outline"
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    <FileUp className="  h-4 w-4" />
                     Choose File
+                    <FileUp className="  h-4 w-4" />
                   </Button>
                 </div>
               ) : (
@@ -284,13 +284,13 @@ export function DrillImportModal({
           >
             {isUploading ? (
               <>
-                <Upload className="  h-4 w-4 animate-pulse" />
                 Importing...
+                <Upload className="  h-4 w-4 animate-pulse" />
               </>
             ) : (
               <>
-                <Upload className="  h-4 w-4" />
                 Start Import
+                <Upload className="  h-4 w-4" />
               </>
             )}
           </Button>

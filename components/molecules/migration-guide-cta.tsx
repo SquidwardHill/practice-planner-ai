@@ -2,15 +2,14 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Upload, FileText } from "lucide-react";
-import { DrillImportModal } from "@/components/drill-import-modal";
+import { DrillImportModal } from "@/components/organisms/drill-import-modal";
+import { useUserAccess } from "@/hooks/useUserAccess";
 
 export function MigrationGuideCTA() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { hasAccess } = useUserAccess();
 
   return (
     <>
@@ -22,12 +21,12 @@ export function MigrationGuideCTA() {
               <h3 className="font-semibold text-lg mb-2">
                 Ready to Import Your Drills?
               </h3>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-base text-muted-foreground mb-4">
                 Upload your drill list file to get started.
               </p>
-              <Button onClick={() => setIsModalOpen(true)}>
-                <Upload className="mr-2 h-4 w-4" />
+              <Button onClick={() => setIsModalOpen(true)} guarded={!hasAccess}>
                 Upload Drill List
+                <Upload className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -37,4 +36,3 @@ export function MigrationGuideCTA() {
     </>
   );
 }
-

@@ -1,5 +1,5 @@
 import { type FeatureCard } from "@/lib/data/features";
-import { H3, P } from "@/components/typography";
+import { H3, P } from "@/components/atoms/typography";
 
 interface FeatureCardsSectionProps {
   features: FeatureCard[];

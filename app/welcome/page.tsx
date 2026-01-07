@@ -10,10 +10,11 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Calendar } from "lucide-react";
 import { isValidSubscription } from "@/lib/types/subscription";
-import { FeatureGrid } from "@/components/feature-grid";
+import { FeatureGrid } from "@/components/organisms/feature-grid";
 import { allFeatures } from "@/lib/data/features";
 import { welcomeBenefits } from "@/lib/data/benefits";
-import { BenefitsSection } from "@/components/benefits-section";
+import { BenefitsSection } from "@/components/molecules/benefits-section";
+import { ShopifyLinkAccount } from "@/components/organisms/shopify-link-account";
 
 export default async function WelcomePage() {
   const { user, subscription } = await getAuthState();
@@ -54,12 +55,22 @@ export default async function WelcomePage() {
           <CardContent className="space-y-4">
             <BenefitsSection benefits={welcomeBenefits} variant="welcome" />
             {!hasAccess && (
-              <div className="pt-4 border-t">
-                <Link href="/profile">
-                  <Button variant="outline" className="w-full">
-                    Get Started with Free Trial
-                  </Button>
-                </Link>
+              <div className="pt-4 border-t space-y-4">
+                {!subscription?.hasLinkedAccount && user && (
+                  <ShopifyLinkAccount
+                    userEmail={user.email}
+                    showEmailInput={true}
+                    buttonVariant="default"
+                    buttonSize="lg"
+                  />
+                )}
+                {subscription?.hasLinkedAccount && (
+                  <Link href="/profile">
+                    <Button variant="outline" className="w-full">
+                      Get Started with Free Trial
+                    </Button>
+                  </Link>
+                )}
               </div>
             )}
             {hasAccess && (

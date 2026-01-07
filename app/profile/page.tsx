@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 import { getAuthState } from "@/lib/supabase/auth-helpers";
 
-import { SubscriptionStatusBadge } from "@/components/subscription-status-badge";
+import { SubscriptionStatusBadge } from "@/components/atoms/subscription-status-badge";
 import { SubscriptionStatus } from "@/lib/types/subscription";
-import { H1, H3, P, Small } from "@/components/typography";
+import { H1, H3, P, Small } from "@/components/atoms/typography";
+import { ShopifyLinkAccount } from "@/components/organisms/shopify-link-account";
 
 export default async function ProfilePage() {
   const { user, subscription } = await getAuthState();
@@ -67,9 +68,7 @@ export default async function ProfilePage() {
             </div>
             {subscription?.isValid && (
               <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
-                <Small>
-                  ✓ You have access to all features
-                </Small>
+                <Small>✓ You have access to all features</Small>
               </div>
             )}
             {!subscription?.isValid &&
@@ -82,11 +81,20 @@ export default async function ProfilePage() {
                 </div>
               )}
             {subscription?.status === SubscriptionStatus.UNSET && (
-              <div className="p-4 bg-muted/50 rounded-lg border">
-                <Small>
-                  No subscription found. Please link your Shopify account to get
-                  started.
-                </Small>
+              <div className="space-y-4">
+                <div className="p-4 bg-muted/50 rounded-lg border">
+                  <Small>
+                    No subscription found. Please link your Shopify account to
+                    get started.
+                  </Small>
+                </div>
+                {!subscription?.hasLinkedAccount && (
+                  <ShopifyLinkAccount
+                    userEmail={user.email}
+                    showEmailInput={true}
+                    buttonVariant="default"
+                  />
+                )}
               </div>
             )}
           </div>

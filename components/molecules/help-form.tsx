@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, CheckCircle2 } from "lucide-react";
-import { H3, P, Small } from "@/components/typography";
+import { H3, P, Small } from "@/components/atoms/typography";
 
 export function HelpForm() {
   const [formData, setFormData] = useState({
@@ -35,7 +35,7 @@ export function HelpForm() {
   };
 
   return (
-    <div className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm">
+    <div className="bg-card text-card-foreground flex flex-col gap-6 rounded-2xl border py-6 shadow-sm">
       <div className="px-6">
         <H3>Need Help?</H3>
         <Small className="text-muted-foreground mt-1">

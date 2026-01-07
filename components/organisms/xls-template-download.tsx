@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Download, FileSpreadsheet } from "lucide-react";
 import * as XLSX from "xlsx";
-import { P, Small } from "@/components/typography";
+import { P, Small } from "@/components/atoms/typography";
 
 export function XLSTemplateDownload() {
   const handleDownload = () => {

@@ -6,24 +6,14 @@ import { usePathname } from "next/navigation";
 import { Home, Library, Calendar, User, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { LogoutButton } from "@/components/logout-button";
-import { SubscriptionStatusBadge } from "@/components/subscription-status-badge";
+import { LogoutButton } from "@/components/atoms/logout-button";
+import { SubscriptionStatusBadge } from "@/components/atoms/subscription-status-badge";
+import { useUserAccess } from "@/hooks/useUserAccess";
 
-interface NavigationProps {
-  user: {
-    id: string;
-    email?: string;
-  } | null;
-  subscription: {
-    status: string;
-    isValid: boolean;
-    isTrial: boolean;
-    hasLinkedAccount: boolean;
-  } | null;
-}
-
-export function Navigation({ user, subscription }: NavigationProps) {
+export function Navigation() {
   const pathname = usePathname();
+  const { isAuthenticated, hasAccess, subscriptionStatus, isLoading } =
+    useUserAccess();
 
   // Don't show navigation on auth pages
   if (pathname?.startsWith("/auth")) {
@@ -36,19 +26,21 @@ export function Navigation({ user, subscription }: NavigationProps) {
       label: "Dashboard",
       icon: Home,
       requiresAuth: false,
+      requiresAccess: true,
     },
     {
       href: "/library",
       label: "Library",
       icon: Library,
       requiresAuth: true,
+      requiresAccess: true,
     },
     {
       href: "/planner",
       label: "Planner",
       icon: Calendar,
       requiresAuth: true,
-      requiresSubscription: true,
+      requiresAccess: true,
     },
     {
       href: "/profile",
@@ -57,9 +49,6 @@ export function Navigation({ user, subscription }: NavigationProps) {
       requiresAuth: true,
     },
   ];
-
-  const isAuthenticated = !!user;
-  const hasActiveSubscription = subscription?.isValid ?? false;
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
@@ -71,20 +60,20 @@ export function Navigation({ user, subscription }: NavigationProps) {
             className="flex items-center gap-2 transition-opacity hover:opacity-80 py-4"
           >
             <Image
-              src="/logo/planner-ai-light-mode.svg"
+              src="/logo/planner-ai-logo-light-mode.svg"
               alt="Practice Planner AI"
               width={218}
               height={100}
-              className="h-8 w-auto object-contain dark:hidden"
+              className="h-9 w-auto object-contain dark:hidden"
               suppressHydrationWarning
               priority
             />
             <Image
-              src="/logo/planner-ai-dark-mode.svg"
+              src="/logo/planner-ai-logo-dark-mode.svg"
               alt="Practice Planner AI"
               width={218}
               height={100}
-              className="h-8 w-auto object-contain hidden dark:block"
+              className="h-9 w-auto object-contain hidden dark:block"
               suppressHydrationWarning
               priority
             />
@@ -101,8 +90,11 @@ export function Navigation({ user, subscription }: NavigationProps) {
 
                 const Icon = item.icon;
                 const isActive = pathname === item.href;
+
+                // Check if item should be locked (requires access but user doesn't have it)
+                // Don't show locked state while loading to prevent flash
                 const isLocked =
-                  item.requiresSubscription && !hasActiveSubscription;
+                  !isLoading && item.requiresAccess && !hasAccess;
 
                 return (
                   <Link
@@ -111,8 +103,8 @@ export function Navigation({ user, subscription }: NavigationProps) {
                     className={cn(
                       "flex items-center gap-2 text-sm font-medium transition-colors",
                       isActive
-                        ? "text-active-nav"
-                        : "text-muted-foreground hover:text-active-nav-hover",
+                        ? "text-primary saturate-75"
+                        : "text-muted-foreground hover:text-primary saturate-105",
                       isLocked && "opacity-50 cursor-not-allowed"
                     )}
                     title={isLocked ? "Subscription required" : undefined}
@@ -123,15 +115,12 @@ export function Navigation({ user, subscription }: NavigationProps) {
                     }}
                   >
                     <div className="flex items-center justify-center gap-1">
-                      {/* <Icon className="h-4 w-4" /> */}
                       <span>{item.label}</span>
-                      {isLocked && (
-                        <Lock className="h-4 w-4 opacity-100 color-red-500 mb-1" />
-                      )}
+                      {isLocked && <Lock className="h-3 w-3" />}
                     </div>
-                    {item.label === "Account" && subscription && (
+                    {item.label === "Account" && (
                       <SubscriptionStatusBadge
-                        status={subscription.status}
+                        status={subscriptionStatus}
                         className="ml-1"
                       />
                     )}

@@ -1,28 +1,36 @@
 import { getAuthState } from "@/lib/supabase/auth-helpers";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Calendar, Library, ArrowRight, BookOpen } from "lucide-react";
-import { Greeting } from "@/components/greeting";
-import { HelpForm } from "@/components/help-form";
-import { FeatureGrid } from "@/components/feature-grid";
+import { Calendar, Library, ArrowRight, BookOpen, Balloon } from "lucide-react";
+import { Greeting } from "@/components/atoms/greeting";
+import { Logo } from "@/components/atoms/logo";
+import { HelpForm } from "@/components/molecules/help-form";
+import { FeatureGrid } from "@/components/organisms/feature-grid";
 import {
   RecentActivity,
   type ActivityItem,
-} from "@/components/recent-activity";
+} from "@/components/organisms/recent-activity";
 import { dashboardFeatures } from "@/lib/data/features";
-import { publicFeatureCards } from "@/lib/data/features";
-import { publicBenefits } from "@/lib/data/benefits";
-import { FeatureCardsSection } from "@/components/feature-cards-section";
-import { BenefitsSection } from "@/components/benefits-section";
-import { DrillImportActions } from "@/components/drill-import-actions";
-import { H1, H2, Lead, P } from "@/components/typography";
+import { FeatureCardsSection } from "@/components/molecules/feature-cards-section";
+import { DrillImportActions } from "@/components/molecules/drill-import-actions";
+import { H1, H2, Lead, P } from "@/components/atoms/typography";
+import Image from "next/image";
+import { type Drill } from "@/lib/types/drill";
 
-export default async function Home() {
-  const { user } = await getAuthState();
+export default async function Home({
+  data: drills,
+  error,
+  count,
+}: {
+  data: Drill[];
+  error: Error | null;
+  count: number;
+}) {
+  const { user, access } = await getAuthState();
 
-  // If authenticated, show internal dashboard
-  if (user) {
-    // Mock recent activity data - replace with actual data from database
+  // If authenticated AND has access, show internal dashboard
+  if (user && access.hasAccess) {
+    // TODO: [mocked data] replace recent activities with persisted user data
     const recentActivity: ActivityItem[] = [
       {
         type: "practice_plan",
@@ -51,10 +59,15 @@ export default async function Home() {
             <Greeting firstName={user.full_name} />
           </H1>
           <Lead className="max-w-2xl mx-auto mb-6">
-            Do you have an existing library of drills from another system? We
-            support migrations from PracticePlannerLive! Download your drill
-            data and import here. If you're coming from another system, use our
-            XLS template for manual import.
+            What's on the docket today?
+            {count === 0 ? (
+              <>
+                Import your drills and let PlannerAI do the rest.. or create
+                something new.
+              </>
+            ) : (
+              <>Create something new</>
+            )}
           </Lead>
 
           <DrillImportActions variant="default" />
@@ -76,54 +89,72 @@ export default async function Home() {
     );
   }
 
-  // Public marketing page for unauthenticated users
-
+  // Unauthenticated content
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="container mx-auto px-4 py-10 max-w-6xl mt-6">
       {/* Hero Section */}
-      <div className="text-center mb-16">
-        <H1 className="mb-4">AI-Powered Basketball Practice Planning</H1>
-        <Lead className="mb-8 max-w-2xl mx-auto">
-          Generate structured practice plans, manage your drill library, and
-          streamline your coaching workflow with AI assistance.
-        </Lead>
-        <div className="flex gap-4 justify-center">
+      <div className="text-center mb-16 border border-primary/90 rounded-2xl px-10 pt-10 pb-14 bg-background glow-primary">
+        <div className="max-w-3xl mx-auto">
+          <Logo className="mb-6 mx-auto w-11 h-auto" />
+          <H1>Coaches, ai-powered planning is here</H1>
+          <Lead className="mb-8 mx-auto mt-4 text-xl max-w-4xl">
+            Generate drills and organize your practice plans using natural,
+            conversational prompts. You can focus on the big picture while
+            planner ai handles the details.
+          </Lead>
           <Link href="/auth/sign-up">
             <Button size="lg">
-              Get Started
-              <ArrowRight className="   h-4 w-4" />
-            </Button>
-          </Link>
-          <Link href="/auth/login">
-            <Button variant="outline" size="lg">
-              Sign In
+              Give it a whirl
+              <Balloon className="h-4 w-4" />
             </Button>
           </Link>
         </div>
       </div>
 
       {/* Features Section */}
-      <FeatureCardsSection features={publicFeatureCards} className="mb-16" />
-
-      {/* Benefits Section */}
-      <div className="mb-16">
-        <H2 className="text-center mb-6">Why Practice Planner AI?</H2>
-        <BenefitsSection benefits={publicBenefits} variant="public" />
+      <div className="my-12 glow-primary-muted rounded-3xl">
+        <div className="max-w-6xl mx-auto rounded-2xl p-px bg-linear-to-b from-primary-muted/70 via-primary-muted/40 to-background/50">
+          <div className="rounded-[calc(1.2rem-1px)] p-10 bg-background text-center">
+            <H2 className="max-w-3xl mx-auto pt-6">
+              <span>Let</span>
+              <div className="text-primary-muted items-center gap-1 inline-flex px-2">
+                <Image
+                  src="/logo/sparkle-trio.svg"
+                  alt="Sparkle Duo"
+                  width={22}
+                  height={22}
+                  className="contrast-75 rotate-180"
+                />
+                <span className="text-primary-muted">planner ai</span>
+              </div>
+              <span>lighten your load</span>
+            </H2>
+            <P className="text-muted-foreground text-xl pt-4 max-w-3xl mx-auto pb-2">
+              Import YouTube videos and digital content to quickly generate
+              drills, or use planner ai like a sidekick to build and manage your
+              training plans. Learn how planner ai can help you streamline your
+              practice planning below.
+            </P>
+          </div>
+        </div>
       </div>
+      <FeatureCardsSection features={dashboardFeatures} className="mb-20" />
 
       {/* CTA Section */}
-      <div className="text-center">
-        <H2 className="mb-2">Ready to get started?</H2>
-        <P className="text-muted-foreground mb-6">
-          Join coaches who are already using AI to streamline their practice
-          planning
-        </P>
-        <Link href="/auth/sign-up">
-          <Button size="lg">
-            Create Your Account
-            <ArrowRight className="   h-4 w-4" />
-          </Button>
-        </Link>
+      <div className="text-center bg-linear-to-b from-background via-primary/5 to-primary/40 rounded-2xl pt-4 mt-42 ">
+        <div className="flex flex-col items-center justify-center bg-linear-to-b from-background via-background/65 to-primary/45 rounded-2xl pb-12">
+          <H2 className="mb-2">Ready to get started?</H2>
+          <P className="text-muted-foreground mb-6">
+            Join coaches who are already using AI to streamline their practice
+            planning
+          </P>
+          <Link href="/auth/sign-up" className="pb-6">
+            <Button variant="light" size="lg">
+              Create Your Account
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   );

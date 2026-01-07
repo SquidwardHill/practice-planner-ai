@@ -89,7 +89,9 @@ export function DevUserSwitcher() {
 
       if (response.ok) {
         setCurrentUser(email);
-        // Refresh the page to update auth state
+        // Dispatch custom event to refresh user access hooks
+        window.dispatchEvent(new Event("user-access-refresh"));
+        // Refresh the page to update server components
         router.refresh();
       } else {
         console.error("Failed to switch user");
@@ -108,6 +110,8 @@ export function DevUserSwitcher() {
         method: "POST",
       });
       setCurrentUser(null);
+      // Dispatch custom event to refresh user access hooks
+      window.dispatchEvent(new Event("user-access-refresh"));
       router.refresh();
     } catch (error) {
       console.error("Error signing out:", error);
@@ -155,8 +159,8 @@ export function DevUserSwitcher() {
             className="border-green-400 bg-white backdrop-blur-sm border shadow-[0_0_10px_rgba(34,197,94,0.6)]"
             disabled={isLoading}
           >
-            <Users className="h-4 w-4  " />
             {isLoading ? "Switching..." : currentUserLabel}
+            <Users className="h-4 w-4  " />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Sora } from "next/font/google";
 import "./globals.css";
-import { Navigation } from "@/components/navigation";
+import { Navigation } from "@/components/organisms/navigation";
 import { getAuthState } from "@/lib/supabase/auth-helpers";
 import { DevUserSwitcher } from "@/components/dev-user-switcher";
 
