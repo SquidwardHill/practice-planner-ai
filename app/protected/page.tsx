@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { LogoutButton } from "@/components/atoms/logout-button";
+import { P } from "@/components/atoms/typography";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function ProtectedPage() {
