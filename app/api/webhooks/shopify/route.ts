@@ -9,6 +9,9 @@ export const runtime = "nodejs";
 // Maximum request body size for webhooks (Shopify can send large payloads)
 export const maxDuration = 30;
 
+// Disable body parsing to get raw body for signature verification
+export const dynamic = "force-dynamic";
+
 /**
  * Verify Shopify webhook signature
  * @param body - Raw request body as string
