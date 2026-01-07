@@ -22,7 +22,8 @@
     "supabase:migrate": "supabase db reset",
     "start:all": "echo '✅ Starting services...' && echo '🚀 Run \"npm run ngrok:start\" in another terminal' && echo '🚀 Then: Run \"npm run dev\" in another terminal'",
     "stop:all": "npm run ngrok:stop && echo '✅ All services stopped'",
-    "status": "node scripts/check-status.js"
+    "status": "node scripts/check-status.js",
+    "delete:drills": "tsx scripts/delete-drills.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.69",
