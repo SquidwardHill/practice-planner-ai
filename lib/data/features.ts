@@ -6,7 +6,7 @@ import {
   Upload,
   FileText,
 } from "lucide-react";
-import { type Feature } from "@/components/feature-grid";
+import { type Feature } from "@/components/organisms/feature-grid";
 import { LucideIcon } from "lucide-react";
 
 // Full feature list for authenticated users (with hrefs)

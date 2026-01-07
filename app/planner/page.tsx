@@ -1,17 +1,7 @@
 import { redirect } from "next/navigation";
 import { getAuthState } from "@/lib/supabase/auth-helpers";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { isValidSubscription } from "@/lib/types/subscription";
-import { PlannerForm } from "@/components/planner-form";
-import { Lock } from "lucide-react";
-import { H1, H3, P, Small } from "@/components/typography";
+import { H1, P } from "@/components/atoms/typography";
+import { PlannerContent } from "./planner-content";
 
 export default async function PlannerPage() {
   const { user, subscription } = await getAuthState();

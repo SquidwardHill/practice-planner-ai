@@ -12,7 +12,9 @@ import { Button } from "@/components/ui/button";
 import { DrillsDataTable } from "@/components/drills-data-table";
 import { Plus } from "lucide-react";
 import { type Drill } from "@/lib/types/drill";
-import { H1, P } from "@/components/typography";
+import { Suspense } from "react";
+import { LibraryContent } from "./library-content";
+import { ImportSuccessMessage } from "@/components/molecules/import-success-message";
 
 export default async function LibraryPage() {
   const { user } = await getAuthState();

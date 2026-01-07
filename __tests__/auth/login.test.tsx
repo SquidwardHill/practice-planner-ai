@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { LoginForm } from "@/components/login-form";
+import { LoginForm } from "@/components/molecules/login-form";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
