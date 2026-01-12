@@ -3,6 +3,7 @@ import { Library, ArrowRight, Dribbble } from "lucide-react";
 import { Greeting } from "@/components/atoms/greeting";
 import { dashboardFeatures } from "@/lib/data/features";
 import { FeatureCardsSection } from "@/components/molecules/feature-cards-section";
+import { DashboardCalendar } from "@/components/molecules/dashboard-calendar";
 import { type Drill } from "@/lib/types/drill";
 import { H2 } from "@/components/atoms/typography";
 import { HeroSection } from "@/components/molecules/section-hero";
@@ -39,7 +40,17 @@ export default async function Home({
           ctaButtonVariant="default"
         />
 
-        <FeatureCardsSection features={dashboardFeatures} hasAccess={true} />
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-6">
+          <div className="lg:col-span-2">
+            <FeatureCardsSection
+              features={dashboardFeatures}
+              hasAccess={true}
+            />
+          </div>
+          <div className="lg:col-span-1">
+            <DashboardCalendar />
+          </div>
+        </div>
       </div>
     );
   }
