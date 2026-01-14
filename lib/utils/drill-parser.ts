@@ -1,25 +1,40 @@
 import * as XLSX from "xlsx";
+import * as iconv from "iconv-lite";
 import { type DrillImportRow } from "@/lib/types/drill";
 
 /**
  * Parse Excel file (.xls) and return array of drill rows
  * Works in both browser and Node.js/server environments
+ *
+ * Note: For Excel files (binary format), we use arrayBuffer() to read the raw binary data.
+ * For text files (CSV, TXT), you would use file.text() which reads as UTF-8 by default:
+ *   const text = await file.text(); // Automatically UTF-8 in modern browsers/Node.js
+ *
+ * The XLSX library handles the binary Excel format and extracts text from cells.
+ * Encoding issues occur when Excel files were saved with Windows-1252 encoding
+ * but are being interpreted as UTF-8, which we fix with iconv-lite.
  */
 export async function parseExcelFile(file: File): Promise<DrillImportRow[]> {
   try {
-    // Convert File to ArrayBuffer
-    // In Node.js/Next.js API routes, File.arrayBuffer() is available
-    // In browsers, we can also use File.arrayBuffer()
+    // For Excel files (binary format), read as ArrayBuffer
+    // For text files, you would use: await file.text() (reads as UTF-8)
     const arrayBuffer = await file.arrayBuffer();
 
     if (!arrayBuffer || arrayBuffer.byteLength === 0) {
       throw new Error("Failed to read file: No data received");
     }
 
-    // XLSX can read from ArrayBuffer
+    // XLSX library handles encoding internally - let it auto-detect
+    // SheetJS automatically handles UTF-8 encoding/decoding when converting to JSON
+    // No need to specify codepage - the library detects it from the file
     let workbook;
     try {
-      workbook = XLSX.read(arrayBuffer, { type: "array" });
+      workbook = XLSX.read(arrayBuffer, {
+        type: "array",
+        // Let XLSX auto-detect encoding - it handles UTF-8 internally
+        // Only specify options that affect parsing behavior
+        cellDates: true, // Parse dates as Date objects
+      });
     } catch (readError) {
       throw new Error(
         `Failed to parse Excel file. The file may be corrupted or in an unsupported format. ${
@@ -39,10 +54,12 @@ export async function parseExcelFile(file: File): Promise<DrillImportRow[]> {
       throw new Error("Failed to read the first sheet from the Excel file");
     }
 
-    // Convert to JSON with header row
+    // Convert to JSON - XLSX handles UTF-8 encoding internally
+    // The library automatically decodes cell text with proper encoding
     const jsonData = XLSX.utils.sheet_to_json(worksheet, {
       defval: null, // Use null for empty cells
-      raw: false, // Convert all values to strings
+      raw: false, // Convert all values to strings (XLSX handles encoding here)
+      blankrows: false, // Skip blank rows
     }) as DrillImportRow[];
 
     if (!jsonData || jsonData.length === 0) {
@@ -51,7 +68,18 @@ export async function parseExcelFile(file: File): Promise<DrillImportRow[]> {
       );
     }
 
-    return jsonData;
+    // Fix encoding issues in all string fields
+    const fixedData = jsonData.map((row) => ({
+      ...row,
+      Category: fixEncoding(row.Category),
+      Name: fixEncoding(row.Name),
+      Notes: row.Notes ? fixEncoding(row.Notes) : undefined,
+      "Media Links": row["Media Links"]
+        ? fixEncoding(row["Media Links"])
+        : undefined,
+    }));
+
+    return fixedData;
   } catch (error) {
     throw error instanceof Error
       ? error
@@ -118,19 +146,73 @@ export function validateDrillRow(
 }
 
 /**
+ * Fix encoding issues in strings (Windows-1252 to UTF-8)
+ * Uses iconv-lite as a fallback when XLSX library doesn't handle encoding correctly
+ *
+ * Note: XLSX (SheetJS) should handle encoding automatically, but some legacy Excel files
+ * saved with Windows-1252 encoding may still have issues. This function serves as a
+ * safety net to fix any encoding problems that slip through.
+ *
+ * The issue: Some Excel files saved with Windows-1252 encoding are incorrectly decoded,
+ * resulting in garbled characters like "â€"" instead of proper Unicode characters.
+ *
+ * Solution: Re-encode the string as Latin1 (preserves byte values), then
+ * decode it correctly as Windows-1252, which will produce proper UTF-8 characters.
+ *
+ * @internal Exported for testing purposes
+ */
+export function fixEncoding(str: string | null | undefined): string {
+  if (!str || typeof str !== "string") return "";
+
+  // Check if the string contains Windows-1252 encoding artifacts
+  // These patterns indicate the string was incorrectly decoded
+  const hasEncodingIssues = /â€|â€™|â€œ|â€|â€¢|â€¦/.test(str);
+
+  if (!hasEncodingIssues) {
+    // String appears to be correctly encoded (XLSX handled it properly), return as-is
+    return str;
+  }
+
+  // XLSX didn't handle this correctly, use iconv-lite to fix it
+  try {
+    // The string was incorrectly decoded as UTF-8 when it should have been Windows-1252
+    // To fix: encode it back to bytes (using Latin1 which preserves byte values),
+    // then decode it correctly as Windows-1252
+    const buffer = Buffer.from(str, "latin1");
+    const converted = iconv.decode(buffer, "win1252");
+    return converted;
+  } catch (error) {
+    // Fallback to manual replacement if iconv fails
+    console.warn("Encoding conversion failed, using fallback:", error);
+    return str
+      .replace(/â€"/g, "—") // em dash
+      .replace(/â€"/g, "–") // en dash
+      .replace(/â€™/g, "'") // apostrophe
+      .replace(/â€œ/g, '"') // left double quote
+      .replace(/â€/g, '"') // right double quote
+      .replace(/â€¢/g, "•") // bullet
+      .replace(/â€¦/g, "…") // ellipsis
+      .replace(/â€"/g, "—") // em dash (alternative)
+      .replace(/â€"/g, "–"); // en dash (alternative)
+  }
+}
+
+/**
  * Normalize drill import row data
  */
 export function normalizeDrillRow(row: DrillImportRow): DrillImportRow {
   return {
-    Category: row.Category?.trim() || "",
-    Name: row.Name?.trim() || "",
+    Category: fixEncoding(row.Category?.trim() || ""),
+    Name: fixEncoding(row.Name?.trim() || ""),
     Minutes:
       row.Minutes !== undefined && row.Minutes !== null && row.Minutes !== ""
         ? typeof row.Minutes === "string"
           ? parseInt(row.Minutes, 10) || 0
           : row.Minutes
         : undefined,
-    Notes: row.Notes?.trim() || undefined,
-    "Media Links": row["Media Links"]?.trim() || undefined,
+    Notes: row.Notes ? fixEncoding(row.Notes.trim()) : undefined,
+    "Media Links": row["Media Links"]
+      ? fixEncoding(row["Media Links"].trim())
+      : undefined,
   };
 }

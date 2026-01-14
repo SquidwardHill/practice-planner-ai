@@ -84,6 +84,20 @@ export function Footer() {
             <Small className="text-muted-foreground">
               © {currentYear} {PRODUCT_NAME}. All rights reserved.
             </Small>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/auth/login"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/auth/sign-up"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Sign up
+              </Link>
+            </div>
           </div>
         </div>
       </div>

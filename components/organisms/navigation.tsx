@@ -106,11 +106,18 @@ export function Navigation({ useLogoFull = false }: { useLogoFull?: boolean }) {
 
             {/* Auth Actions */}
             {!isAuthenticated ? (
-              <Link href="/auth/sign-up">
-                <Button size="sm" className="text-sm font-medium">
-                  Sign up
-                </Button>
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link href="/auth/login">
+                  <Button variant="ghost" size="sm" className="text-sm font-medium">
+                    Sign in
+                  </Button>
+                </Link>
+                <Link href="/auth/sign-up">
+                  <Button size="sm" className="text-sm font-medium">
+                    Sign up
+                  </Button>
+                </Link>
+              </div>
             ) : (
               <LogoutButton />
             )}

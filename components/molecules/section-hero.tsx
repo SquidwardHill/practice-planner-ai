@@ -11,6 +11,8 @@ interface HeroSectionProps {
   buttonText: string;
   buttonHref: string;
   buttonIcon?: LucideIcon;
+  secondaryButtonText?: string;
+  secondaryButtonHref?: string;
 }
 
 export function HeroSection({
@@ -20,17 +22,28 @@ export function HeroSection({
   buttonText,
   buttonHref,
   buttonIcon: ButtonIcon,
+  secondaryButtonText,
+  secondaryButtonHref,
 }: HeroSectionProps) {
   return (
     <div className="text-center border border-primary/90 rounded-2xl px-10 pt-10 pb-14 bg-background glow-primary w-full">
       {hasLogo && <Logo className="mb-6 mx-auto w-11 h-auto" />}
       <H1 className="max-w-3xl mx-auto">{title}</H1>
       <Lead className="max-w-3xl mx-auto mb-8 mt-4 text-xl">{description}</Lead>
-      <CtaButton
-        href={buttonHref}
-        text={buttonText}
-        icon={ButtonIcon}
-      />
+      <div className="flex items-center justify-center gap-3">
+        <CtaButton
+          href={buttonHref}
+          text={buttonText}
+          icon={ButtonIcon}
+        />
+        {secondaryButtonText && secondaryButtonHref && (
+          <CtaButton
+            href={secondaryButtonHref}
+            text={secondaryButtonText}
+            variant="outline"
+          />
+        )}
+      </div>
     </div>
   );
 }
