@@ -45,7 +45,6 @@ export default async function Home({
         <DividerSection />
 
         <section className="mt-10">
-          <H3 className="mb-6">Upcoming Practices</H3>
           <DashboardCalendar />
         </section>
       </div>
