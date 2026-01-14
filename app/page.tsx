@@ -63,6 +63,8 @@ export default async function Home({
           buttonText="Give it a shot"
           buttonHref="/auth/sign-up"
           buttonIcon={Dribbble}
+          secondaryButtonText="Sign in"
+          secondaryButtonHref="/auth/login"
         />
       </div>
 
@@ -79,6 +81,8 @@ export default async function Home({
         description="Generate drills in seconds  from YouTube videos, digital content, drill list uploads, and user prompts. Practice planning has never been easier."
         ctaLink="/auth/sign-up"
         ctaText="Get started"
+        secondaryCtaLink="/auth/login"
+        secondaryCtaText="Sign in"
       />
       <FeatureCardsSection features={dashboardFeatures} className="mb-10" />
 
@@ -89,6 +93,8 @@ export default async function Home({
         buttonText="Try for free"
         buttonHref="/auth/sign-up"
         buttonIcon={ArrowRight}
+        secondaryButtonText="Sign in"
+        secondaryButtonHref="/auth/login"
       />
     </div>
   );
