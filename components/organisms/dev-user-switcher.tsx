@@ -4,14 +4,15 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Users, LogOut, Code, Database } from "lucide-react";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Users, LogOut, Database, Trash2, Code } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 // Test users from seed script
 const TEST_USERS = [
@@ -48,6 +49,7 @@ export function DevUserSwitcher() {
   const [isDev, setIsDev] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -63,18 +65,21 @@ export function DevUserSwitcher() {
 
     if (isDevelopment) {
       // Get current user email
-      fetch("/api/dev/current-user")
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.email) {
-            setCurrentUser(data.email);
-          }
-        })
-        .catch(() => {
-          // Ignore errors
-        });
+      fetchCurrentUser();
     }
   }, []);
+
+  const fetchCurrentUser = async () => {
+    try {
+      const res = await fetch("/api/dev/current-user");
+      const data = await res.json();
+      if (data.email) {
+        setCurrentUser(data.email);
+      }
+    } catch {
+      // Ignore errors
+    }
+  };
 
   const handleSwitchUser = async (email: string) => {
     setIsLoading(true);
@@ -91,13 +96,15 @@ export function DevUserSwitcher() {
         setCurrentUser(email);
         // Dispatch custom event to refresh user access hooks
         window.dispatchEvent(new Event("user-access-refresh"));
-        // Refresh the page to update server components
-        router.refresh();
+        // Force a full page reload to ensure all server components update
+        window.location.reload();
       } else {
-        console.error("Failed to switch user");
+        const errorData = await response.json();
+        alert(`❌ Failed to switch user: ${errorData.error || "Unknown error"}`);
       }
     } catch (error) {
       console.error("Error switching user:", error);
+      alert("❌ Error switching user. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -106,15 +113,22 @@ export function DevUserSwitcher() {
   const handleSignOut = async () => {
     setIsLoading(true);
     try {
-      await fetch("/api/dev/sign-out", {
+      const response = await fetch("/api/dev/sign-out", {
         method: "POST",
       });
-      setCurrentUser(null);
-      // Dispatch custom event to refresh user access hooks
-      window.dispatchEvent(new Event("user-access-refresh"));
-      router.refresh();
+
+      if (response.ok) {
+        setCurrentUser(null);
+        // Dispatch custom event to refresh user access hooks
+        window.dispatchEvent(new Event("user-access-refresh"));
+        // Force a full page reload
+        window.location.reload();
+      } else {
+        alert("❌ Failed to sign out");
+      }
     } catch (error) {
       console.error("Error signing out:", error);
+      alert("❌ Error signing out. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -129,12 +143,46 @@ export function DevUserSwitcher() {
       const data = await response.json();
       if (response.ok) {
         alert(`✅ ${data.message || "Database seeded successfully!"}`);
+        setIsOpen(false);
       } else {
         alert(`❌ Error: ${data.error || "Failed to seed database"}`);
       }
     } catch (error) {
       console.error("Error seeding database:", error);
       alert("❌ Failed to seed database");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleClearDrills = async () => {
+    if (
+      !confirm(
+        "⚠️ Are you sure you want to delete ALL drills for the current user? This cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/dev/clear-drills", {
+        method: "POST",
+      });
+      const data = await response.json();
+      if (response.ok) {
+        alert(
+          `✅ ${data.message || `Cleared ${data.deleted || 0} drill(s)`}`
+        );
+        setIsOpen(false);
+        // Refresh the page to show updated drill list
+        router.refresh();
+      } else {
+        alert(`❌ Error: ${data.error || "Failed to clear drills"}`);
+      }
+    } catch (error) {
+      console.error("Error clearing drills:", error);
+      alert("❌ Failed to clear drills");
     } finally {
       setIsLoading(false);
     }
@@ -151,42 +199,113 @@ export function DevUserSwitcher() {
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        <SheetTrigger asChild>
           <Button
             variant="outline"
             size="sm"
             className="border-green-400 bg-white backdrop-blur-sm border shadow-[0_0_10px_rgba(34,197,94,0.6)]"
             disabled={isLoading}
           >
-            {isLoading ? "Switching..." : currentUserLabel}
-            <Users className="h-4 w-4  " />
+            <Code className="h-4 w-4 mr-2" />
+            {isLoading ? "Loading..." : "Dev Actions"}
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel>Switch User (Dev Only)</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {TEST_USERS.map((user) => (
-            <DropdownMenuItem
-              key={user.email}
-              onClick={() => handleSwitchUser(user.email)}
-              className={currentUser === user.email ? "bg-accent" : ""}
+        </SheetTrigger>
+        <SheetContent side="right" className="w-[400px] sm:w-[540px] px-6">
+          <SheetHeader>
+            <SheetTitle>Developer Actions</SheetTitle>
+            <SheetDescription>
+              Dev-only tools for testing and development
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="mt-6 space-y-4">
+            {/* Current User Info */}
+            <div className="p-4 bg-muted rounded-lg">
+              <div className="text-sm text-muted-foreground mb-1">
+                Current User
+              </div>
+              <div className="font-medium">{currentUserLabel}</div>
+              {currentUser && (
+                <div className="text-xs text-muted-foreground mt-1">
+                  {currentUser}
+                </div>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* Switch User Section */}
+            <div>
+              <h3 className="text-sm font-semibold mb-3 flex items-center">
+                <Users className="h-4 w-4 mr-2" />
+                Switch User
+              </h3>
+              <div className="space-y-2">
+                {TEST_USERS.map((user) => (
+                  <Button
+                    key={user.email}
+                    variant={
+                      currentUser === user.email ? "default" : "outline"
+                    }
+                    className="w-full justify-start"
+                    onClick={() => handleSwitchUser(user.email)}
+                    disabled={isLoading || currentUser === user.email}
+                  >
+                    {user.label}
+                    {currentUser === user.email && (
+                      <span className="ml-auto text-xs">(Current)</span>
+                    )}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Data Actions */}
+            <div>
+              <h3 className="text-sm font-semibold mb-3 flex items-center">
+                <Database className="h-4 w-4 mr-2" />
+                Data Actions
+              </h3>
+              <div className="space-y-2">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={handleClearDrills}
+                  disabled={isLoading || !currentUser}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Clear Drills (Current User)
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={handleSeedDatabase}
+                  disabled={isLoading}
+                >
+                  <Database className="h-4 w-4 mr-2" />
+                  Seed Database
+                </Button>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Sign Out */}
+            <Button
+              variant="outline"
+              className="w-full justify-start text-destructive hover:text-destructive"
+              onClick={handleSignOut}
+              disabled={isLoading || !currentUser}
             >
-              {user.label}
-            </DropdownMenuItem>
-          ))}
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleSeedDatabase}>
-            <Database className="h-4 w-4  " />
-            Seed Database
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleSignOut}>
-            <LogOut className="h-4 w-4  " />
-            Sign Out
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

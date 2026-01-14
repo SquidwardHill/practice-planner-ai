@@ -23,7 +23,8 @@
     "start:all": "echo '✅ Starting services...' && echo '🚀 Run \"npm run ngrok:start\" in another terminal' && echo '🚀 Then: Run \"npm run dev\" in another terminal'",
     "stop:all": "npm run ngrok:stop && echo '✅ All services stopped'",
     "status": "node scripts/check-status.js",
-    "delete:drills": "tsx scripts/delete-drills.ts"
+    "delete:drills": "tsx scripts/delete-drills.ts",
+    "wipe:drills": "tsx scripts/wipe-drills.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^2.0.69",
@@ -46,6 +47,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "iconv-lite": "^0.7.2",
     "lucide-react": "^0.562.0",
     "next": "16.0.7",
     "openai": "^6.9.1",
