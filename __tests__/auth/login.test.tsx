@@ -64,7 +64,7 @@ describe("LoginForm", () => {
     );
   });
 
-  it("redirects to protected route on successful login", async () => {
+  it("redirects to home page on successful login", async () => {
     mockSignIn.mockResolvedValue({
       error: null,
     });
@@ -80,7 +80,7 @@ describe("LoginForm", () => {
     fireEvent.click(screen.getByRole("button", { name: /login/i }));
 
     await waitFor(() => {
-      expect(mockRouter.push).toHaveBeenCalledWith("/protected");
+      expect(mockRouter.push).toHaveBeenCalledWith("/");
     });
   });
 

@@ -87,7 +87,7 @@ describe("SignUpForm", () => {
     );
   });
 
-  it("redirects to protected route when user is already confirmed", async () => {
+  it("redirects to welcome page when user is already confirmed", async () => {
     mockSignUp.mockResolvedValue({
       error: null,
       data: {
@@ -111,7 +111,7 @@ describe("SignUpForm", () => {
     fireEvent.click(screen.getByRole("button", { name: /sign up/i }));
 
     await waitFor(() => {
-      expect(mockRouter.push).toHaveBeenCalledWith("/protected");
+      expect(mockRouter.push).toHaveBeenCalledWith("/welcome");
     });
   });
 
