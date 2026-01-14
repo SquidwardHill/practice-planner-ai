@@ -3,13 +3,15 @@ import { Library, ArrowRight, Dribbble } from "lucide-react";
 import { Greeting } from "@/components/atoms/greeting";
 import { dashboardFeatures } from "@/lib/data/features";
 import { FeatureCardsSection } from "@/components/molecules/feature-cards-section";
+import { DashboardCalendar } from "@/components/molecules/calendar-practice-schedule";
 import { type Drill } from "@/lib/types/drill";
-import { H2 } from "@/components/atoms/typography";
+import { H2, H3 } from "@/components/atoms/typography";
 import { HeroSection } from "@/components/molecules/section-hero";
 import { SectionPitch } from "@/components/molecules/section-pitch";
 import { TitleWithAccent } from "@/components/molecules/title-with-accent";
 import { SectionCta } from "@/components/molecules/section-cta";
 import { AI_NAME } from "@/lib/config/branding";
+import { DividerSection } from "@/components/atoms/divider-section";
 
 export default async function Home({
   data: drills,
@@ -40,6 +42,11 @@ export default async function Home({
         />
 
         <FeatureCardsSection features={dashboardFeatures} hasAccess={true} />
+        <DividerSection />
+
+        <section className="mt-10">
+          <DashboardCalendar />
+        </section>
       </div>
     );
   }
@@ -69,7 +76,7 @@ export default async function Home({
             className="max-w-3xl mx-auto"
           />
         }
-        description={`${AI_NAME} generates drills in seconds from YouTube videos, digital content, drill list uploads, and user prompts. Practice planning has never been easier.`}
+        description="Generate drills in seconds  from YouTube videos, digital content, drill list uploads, and user prompts. Practice planning has never been easier."
         ctaLink="/auth/sign-up"
         ctaText="Get started"
       />
