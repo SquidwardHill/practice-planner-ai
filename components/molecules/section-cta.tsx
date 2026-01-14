@@ -9,6 +9,8 @@ interface SectionCtaProps {
   buttonText: string;
   buttonHref: string;
   buttonIcon?: LucideIcon;
+  secondaryButtonText?: string;
+  secondaryButtonHref?: string;
 }
 
 export function SectionCta({
@@ -17,6 +19,8 @@ export function SectionCta({
   buttonText,
   buttonHref,
   buttonIcon: ButtonIcon = ArrowRight,
+  secondaryButtonText,
+  secondaryButtonHref,
 }: SectionCtaProps) {
   return (
     <div className="text-center bg-linear-to-b from-background via-primary/5 to-primary/40 rounded-2xl pt-4 mt-30">
@@ -25,13 +29,21 @@ export function SectionCta({
         <P className="text-muted-foreground mb-8 text-xl max-w-3xl mx-auto">
           {description}
         </P>
-        <CtaButton
-          href={buttonHref}
-          text={buttonText}
-          icon={ButtonIcon}
-          variant="light"
-          linkClassName="pb-6"
-        />
+        <div className="flex items-center justify-center gap-3 pb-6">
+          <CtaButton
+            href={buttonHref}
+            text={buttonText}
+            icon={ButtonIcon}
+            variant="light"
+          />
+          {secondaryButtonText && secondaryButtonHref && (
+            <CtaButton
+              href={secondaryButtonHref}
+              text={secondaryButtonText}
+              variant="outline"
+            />
+          )}
+        </div>
       </div>
     </div>
   );

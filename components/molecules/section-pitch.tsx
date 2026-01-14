@@ -12,6 +12,8 @@ interface SectionPitchProps {
   ctaText?: string;
   ctaButtonVariant?: VariantProps<typeof buttonVariants>["variant"];
   ctaIcon?: LucideIcon;
+  secondaryCtaLink?: string;
+  secondaryCtaText?: string;
 }
 
 export function SectionPitch({
@@ -21,6 +23,8 @@ export function SectionPitch({
   ctaText = "Get started",
   ctaButtonVariant = "default",
   ctaIcon: CtaIcon = ArrowRight,
+  secondaryCtaLink,
+  secondaryCtaText,
 }: SectionPitchProps) {
   return (
     <div>
@@ -31,14 +35,23 @@ export function SectionPitch({
             <P className="text-muted-foreground text-xl pt-4 max-w-3xl mx-auto pb-6">
               {description}
             </P>
-            {ctaLink && (
-              <div className="block text-center pb-4">
-                <CtaButton
-                  href={ctaLink}
-                  text={ctaText}
-                  icon={CtaIcon}
-                  variant={ctaButtonVariant}
-                />
+            {(ctaLink || secondaryCtaLink) && (
+              <div className="flex items-center justify-center gap-3 pb-4">
+                {ctaLink && (
+                  <CtaButton
+                    href={ctaLink}
+                    text={ctaText}
+                    icon={CtaIcon}
+                    variant={ctaButtonVariant}
+                  />
+                )}
+                {secondaryCtaLink && secondaryCtaText && (
+                  <CtaButton
+                    href={secondaryCtaLink}
+                    text={secondaryCtaText}
+                    variant="outline"
+                  />
+                )}
               </div>
             )}
           </div>
