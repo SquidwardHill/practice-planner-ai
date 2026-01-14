@@ -16,7 +16,7 @@ export function FeatureCardsSection({
   hasAccess = true,
 }: FeatureCardsSectionProps) {
   return (
-    <div className={`grid gap-6 md:grid-cols-3 ${className}`}>
+    <div className={`grid gap-6 md:grid-cols-3 items-stretch ${className}`}>
       {features.map((feature) => {
         const Icon = feature.icon;
         const isClickable =
@@ -25,7 +25,7 @@ export function FeatureCardsSection({
         const cardContent = (
           <div
             className={cn(
-              "p-4 border rounded-lg flex flex-col relative group transition-all",
+              "p-4 border rounded-lg flex flex-col relative group transition-all h-full",
               isClickable
                 ? "cursor-pointer hover:border-primary/50 hover:shadow-md"
                 : "opacity-60 cursor-not-allowed"
@@ -62,7 +62,11 @@ export function FeatureCardsSection({
           );
         }
 
-        return <div key={feature.title}>{cardContent}</div>;
+        return (
+          <div key={feature.title} className="h-full">
+            {cardContent}
+          </div>
+        );
       })}
     </div>
   );
