@@ -28,6 +28,8 @@ export function DataTableColumnHeader<TData, TValue>({
     return <div className={cn(className)}>{title}</div>;
   }
 
+  const isSorted = column.getIsSorted() !== false;
+
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <DropdownMenu>
@@ -35,15 +37,20 @@ export function DataTableColumnHeader<TData, TValue>({
           <Button
             variant="ghost"
             size="sm"
-            className="data-[state=open]:bg-accent -ml-3 h-8"
+            className={cn(
+              "data-[state=open]:bg-accent -ml-3 h-8 transition-all duration-200",
+              isSorted && "bg-primary/10 text-primary hover:bg-primary/15"
+            )}
           >
-            <span>{title}</span>
+            <span className={cn("transition-colors duration-200", isSorted && "font-medium")}>
+              {title}
+            </span>
             {column.getIsSorted() === "desc" ? (
-              <ArrowDown className="   h-4 w-4" />
+              <ArrowDown className="h-4 w-4 transition-opacity duration-200" />
             ) : column.getIsSorted() === "asc" ? (
-              <ArrowUp className="   h-4 w-4" />
+              <ArrowUp className="h-4 w-4 transition-opacity duration-200" />
             ) : (
-              <ChevronsUpDown className="   h-4 w-4 opacity-50" />
+              <ChevronsUpDown className="h-4 w-4 opacity-50 transition-opacity duration-200" />
             )}
           </Button>
         </DropdownMenuTrigger>
