@@ -46,7 +46,7 @@ export interface UpdateDrillInput {
   category?: string;
   name?: string;
   minutes?: number;
-  notes?: string;
-  media_links?: string;
+  notes?: string | null;
+  media_links?: string | null;
 }
 

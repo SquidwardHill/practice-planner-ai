@@ -1,14 +1,17 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import {
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  getFilteredRowModel,
   useReactTable,
   type ColumnDef,
   type SortingState,
+  type ColumnFiltersState,
 } from "@tanstack/react-table";
 import { type Drill } from "@/lib/types/drill";
 import {
@@ -21,14 +24,72 @@ import {
 } from "@/components/ui/table";
 import { DataTableColumnHeader } from "@/components/molecules/data-table-column-header";
 import { DataTablePagination } from "@/components/molecules/data-table-pagination";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { MoreHorizontal, Pencil, Trash2, Search, X } from "lucide-react";
+import {
+  TooltipProvider,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface DrillsDataTableProps {
   data: Drill[];
   totalRows: number;
+  onEdit?: (drill: Drill) => void;
+  onDelete?: (drill: Drill) => void;
 }
 
-export function DrillsDataTable({ data, totalRows }: DrillsDataTableProps) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+export function DrillsDataTable({
+  data,
+  totalRows,
+  onEdit,
+  onDelete,
+}: DrillsDataTableProps) {
+  const router = useRouter();
+  // Default sort by category ascending
+  const [sorting, setSorting] = React.useState<SortingState>([
+    { id: "category", desc: false },
+  ]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [globalFilter, setGlobalFilter] = React.useState("");
+  const [deletingId, setDeletingId] = React.useState<string | null>(null);
+
+  const handleDelete = async (drill: Drill) => {
+    if (!confirm(`Are you sure you want to delete "${drill.name}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    if (onDelete) {
+      onDelete(drill);
+      return;
+    }
+
+    setDeletingId(drill.id);
+    try {
+      const response = await fetch(`/api/drills/${drill.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to delete drill");
+      }
+
+      router.refresh();
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Failed to delete drill");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const columns: ColumnDef<Drill>[] = React.useMemo(
     () => [
@@ -63,7 +124,39 @@ export function DrillsDataTable({ data, totalRows }: DrillsDataTableProps) {
         header: "Notes",
         cell: ({ row }) => {
           const notes = row.getValue("notes") as string | null;
-          return <div className="max-w-xs truncate">{notes || "-"}</div>;
+          if (!notes) {
+            return <div>-</div>;
+          }
+
+          // Always show tooltip if notes exist (for now, to test), or if longer than 100 chars
+          const shouldShowTooltip = notes.length > 100;
+
+          const notesContent = (
+            <div className="max-w-xs break-words line-clamp-3">{notes}</div>
+          );
+
+          if (shouldShowTooltip) {
+            return (
+              <Tooltip delayDuration={300}>
+                <TooltipTrigger asChild>
+                  <div className="max-w-xs break-words line-clamp-3 cursor-help">
+                    {notes}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent 
+                  className="max-w-md" 
+                  side="top"
+                  sideOffset={8}
+                >
+                  <div className="whitespace-pre-wrap break-words text-sm">
+                    {notes}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            );
+          }
+
+          return notesContent;
         },
       },
       {
@@ -89,8 +182,44 @@ export function DrillsDataTable({ data, totalRows }: DrillsDataTableProps) {
           );
         },
       },
+      {
+        id: "actions",
+        header: "Actions",
+        cell: ({ row }) => {
+          const drill = row.original;
+          const isDeleting = deletingId === drill.id;
+
+          return (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => onEdit?.(drill)}
+                  disabled={isDeleting}
+                >
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleDelete(drill)}
+                  disabled={isDeleting}
+                  variant="destructive"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  {isDeleting ? "Deleting..." : "Delete"}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          );
+        },
+      },
     ],
-    []
+    [onEdit, deletingId]
   );
 
   const table = useReactTable({
@@ -99,9 +228,29 @@ export function DrillsDataTable({ data, totalRows }: DrillsDataTableProps) {
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: (row, columnId, filterValue) => {
+      const search = filterValue.toLowerCase();
+      const drill = row.original;
+      
+      // Search across name, category, and notes
+      const name = drill.name?.toLowerCase() || "";
+      const category = drill.category?.toLowerCase() || "";
+      const notes = drill.notes?.toLowerCase() || "";
+      
+      return (
+        name.includes(search) ||
+        category.includes(search) ||
+        notes.includes(search)
+      );
+    },
     state: {
       sorting,
+      columnFilters,
+      globalFilter,
     },
     initialState: {
       pagination: {
@@ -110,8 +259,40 @@ export function DrillsDataTable({ data, totalRows }: DrillsDataTableProps) {
     },
   });
 
+  // Get filtered row count for pagination
+  const filteredRowCount = table.getFilteredRowModel().rows.length;
+
   return (
     <div className="space-y-4">
+      {/* Search Input */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search drills by name, category, or notes..."
+            value={globalFilter}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            className="pl-9 pr-9"
+          />
+          {globalFilter && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
+              onClick={() => setGlobalFilter("")}
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Clear search</span>
+            </Button>
+          )}
+        </div>
+        {globalFilter && (
+          <div className="text-sm text-muted-foreground">
+            {filteredRowCount} {filteredRowCount === 1 ? "result" : "results"}
+          </div>
+        )}
+      </div>
+
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
@@ -162,7 +343,10 @@ export function DrillsDataTable({ data, totalRows }: DrillsDataTableProps) {
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} totalRows={totalRows} />
+      <DataTablePagination 
+        table={table} 
+        totalRows={globalFilter ? filteredRowCount : totalRows} 
+      />
     </div>
   );
 }
