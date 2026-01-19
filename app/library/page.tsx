@@ -13,7 +13,7 @@ export default async function LibraryPage() {
     redirect("/auth/login");
   }
 
-  // Fetch all drills from database (TanStack Table handles pagination client-side)
+  // Fetch all drills from database (TanStack Table handles pagination and sorting client-side)
   const supabase = await createClient();
   const {
     data: drills,
@@ -23,7 +23,7 @@ export default async function LibraryPage() {
     .from("drills")
     .select("*", { count: "exact" })
     .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
+    .order("category", { ascending: true }); // Default sort by category, client-side table can override
 
   if (error) {
     console.error("Error fetching drills:", error);
