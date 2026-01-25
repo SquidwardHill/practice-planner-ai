@@ -190,10 +190,10 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // Verify drill exists and belongs to user
+    // Verify drill exists and belongs to user, get media_links for cleanup
     const { data: existing, error: fetchError } = await supabase
       .from("drills")
-      .select("id")
+      .select("id, media_links")
       .eq("id", id)
       .eq("user_id", user.id)
       .single();
@@ -203,6 +203,46 @@ export async function DELETE(
         { error: "Drill not found" },
         { status: 404 }
       );
+    }
+
+    // Delete associated media files from storage if they exist
+    if (existing.media_links) {
+      const BUCKET_NAME = "Drill Media";
+      const mediaUrls = existing.media_links.split(",").map((link: string) => link.trim());
+      
+      for (const url of mediaUrls) {
+        try {
+          // Extract file path from URL
+          // URL format: https://{project}.supabase.co/storage/v1/object/public/{bucket}/{path}
+          const urlParts = url.split("/");
+          const bucketIndex = urlParts.findIndex((part: string) => part === "public");
+          
+          if (bucketIndex > 0 && bucketIndex < urlParts.length - 1) {
+            const bucketName = urlParts[bucketIndex + 1];
+            const filePath = urlParts.slice(bucketIndex + 2).join("/");
+            
+            // Only delete if file is in user's folder and bucket matches
+            if (bucketName === BUCKET_NAME && filePath.startsWith(`${user.id}/`)) {
+              const { error: storageError } = await supabase.storage
+                .from(BUCKET_NAME)
+                .remove([filePath]);
+              
+              if (storageError) {
+                // If bucket not found, log but don't fail the drill deletion
+                if (storageError.message?.includes("bucket") || storageError.message?.includes("not found")) {
+                  console.warn(`Bucket "${BUCKET_NAME}" not found or inaccessible. Skipping file deletion for ${filePath}`);
+                } else {
+                  console.error(`Error deleting media file ${filePath}:`, storageError);
+                }
+                // Continue with drill deletion even if file deletion fails
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`Error processing media URL ${url}:`, error);
+          // Continue with drill deletion even if file deletion fails
+        }
+      }
     }
 
     // Delete drill
