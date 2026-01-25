@@ -107,7 +107,25 @@ export function DrillsDataTable({
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title="Name" />
         ),
-        cell: ({ row }) => <div>{row.getValue("name")}</div>,
+        cell: ({ row }) => {
+          const name = row.getValue("name") as string;
+          return (
+            <Tooltip delayDuration={300}>
+              <TooltipTrigger asChild>
+                <div className="max-w-[200px] truncate cursor-help">
+                  {name}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent 
+                className="max-w-md" 
+                side="top"
+                sideOffset={8}
+              >
+                <div className="text-sm">{name}</div>
+              </TooltipContent>
+            </Tooltip>
+          );
+        },
       },
       {
         accessorKey: "minutes",
@@ -128,35 +146,24 @@ export function DrillsDataTable({
             return <div>-</div>;
           }
 
-          // Always show tooltip if notes exist (for now, to test), or if longer than 100 chars
-          const shouldShowTooltip = notes.length > 100;
-
-          const notesContent = (
-            <div className="max-w-xs break-words line-clamp-3">{notes}</div>
+          return (
+            <Tooltip delayDuration={300}>
+              <TooltipTrigger asChild>
+                <div className="max-w-[200px] truncate cursor-help">
+                  {notes}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent 
+                className="max-w-md" 
+                side="top"
+                sideOffset={8}
+              >
+                <div className="whitespace-pre-wrap wrap-break-word text-sm">
+                  {notes}
+                </div>
+              </TooltipContent>
+            </Tooltip>
           );
-
-          if (shouldShowTooltip) {
-            return (
-              <Tooltip delayDuration={300}>
-                <TooltipTrigger asChild>
-                  <div className="max-w-xs break-words line-clamp-3 cursor-help">
-                    {notes}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent 
-                  className="max-w-md" 
-                  side="top"
-                  sideOffset={8}
-                >
-                  <div className="whitespace-pre-wrap break-words text-sm">
-                    {notes}
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            );
-          }
-
-          return notesContent;
         },
       },
       {
@@ -164,21 +171,33 @@ export function DrillsDataTable({
         header: "Media Links",
         cell: ({ row }) => {
           const mediaLinks = row.getValue("media_links") as string | null;
+          if (!mediaLinks) {
+            return <div>-</div>;
+          }
+
           return (
-            <div className="max-w-xs truncate">
-              {mediaLinks ? (
-                <a
-                  href={mediaLinks}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  {mediaLinks}
-                </a>
-              ) : (
-                "-"
-              )}
-            </div>
+            <Tooltip delayDuration={300}>
+              <TooltipTrigger asChild>
+                <div className="max-w-[200px] truncate cursor-help">
+                  <a
+                    href={mediaLinks}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                    onClick={(e) => e.stopPropagation()} // Prevent row navigation and tooltip from closing on click
+                  >
+                    {mediaLinks}
+                  </a>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent 
+                className="max-w-md" 
+                side="top"
+                sideOffset={8}
+              >
+                <div className="text-sm wrap-break-word">{mediaLinks}</div>
+              </TooltipContent>
+            </Tooltip>
           );
         },
       },
@@ -192,21 +211,32 @@ export function DrillsDataTable({
           return (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-8 w-8 p-0"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <span className="sr-only">Open menu</span>
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                 <DropdownMenuItem
-                  onClick={() => onEdit?.(drill)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit?.(drill);
+                  }}
                   disabled={isDeleting}
                 >
                   <Pencil className="mr-2 h-4 w-4" />
                   Edit
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => handleDelete(drill)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(drill);
+                  }}
                   disabled={isDeleting}
                   variant="destructive"
                 >
@@ -315,11 +345,15 @@ export function DrillsDataTable({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
+              table.getRowModel().rows.map((row) => {
+                const drill = row.original;
+                return (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    className="cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => router.push(`/library/${drill.id}`)}
+                  >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
@@ -329,12 +363,14 @@ export function DrillsDataTable({
                     </TableCell>
                   ))}
                 </TableRow>
-              ))
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="h-24 text-center max-w-[200px] truncate"
+                  
                 >
                   No results.
                 </TableCell>
