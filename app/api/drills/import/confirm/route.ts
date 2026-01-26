@@ -17,10 +17,7 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Get rows from request body
@@ -28,26 +25,31 @@ export async function POST(request: NextRequest) {
     const { rows } = body as { rows: DrillImportRow[] };
 
     if (!rows || !Array.isArray(rows) || rows.length === 0) {
-      return NextResponse.json(
-        { error: "No rows provided" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "No rows provided" }, { status: 400 });
     }
 
     // Transform import rows to database format
-    const drillsToInsert = rows.map((row) => ({
-      user_id: user.id,
-      category: row.Category || "",
-      name: row.Name || "",
-      minutes:
-        row.Minutes !== undefined && row.Minutes !== null
-          ? typeof row.Minutes === "string"
-            ? parseInt(row.Minutes, 10) || 0
-            : row.Minutes
-          : 0,
-      notes: row.Notes || null,
-      media_links: row["Media Links"] || null,
-    }));
+    const drillsToInsert = rows.map((row) => {
+      // Parse minutes: default to 5 if not provided or invalid
+      let minutes = 5; // Default value
+      if (row.Minutes !== undefined && row.Minutes !== null) {
+        if (typeof row.Minutes === "string") {
+          const parsed = parseInt(row.Minutes, 10);
+          minutes = isNaN(parsed) ? 2 : parsed;
+        } else if (typeof row.Minutes === "number" && !isNaN(row.Minutes)) {
+          minutes = row.Minutes;
+        }
+      }
+
+      return {
+        user_id: user.id,
+        category: row.Category || "",
+        name: row.Name || "",
+        minutes,
+        notes: row.Notes || null,
+        media_links: row["Media Links"] || null,
+      };
+    });
 
     // Check for duplicates before inserting
     // TODO: POST-MVP - Implement duplicate handling strategies:
@@ -61,7 +63,7 @@ export async function POST(request: NextRequest) {
       .eq("user_id", user.id);
 
     const existingNames = new Set(
-      (existingDrills.data || []).map((d) => d.name.toLowerCase())
+      (existingDrills.data || []).map((d) => d.name.toLowerCase()),
     );
 
     // Filter out duplicates (based on name) - current MVP behavior: skip duplicates
@@ -135,10 +137,7 @@ export async function POST(request: NextRequest) {
         message:
           error instanceof Error ? error.message : "Unknown error occurred",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-
-
-

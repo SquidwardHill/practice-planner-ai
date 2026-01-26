@@ -23,7 +23,8 @@ export default async function LibraryPage() {
     .from("drills")
     .select("*", { count: "exact" })
     .eq("user_id", user.id)
-    .order("category", { ascending: true }); // Default sort by category, client-side table can override
+    .order("category", { ascending: true })
+    .order("name", { ascending: true }); // Secondary sort by name for stable ordering
 
   if (error) {
     console.error("Error fetching drills:", error);

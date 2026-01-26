@@ -3,12 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  Item,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -19,17 +19,24 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { ButtonGroup } from "@/components/ui/button-group";
+import { Badge } from "@/components/ui/badge";
 import {
   CheckCircle2,
   XCircle,
   AlertCircle,
+  AlertTriangle,
   Save,
   X,
-  Edit2,
+  SquarePen,
   Check,
   ChevronLeft,
   ChevronRight,
+  Minus,
+  Plus,
+  ClockAlert,
+  ClockPlus,
+  ShieldAlert,
 } from "lucide-react";
 import { type DrillImportRow } from "@/lib/types/drill";
 import {
@@ -41,7 +48,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import Link from "next/link";
-import { H1, H2, H3, P, Small } from "@/components/atoms/typography";
+import { H1, H3, P, Small } from "@/components/atoms/typography";
 
 interface ImportReviewData {
   rows: DrillImportRow[];
@@ -61,10 +68,13 @@ export default function ImportReviewPage() {
   const [reviewData, setReviewData] = useState<ImportReviewData | null>(null);
   const [editingRow, setEditingRow] = useState<number | null>(null);
   const [editedRows, setEditedRows] = useState<Map<number, DrillImportRow>>(
-    new Map()
+    new Map(),
   );
   const [isConfirming, setIsConfirming] = useState(false);
   const [errorPage, setErrorPage] = useState(1);
+  const [defaultDuration, setDefaultDuration] = useState<number>(5);
+  const [hasUserSetDefaultDuration, setHasUserSetDefaultDuration] =
+    useState<boolean>(false);
 
   useEffect(() => {
     // 🔌 TODO: fetch from the API or session storage
@@ -117,7 +127,7 @@ export default function ImportReviewPage() {
   const handleFieldChange = (
     index: number,
     field: keyof DrillImportRow,
-    value: string | number
+    value: string | number,
   ) => {
     const edited = editedRows.get(index) || { ...reviewData.rows[index] };
     edited[field] = value as any;
@@ -127,15 +137,30 @@ export default function ImportReviewPage() {
   const handleConfirmImport = async () => {
     setIsConfirming(true);
     try {
-      // Merge edited rows back into the data
-      // Only merge edited rows from the preview (first PREVIEW_ROWS)
-      // All other rows remain unchanged
+      // Merge edited rows back into the data (only PREVIEW_ROWS) and apply default duration to unset Minutes values
       const finalRows = reviewData.rows.map((row, index) => {
-        // Only apply edits to rows that were in the preview and were edited
+        let finalRow: DrillImportRow;
+
+        // Update and Persist (1): Apply user edits to preview rows first (manually set durations are preserved)
         if (index < PREVIEW_ROWS && editedRows.has(index)) {
-          return editedRows.get(index)!;
+          finalRow = editedRows.get(index)!;
+        } else {
+          finalRow = { ...row };
         }
-        return row;
+
+        // Update and Persist (2): Only update unset Minutes values
+        if (
+          finalRow.Minutes === undefined ||
+          finalRow.Minutes === null ||
+          finalRow.Minutes === "" ||
+          (typeof finalRow.Minutes === "number" && finalRow.Minutes === 0) ||
+          (typeof finalRow.Minutes === "string" &&
+            parseInt(finalRow.Minutes, 10) === 0)
+        ) {
+          finalRow.Minutes = defaultDuration;
+        }
+
+        return finalRow;
       });
 
       const response = await fetch("/api/drills/import/confirm", {
@@ -147,7 +172,7 @@ export default function ImportReviewPage() {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
-          errorData.error || errorData.message || "Failed to confirm import"
+          errorData.error || errorData.message || "Failed to confirm import",
         );
       }
 
@@ -155,11 +180,10 @@ export default function ImportReviewPage() {
 
       sessionStorage.removeItem("importReviewData");
 
-      // Redirect directly to library page with import stats
       router.push(
         `/library?imported=${result.imported || 0}&skipped=${
           result.skipped || 0
-        }`
+        }`,
       );
     } catch (error) {
       console.error("Import confirmation error:", error);
@@ -181,6 +205,20 @@ export default function ImportReviewPage() {
   const previewRows = reviewData.rows.slice(0, PREVIEW_ROWS);
   const hasMoreRows = reviewData.rows.length > PREVIEW_ROWS;
 
+  // Helper function to check if a row has unset Minutes
+  const hasUnsetMinutes = (row: DrillImportRow): boolean => {
+    return (
+      row.Minutes === undefined ||
+      row.Minutes === null ||
+      row.Minutes === "" ||
+      (typeof row.Minutes === "number" && row.Minutes === 0) ||
+      (typeof row.Minutes === "string" && parseInt(row.Minutes, 10) === 0)
+    );
+  };
+
+  // Count drills without duration
+  const drillsWithoutDuration = reviewData.rows.filter(hasUnsetMinutes).length;
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <Breadcrumb className="mb-6">
@@ -198,67 +236,135 @@ export default function ImportReviewPage() {
       </Breadcrumb>
 
       <div className="mb-12">
-        <H1 className="mb-2">Review Your Import</H1>
-        <P className="text-muted-foreground">
-          Review and verify your drill data before finalizing the import
-        </P>
-      </div>
-
-      {/* Summary Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-        <div>
-          <Small className="mb-1">Total Rows</Small>
-          <H2>{reviewData.summary.totalRows}</H2>
-        </div>
-        <div>
-          <Small className="mb-1 flex items-center gap-1">
-            <CheckCircle2 className="h-3 w-3" />
-            Valid
-          </Small>
-          <H2>{reviewData.summary.validRows}</H2>
-        </div>
-        <div>
-          <Small className="mb-1 flex items-center gap-1">
-            <XCircle className="h-3 w-3" />
-            Invalid
-          </Small>
-          <H2>{reviewData.summary.invalidRows}</H2>
-        </div>
-        <div>
-          <Small className="mb-1 flex items-center gap-1">
-            <AlertCircle className="h-3 w-3" />
-            Errors
-          </Small>
-          <H2>{reviewData.summary.errors.length}</H2>
-        </div>
-      </div>
-
-      {/* Info Note - Only show if there are valid rows */}
-      {reviewData.summary.validRows > 0 && (
-        <div className="mb-12 p-4 bg-muted/50 rounded-lg border">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-            <div>
-              <Small className="font-medium mb-1">Review Sample Data</Small>
-              <Small className="text-muted-foreground">
-                Showing the first {PREVIEW_ROWS} rows. Review and edit as
-                needed, then confirm to import all{" "}
-                {reviewData.summary.totalRows} rows.
-              </Small>
-            </div>
+        <H1 className="mb-8">Review Your Import</H1>
+        {/* Summary Stats */}
+        <div className="grid grid-cols-5 gap-2 mb-4 border rounded-lg px-4 py-2 max-w-2xl mt-4">
+          <div className="col-span-1 border-r pr-2">
+            <Small className="mb-1">Total Rows</Small>
+            <H3>{reviewData.summary.totalRows}</H3>
+          </div>
+          <div className="col-span-1 border-r pr-2 ">
+            <Small className="mb-1 inline-flex items-center gap-1">
+              <CheckCircle2 className="h-3 w-3 text-green-500/60" />
+              Valid
+            </Small>
+            <H3>{reviewData.summary.validRows}</H3>
+          </div>
+          <div className="col-span-1 border-r pr-2">
+            <Small className="mb-1 inline-flex items-center  gap-1">
+              <XCircle className="h-3 w-3 text-destructive/60" />
+              Invalid
+            </Small>
+            <H3>{reviewData.summary.invalidRows}</H3>
+          </div>
+          <div className="col-span-1 border-r pr-2">
+            <Small className="mb-1 inline-flex items-center gap-1">
+              <AlertCircle className="h-3 w-3 text-orange-400/60" />
+              Errors
+            </Small>
+            <H3>{reviewData.summary.errors.length}</H3>
+          </div>
+          <div className="col-span-1">
+            <Small className="mb-1 inline-flex items-center  gap-1">
+              <AlertTriangle className="h-3 w-3 text-yellow-500/60" />
+              Warnings
+            </Small>
+            <H3>{drillsWithoutDuration}</H3>
           </div>
         </div>
-      )}
+        {reviewData.summary.validRows > 0 && (
+          <div className="mb-12 space-y-4">
+            {/* [Section] Default Min Duration*/}
+            {drillsWithoutDuration > 0 && (
+              <div>
+                <div className="flex w-full max-w-2xl flex-col gap-6">
+                  <Item variant="outline">
+                    <ItemMedia variant="icon">
+                      <ShieldAlert />
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle className="text-base">
+                        Minimum Duration Required
+                      </ItemTitle>
+                      <ItemDescription>
+                        {drillsWithoutDuration} drill
+                        {drillsWithoutDuration !== 1 ? "s" : ""} have no
+                        "Minutes" (drill duration)column value. Please set a
+                        default value (1 minute minimum), and then review the
+                        sample of your data below.
+                        <div className="mt-4 flex items-center gap-2">
+                          {hasUserSetDefaultDuration ? (
+                            <ClockPlus className="h-4 w-4 text-yellow-500" />
+                          ) : (
+                            <ClockAlert className="h-4 w-4 text-yellow-500" />
+                          )}
+                          <div>Set fallback "Minutes" value: </div>
+                          <ButtonGroup>
+                            <Input
+                              id="default-duration"
+                              type="number"
+                              min="1"
+                              value={defaultDuration}
+                              onChange={(e) => {
+                                const value = parseInt(e.target.value, 10);
+                                if (!isNaN(value) && value >= 1) {
+                                  setDefaultDuration(value);
+                                  setHasUserSetDefaultDuration(true);
+                                }
+                              }}
+                              className={`h-7 font-mono [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]`}
+                              size={2}
+                              maxLength={3}
+                            />
+                            <Button
+                              variant="outline"
+                              type="button"
+                              aria-label="Decrement"
+                              onClick={() => {
+                                if (defaultDuration > 1) {
+                                  setDefaultDuration(defaultDuration - 1);
+                                  setHasUserSetDefaultDuration(true);
+                                }
+                              }}
+                              className="size-7 rounded-[min(var(--radius-md),12px)]"
+                            >
+                              <Minus className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              type="button"
+                              aria-label="Increment"
+                              onClick={() => {
+                                setDefaultDuration(defaultDuration + 1);
+                                setHasUserSetDefaultDuration(true);
+                              }}
+                              className="size-7 rounded-[min(var(--radius-md),12px)]"
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </ButtonGroup>
+                        </div>
+                      </ItemDescription>
+                    </ItemContent>
+                  </Item>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Preview Table - Only show if there are valid rows */}
       {reviewData.summary.validRows > 0 && (
         <div className="mb-12">
           <div className="mb-4">
-            <H3 className="mb-1">Preview Data</H3>
-            <Small className="text-muted-foreground">
-              Click the edit icon to modify any row. Changes will be applied to
-              the full import.
-            </Small>
+            <H3 className="mb-1">Preview Your Data</H3>
+            <P className="max-w-3xl">
+              To ensure your drill data is being parsed correctly, we'll do a
+              spot check on the first {PREVIEW_ROWS} rows of your import. Please
+              review and edit as needed, then confirm to import all{" "}
+              {reviewData.summary.totalRows} rows.
+            </P>
           </div>
           <div className="border rounded-lg overflow-hidden">
             <Table>
@@ -279,13 +385,20 @@ export default function ImportReviewPage() {
                   const editedRow = editedRows.get(index);
                   const displayRow = editedRow || row;
                   const hasError = reviewData.summary.errors.some(
-                    (e) => e.row === index + 1
+                    (e) => e.row === index + 1,
                   );
 
                   return (
                     <TableRow
                       key={index}
-                      className={hasError ? "bg-destructive/5" : ""}
+                      className={`${hasError ? "bg-destructive/5" : ""} ${
+                        !isEditing ? "cursor-pointer hover:bg-muted/50" : ""
+                      } transition-colors`}
+                      onClick={() => {
+                        if (!isEditing) {
+                          handleEdit(index);
+                        }
+                      }}
                     >
                       <TableCell>{index + 1}</TableCell>
                       <TableCell>
@@ -296,9 +409,10 @@ export default function ImportReviewPage() {
                               handleFieldChange(
                                 index,
                                 "Category",
-                                e.target.value
+                                e.target.value,
                               )
                             }
+                            onClick={(e) => e.stopPropagation()}
                             className="h-8"
                           />
                         ) : (
@@ -312,6 +426,7 @@ export default function ImportReviewPage() {
                             onChange={(e) =>
                               handleFieldChange(index, "Name", e.target.value)
                             }
+                            onClick={(e) => e.stopPropagation()}
                             className="h-8"
                           />
                         ) : (
@@ -327,13 +442,24 @@ export default function ImportReviewPage() {
                               handleFieldChange(
                                 index,
                                 "Minutes",
-                                e.target.value ? parseInt(e.target.value) : 0
+                                e.target.value ? parseInt(e.target.value) : 0,
                               )
                             }
+                            onClick={(e) => e.stopPropagation()}
                             className="h-8 w-20"
                           />
+                        ) : hasUnsetMinutes(displayRow) ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground">-</span>
+                            <Badge
+                              variant="outline"
+                              className="text-xs bg-yellow-50 dark:bg-yellow-950/20 border-yellow-300 dark:border-yellow-800 text-yellow-700 dark:text-yellow-400"
+                            >
+                              → {defaultDuration} min
+                            </Badge>
+                          </div>
                         ) : (
-                          displayRow.Minutes || "-"
+                          displayRow.Minutes
                         )}
                       </TableCell>
                       <TableCell className="max-w-xs truncate">
@@ -343,6 +469,7 @@ export default function ImportReviewPage() {
                             onChange={(e) =>
                               handleFieldChange(index, "Notes", e.target.value)
                             }
+                            onClick={(e) => e.stopPropagation()}
                             className="h-8"
                           />
                         ) : (
@@ -357,9 +484,10 @@ export default function ImportReviewPage() {
                               handleFieldChange(
                                 index,
                                 "Media Links",
-                                e.target.value
+                                e.target.value,
                               )
                             }
+                            onClick={(e) => e.stopPropagation()}
                             className="h-8"
                           />
                         ) : (
@@ -368,7 +496,10 @@ export default function ImportReviewPage() {
                       </TableCell>
                       <TableCell>
                         {isEditing ? (
-                          <div className="flex gap-1">
+                          <div
+                            className="flex gap-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <Button
                               size="icon"
                               variant="ghost"
@@ -389,11 +520,14 @@ export default function ImportReviewPage() {
                         ) : (
                           <Button
                             size="icon"
-                            variant="ghost"
-                            className="h-7 w-7"
-                            onClick={() => handleEdit(index)}
+                            variant="outline"
+                            className="h-7 w-7 bg-primary/10 rounded-md border-primary/50"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(index);
+                            }}
                           >
-                            <Edit2 className="h-3 w-3" />
+                            <SquarePen className="h-2 w-2 " />
                           </Button>
                         )}
                       </TableCell>
@@ -444,7 +578,7 @@ export default function ImportReviewPage() {
                 {reviewData.summary.errors
                   .slice(
                     (errorPage - 1) * ERRORS_PER_PAGE,
-                    errorPage * ERRORS_PER_PAGE
+                    errorPage * ERRORS_PER_PAGE,
                   )
                   .map((error, index) => (
                     <TableRow
@@ -473,7 +607,7 @@ export default function ImportReviewPage() {
                   Showing {(errorPage - 1) * ERRORS_PER_PAGE + 1} to{" "}
                   {Math.min(
                     errorPage * ERRORS_PER_PAGE,
-                    reviewData.summary.errors.length
+                    reviewData.summary.errors.length,
                   )}{" "}
                   of {reviewData.summary.errors.length} errors
                 </Small>
@@ -490,7 +624,7 @@ export default function ImportReviewPage() {
                   <Small className="text-muted-foreground min-w-[80px] text-center">
                     Page {errorPage} of{" "}
                     {Math.ceil(
-                      reviewData.summary.errors.length / ERRORS_PER_PAGE
+                      reviewData.summary.errors.length / ERRORS_PER_PAGE,
                     )}
                   </Small>
                   <Button
@@ -500,16 +634,16 @@ export default function ImportReviewPage() {
                       setErrorPage((p) =>
                         Math.min(
                           Math.ceil(
-                            reviewData.summary.errors.length / ERRORS_PER_PAGE
+                            reviewData.summary.errors.length / ERRORS_PER_PAGE,
                           ),
-                          p + 1
-                        )
+                          p + 1,
+                        ),
                       )
                     }
                     disabled={
                       errorPage >=
                       Math.ceil(
-                        reviewData.summary.errors.length / ERRORS_PER_PAGE
+                        reviewData.summary.errors.length / ERRORS_PER_PAGE,
                       )
                     }
                   >

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { DrillsDataTable } from "@/components/organisms/drills-data-table";
-import { Plus, Lock, HeartCrack } from "lucide-react";
+import { Plus, Lock, BookOpen } from "lucide-react";
 import { type Drill } from "@/lib/types/drill";
 import { H1, H4, Lead, P } from "@/components/atoms/typography";
 import { DrillImportActions } from "@/components/molecules/drill-import-actions";
@@ -12,6 +12,14 @@ import { RequireAccess } from "@/components/organisms/access-control";
 import { useUserAccess } from "@/hooks/useUserAccess";
 import { SubscriptionRequired } from "@/components/molecules/subscription-required";
 import { DrillFormDialog } from "@/components/molecules/drill-form-dialog";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+  EmptyContent,
+} from "@/components/ui/empty";
 
 interface LibraryContentProps {
   drills: Drill[];
@@ -76,8 +84,7 @@ export function LibraryContent({ drills, totalDrills }: LibraryContentProps) {
           <H1 className="mb-2">Drill Library</H1>
           {totalDrills === 0 ? (
             <Lead>
-              <span>Your drill library is empty</span>{" "}
-              <HeartCrack className="w-5 h-5 inline-block ml-1" />
+              Your drill library is empty
             </Lead>
           ) : (
             <P className="text-muted-foreground mt-1 flex gap-2 items-center">
@@ -109,23 +116,27 @@ export function LibraryContent({ drills, totalDrills }: LibraryContentProps) {
             <SubscriptionRequired message="Subscribe to unlock your drill library" />
           }
         >
-          <div className="text-center py-16 border rounded-lg p-8">
-            <div className="space-y-4">
-              <P className="text-muted-foreground mb-2">
-                Import drills from PracticePlannerLive or create your first
-                drill to get started
-              </P>
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <BookOpen className="h-6 w-6 text-muted-foreground" />
+              </EmptyMedia>
+              <EmptyTitle>Your drill library is empty</EmptyTitle>
+              <EmptyDescription>
+                Import drills from PracticePlannerLive or create your first drill to get started.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
               <Button
                 variant="default"
                 size="default"
-                className="mt-4"
                 onClick={handleCreateClick}
               >
                 Create Drill
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4 ml-2" />
               </Button>
-            </div>
-          </div>
+            </EmptyContent>
+          </Empty>
         </RequireAccess>
       ) : (
         <DrillsDataTable

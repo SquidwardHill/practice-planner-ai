@@ -32,13 +32,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MoreHorizontal, Pencil, Trash2, Search, X } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Search, X, SearchX } from "lucide-react";
 import {
   TooltipProvider,
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty";
 
 interface DrillsDataTableProps {
   data: Drill[];
@@ -54,9 +61,10 @@ export function DrillsDataTable({
   onDelete,
 }: DrillsDataTableProps) {
   const router = useRouter();
-  // Default sort by category ascending
+  // Default sort by category ascending, then name for stable ordering
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: "category", desc: false },
+    { id: "name", desc: false },
   ]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = React.useState("");
@@ -367,12 +375,20 @@ export function DrillsDataTable({
               })
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center max-w-[200px] truncate"
-                  
-                >
-                  No results.
+                <TableCell colSpan={columns.length} className="h-64 p-0">
+                  <Empty className="min-h-64 border-0 rounded-none">
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <SearchX className="h-6 w-6 text-muted-foreground" />
+                      </EmptyMedia>
+                      <EmptyTitle>No drills found</EmptyTitle>
+                      <EmptyDescription>
+                        {globalFilter
+                          ? `No drills match your search "${globalFilter}". Try adjusting your search terms.`
+                          : "No drills found. Create your first drill to get started."}
+                      </EmptyDescription>
+                    </EmptyHeader>
+                  </Empty>
                 </TableCell>
               </TableRow>
             )}

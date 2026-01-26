@@ -2,6 +2,13 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { History, Clock, LucideIcon } from "lucide-react";
 import { H3, P, Small } from "@/components/atoms/typography";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty";
 
 export interface ActivityItem {
   type: string;
@@ -60,10 +67,16 @@ export function RecentActivity({
           })}
         </div>
       ) : (
-        <div className="text-center py-8 text-muted-foreground px-6">
-          <History className="h-10 w-10 mx-auto mb-3 opacity-50" />
-          <P>{emptyStateTitle}</P>
-          <Small className="mt-1">{emptyStateDescription}</Small>
+        <div className="px-6">
+          <Empty className="min-h-[200px] border-0">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <History className="h-6 w-6 text-muted-foreground" />
+              </EmptyMedia>
+              <EmptyTitle>{emptyStateTitle}</EmptyTitle>
+              <EmptyDescription>{emptyStateDescription}</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         </div>
       )}
       <div className="px-6">
