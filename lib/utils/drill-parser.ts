@@ -166,20 +166,43 @@ export function fixEncoding(str: string | null | undefined): string {
 
   // Check if the string contains Windows-1252 encoding artifacts
   // These patterns indicate the string was incorrectly decoded
-  const hasEncodingIssues = /â€|â€™|â€œ|â€|â€¢|â€¦/.test(str);
+  const hasEncodingIssues = /â[€"'"œ"¢¦]|â€|â€™|â€œ|â€|â€¢|â€¦/.test(str);
+  
+  // Also check for standalone "â" characters that are likely encoding issues
+  // "â" (U+00E2) often appears when a dash or other character was mis-encoded
+  const hasStandaloneA = /[^a-z]â[^a-z€"'"œ"¢¦]/.test(str);
 
-  if (!hasEncodingIssues) {
-    // String appears to be correctly encoded (XLSX handled it properly), return as-is
-    return str;
-  }
-
-  // XLSX didn't handle this correctly, use iconv-lite to fix it
+  // Always try to fix encoding issues using iconv-lite first
   try {
     // The string was incorrectly decoded as UTF-8 when it should have been Windows-1252
     // To fix: encode it back to bytes (using Latin1 which preserves byte values),
     // then decode it correctly as Windows-1252
     const buffer = Buffer.from(str, "latin1");
     const converted = iconv.decode(buffer, "win1252");
+    
+    // If conversion changed the string, use it (indicates encoding issue was fixed)
+    if (converted !== str) {
+      return converted;
+    }
+    
+    // If no change from iconv but we detected issues, try manual replacements
+    if (hasEncodingIssues || hasStandaloneA) {
+      return converted
+        .replace(/â€"/g, "—") // em dash
+        .replace(/â€"/g, "–") // en dash
+        .replace(/â€™/g, "'") // apostrophe
+        .replace(/â€œ/g, '"') // left double quote
+        .replace(/â€/g, '"') // right double quote
+        .replace(/â€¢/g, "•") // bullet
+        .replace(/â€¦/g, "…") // ellipsis
+        .replace(/\sâ\s/g, " — ") // " â " -> " — " (space around)
+        .replace(/\sâ(?=[A-Za-z])/g, " —") // " â" before letter -> " —"
+        .replace(/â\s/g, "— ") // "â " -> "— "
+        .replace(/â(?=[A-Za-z])/g, "—") // "â" before letter -> "—" (most common case)
+        .replace(/â(?=\s)/g, "—") // "â" before space -> "—"
+        .replace(/â/g, "—"); // catch-all: any remaining "â" -> "—"
+    }
+    
     return converted;
   } catch (error) {
     // Fallback to manual replacement if iconv fails
@@ -192,8 +215,12 @@ export function fixEncoding(str: string | null | undefined): string {
       .replace(/â€/g, '"') // right double quote
       .replace(/â€¢/g, "•") // bullet
       .replace(/â€¦/g, "…") // ellipsis
-      .replace(/â€"/g, "—") // em dash (alternative)
-      .replace(/â€"/g, "–"); // en dash (alternative)
+      .replace(/\sâ\s/g, " — ") // " â " -> " — "
+      .replace(/\sâ(?=[A-Za-z])/g, " —") // " â" before letter -> " —"
+      .replace(/â\s/g, "— ") // "â " -> "— "
+      .replace(/â(?=[A-Za-z])/g, "—") // "â" before letter -> "—"
+      .replace(/â(?=\s)/g, "—") // "â" before space -> "—"
+      .replace(/â/g, "—"); // catch-all: any remaining "â" -> "—"
   }
 }
 
