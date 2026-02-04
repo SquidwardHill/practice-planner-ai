@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/sheet";
 import { Users, LogOut, Database, Trash2, Code } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { PRACTICE_PLAN_STORAGE_KEY } from "@/lib/storage-keys";
 
 // Test users from seed script
 const TEST_USERS = [
@@ -100,7 +101,9 @@ export function DevUserSwitcher() {
         window.location.reload();
       } else {
         const errorData = await response.json();
-        alert(`❌ Failed to switch user: ${errorData.error || "Unknown error"}`);
+        alert(
+          `❌ Failed to switch user: ${errorData.error || "Unknown error"}`
+        );
       }
     } catch (error) {
       console.error("Error switching user:", error);
@@ -119,6 +122,7 @@ export function DevUserSwitcher() {
 
       if (response.ok) {
         setCurrentUser(null);
+        localStorage.removeItem(PRACTICE_PLAN_STORAGE_KEY);
         // Dispatch custom event to refresh user access hooks
         window.dispatchEvent(new Event("user-access-refresh"));
         // Force a full page reload
@@ -171,9 +175,7 @@ export function DevUserSwitcher() {
       });
       const data = await response.json();
       if (response.ok) {
-        alert(
-          `✅ ${data.message || `Cleared ${data.deleted || 0} drill(s)`}`
-        );
+        alert(`✅ ${data.message || `Cleared ${data.deleted || 0} drill(s)`}`);
         setIsOpen(false);
         // Refresh the page to show updated drill list
         router.refresh();
@@ -245,9 +247,7 @@ export function DevUserSwitcher() {
                 {TEST_USERS.map((user) => (
                   <Button
                     key={user.email}
-                    variant={
-                      currentUser === user.email ? "default" : "outline"
-                    }
+                    variant={currentUser === user.email ? "default" : "outline"}
                     className="w-full justify-start"
                     onClick={() => handleSwitchUser(user.email)}
                     disabled={isLoading || currentUser === user.email}

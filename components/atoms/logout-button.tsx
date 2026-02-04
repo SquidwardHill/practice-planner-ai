@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { PRACTICE_PLAN_STORAGE_KEY } from "@/lib/storage-keys";
 
 export function LogoutButton() {
   const router = useRouter();
@@ -10,6 +11,9 @@ export function LogoutButton() {
   const logout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(PRACTICE_PLAN_STORAGE_KEY);
+    }
     router.push("/auth/login");
   };
 
