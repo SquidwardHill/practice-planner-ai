@@ -21,8 +21,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { type Drill, type CreateDrillInput, type UpdateDrillInput } from "@/lib/types/drill";
-import { Upload, X, File, Image, Video, FileText, Link2, Youtube } from "lucide-react";
+import {
+  type Drill,
+  type CreateDrillInput,
+  type UpdateDrillInput,
+} from "@/lib/types/drill";
+import {
+  Upload,
+  X,
+  File,
+  Image,
+  Video,
+  FileText,
+  Link2,
+  Youtube,
+  Plus,
+} from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 interface DrillFormDialogProps {
@@ -32,19 +51,10 @@ interface DrillFormDialogProps {
   onSuccess?: () => void;
 }
 
-// Common drill categories
-const DRILL_CATEGORIES = [
-  "Warmup",
-  "Shooting",
-  "Defense",
-  "Offense",
-  "Transition",
-  "Rebounding",
-  "Conditioning",
-  "Live Play",
-  "Rest",
-  "Other",
-];
+export interface CategoryOption {
+  id: string;
+  name: string;
+}
 
 export function DrillFormDialog({
   open,
@@ -56,22 +66,64 @@ export function DrillFormDialog({
   const isEditing = !!drill;
 
   const [formData, setFormData] = useState<CreateDrillInput>({
-    category: "",
+    category_id: "",
     name: "",
     minutes: undefined,
     notes: undefined,
     media_links: undefined,
   });
 
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
+  const [addCategoryOpen, setAddCategoryOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [addCategoryLoading, setAddCategoryLoading] = useState(false);
+  const [addCategoryError, setAddCategoryError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [uploadedFiles, setUploadedFiles] = useState<Array<{ url: string; name: string }>>([]);
-  const [youtubeLinks, setYoutubeLinks] = useState<Array<{ url: string; name: string }>>([]);
-  const [otherLinks, setOtherLinks] = useState<Array<{ url: string; name: string }>>([]);
-  const [pendingFiles, setPendingFiles] = useState<Array<{ file: File; name: string }>>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<
+    Array<{ url: string; name: string }>
+  >([]);
+  const [youtubeLinks, setYoutubeLinks] = useState<
+    Array<{ url: string; name: string }>
+  >([]);
+  const [otherLinks, setOtherLinks] = useState<
+    Array<{ url: string; name: string }>
+  >([]);
+  const [pendingFiles, setPendingFiles] = useState<
+    Array<{ file: File; name: string }>
+  >([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch categories when dialog opens; if none, create "Uncategorized" so user can create a drill
+  useEffect(() => {
+    if (open) {
+      setCategoriesLoading(true);
+      fetch("/api/categories", { credentials: "same-origin" })
+        .then((res) => (res.ok ? res.json() : []))
+        .then(async (data) => {
+          const list = Array.isArray(data) ? data : [];
+          if (list.length === 0) {
+            const create = await fetch("/api/categories", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "same-origin",
+              body: JSON.stringify({ name: "Uncategorized" }),
+            });
+            if (create.ok) {
+              const created = await create.json();
+              return [created];
+            }
+          }
+          return list;
+        })
+        .then(setCategories)
+        .catch(() => setCategories([]))
+        .finally(() => setCategoriesLoading(false));
+    }
+  }, [open]);
 
   // Helper functions to categorize media
   const isYouTubeUrl = (url: string): boolean => {
@@ -86,7 +138,10 @@ export function DrillFormDialog({
 
   const isUploadedFile = (url: string): boolean => {
     // Check if it's a Supabase storage URL
-    return url.includes("supabase.co/storage") || url.includes("supabase.co/storage/v1/object/public");
+    return (
+      url.includes("supabase.co/storage") ||
+      url.includes("supabase.co/storage/v1/object/public")
+    );
   };
 
   // Initialize form when drill changes
@@ -94,7 +149,10 @@ export function DrillFormDialog({
     if (drill) {
       // Parse and categorize media links
       const mediaLinks = drill.media_links
-        ? drill.media_links.split(",").map((link) => link.trim()).filter(Boolean)
+        ? drill.media_links
+            .split(",")
+            .map((link) => link.trim())
+            .filter(Boolean)
         : [];
 
       const uploaded: Array<{ url: string; name: string }> = [];
@@ -115,7 +173,7 @@ export function DrillFormDialog({
       });
 
       setFormData({
-        category: drill.category,
+        category_id: drill.category_id,
         name: drill.name,
         minutes: drill.minutes || undefined,
         notes: drill.notes || undefined,
@@ -126,7 +184,7 @@ export function DrillFormDialog({
       setOtherLinks(other);
     } else {
       setFormData({
-        category: "",
+        category_id: "",
         name: "",
         minutes: undefined,
         notes: undefined,
@@ -175,7 +233,7 @@ export function DrillFormDialog({
     try {
       const formData = new FormData();
       const fileNames: string[] = [];
-      
+
       pendingFiles.forEach(({ file, name }) => {
         formData.append("files", file);
         formData.append("fileNames", name); // Send friendly names
@@ -194,9 +252,7 @@ export function DrillFormDialog({
           statusText: response.statusText,
           data,
         });
-        throw new Error(
-          data.error || data.details || "Failed to upload files"
-        );
+        throw new Error(data.error || data.details || "Failed to upload files");
       }
 
       console.log("Upload successful:", {
@@ -210,7 +266,7 @@ export function DrillFormDialog({
         url,
         name: pendingFiles[index]?.name || url.split("/").pop() || "File",
       }));
-      
+
       setUploadedFiles((prev) => [...prev, ...newUploadedFiles]);
       setPendingFiles([]); // Clear pending files after upload
     } catch (err) {
@@ -312,7 +368,8 @@ export function DrillFormDialog({
 
       const submitData = {
         ...formData,
-        media_links: allMediaLinks.length > 0 ? allMediaLinks.join(", ") : undefined,
+        media_links:
+          allMediaLinks.length > 0 ? allMediaLinks.join(", ") : undefined,
       };
 
       const response = await fetch(url, {
@@ -343,6 +400,44 @@ export function DrillFormDialog({
     }
   };
 
+  const handleAddCategory = async () => {
+    const name = newCategoryName.trim();
+    if (!name) return;
+    setAddCategoryError(null);
+    setAddCategoryLoading(true);
+    try {
+      const res = await fetch("/api/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ name }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (res.status === 409) {
+          setAddCategoryError("A category with this name already exists.");
+        } else {
+          setAddCategoryError(
+            (data as { error?: string })?.error ?? "Failed to create category."
+          );
+        }
+        return;
+      }
+      const created = data as CategoryOption & { created_at?: string };
+      setCategories((prev) => [
+        ...prev,
+        { id: created.id, name: created.name },
+      ]);
+      setFormData((prev) => ({ ...prev, category_id: created.id }));
+      setNewCategoryName("");
+      setAddCategoryOpen(false);
+    } catch {
+      setAddCategoryError("Failed to create category.");
+    } finally {
+      setAddCategoryLoading(false);
+    }
+  };
+
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       // Clear all media when dialog closes
@@ -351,7 +446,7 @@ export function DrillFormDialog({
       setOtherLinks([]);
       setPendingFiles([]);
       setFormData({
-        category: "",
+        category_id: "",
         name: "",
         minutes: undefined,
         notes: undefined,
@@ -380,24 +475,94 @@ export function DrillFormDialog({
               <Label htmlFor="category">
                 Category <span className="text-destructive">*</span>
               </Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, category: value })
-                }
-                required
-              >
-                <SelectTrigger id="category">
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {DRILL_CATEGORIES.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex gap-2">
+                <Select
+                  value={formData.category_id || undefined}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, category_id: value })
+                  }
+                  required
+                  disabled={categoriesLoading}
+                >
+                  <SelectTrigger id="category" className="flex-1">
+                    <SelectValue
+                      placeholder={
+                        categoriesLoading ? "Loading…" : "Select a category"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                    {!categoriesLoading && categories.length === 0 && (
+                      <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                        No categories. Loading or creating default…
+                      </div>
+                    )}
+                  </SelectContent>
+                </Select>
+                <Popover
+                  open={addCategoryOpen}
+                  onOpenChange={(open) => {
+                    setAddCategoryOpen(open);
+                    if (!open) {
+                      setNewCategoryName("");
+                      setAddCategoryError(null);
+                    }
+                  }}
+                >
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="shrink-0"
+                      title="Add category"
+                      disabled={categoriesLoading}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64" align="end">
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium">New category</p>
+                      <Input
+                        placeholder="Category name"
+                        value={newCategoryName}
+                        onChange={(e) => {
+                          setNewCategoryName(e.target.value);
+                          setAddCategoryError(null);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleAddCategory();
+                          }
+                        }}
+                        disabled={addCategoryLoading}
+                        className="placeholder:text-muted-foreground/40"
+                      />
+                      {addCategoryError && (
+                        <p className="text-xs text-destructive">
+                          {addCategoryError}
+                        </p>
+                      )}
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="w-full"
+                        disabled={addCategoryLoading || !newCategoryName.trim()}
+                        onClick={handleAddCategory}
+                      >
+                        {addCategoryLoading ? "Creating…" : "Create"}
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -410,7 +575,9 @@ export function DrillFormDialog({
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    minutes: e.target.value ? parseInt(e.target.value, 10) : undefined,
+                    minutes: e.target.value
+                      ? parseInt(e.target.value, 10)
+                      : undefined,
                   })
                 }
                 placeholder="e.g., 10"
@@ -451,7 +618,7 @@ export function DrillFormDialog({
 
           <div className="space-y-2">
             <Label htmlFor="media">Media</Label>
-            
+
             {/* File Upload Area */}
             <div
               onDragOver={handleDragOver}
@@ -529,7 +696,11 @@ export function DrillFormDialog({
                     disabled={isUploading}
                     className="w-full"
                   >
-                    {isUploading ? "Uploading..." : `Upload ${pendingFiles.length} file${pendingFiles.length !== 1 ? "s" : ""}`}
+                    {isUploading
+                      ? "Uploading..."
+                      : `Upload ${pendingFiles.length} file${
+                          pendingFiles.length !== 1 ? "s" : ""
+                        }`}
                   </Button>
                 </div>
               </div>
@@ -676,7 +847,10 @@ export function DrillFormDialog({
 
             {/* Manual URL Entry */}
             <div className="space-y-2">
-              <Label htmlFor="media_links" className="text-xs text-muted-foreground">
+              <Label
+                htmlFor="media_links"
+                className="text-xs text-muted-foreground"
+              >
                 Add URL (YouTube or other link)
               </Label>
               <Input
@@ -733,8 +907,8 @@ export function DrillFormDialog({
                   ? "Updating..."
                   : "Creating..."
                 : isEditing
-                  ? "Update Drill"
-                  : "Create Drill"}
+                ? "Update Drill"
+                : "Create Drill"}
             </Button>
           </DialogFooter>
         </form>

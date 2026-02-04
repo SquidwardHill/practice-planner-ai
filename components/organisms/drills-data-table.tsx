@@ -32,9 +32,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MoreHorizontal, Pencil, Trash2, Search, X, SearchX } from "lucide-react";
 import {
-  TooltipProvider,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  Search,
+  X,
+  SearchX,
+} from "lucide-react";
+import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -66,12 +72,18 @@ export function DrillsDataTable({
     { id: "category", desc: false },
     { id: "name", desc: false },
   ]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
 
   const handleDelete = async (drill: Drill) => {
-    if (!confirm(`Are you sure you want to delete "${drill.name}"? This action cannot be undone.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to delete "${drill.name}"? This action cannot be undone.`
+      )
+    ) {
       return;
     }
 
@@ -121,15 +133,9 @@ export function DrillsDataTable({
           return (
             <Tooltip delayDuration={300}>
               <TooltipTrigger asChild>
-                <div className="max-w-[200px] truncate cursor-help">
-                  {name}
-                </div>
+                <div className="max-w-[200px] truncate cursor-help">{name}</div>
               </TooltipTrigger>
-              <TooltipContent 
-                className="max-w-md" 
-                side="top"
-                sideOffset={8}
-              >
+              <TooltipContent className="max-w-md" side="top" sideOffset={8}>
                 <div className="text-sm">{name}</div>
               </TooltipContent>
             </Tooltip>
@@ -162,11 +168,7 @@ export function DrillsDataTable({
                   {notes}
                 </div>
               </TooltipTrigger>
-              <TooltipContent 
-                className="max-w-md" 
-                side="top"
-                sideOffset={8}
-              >
+              <TooltipContent className="max-w-md" side="top" sideOffset={8}>
                 <div className="whitespace-pre-wrap wrap-break-word text-sm">
                   {notes}
                 </div>
@@ -199,11 +201,7 @@ export function DrillsDataTable({
                   </a>
                 </div>
               </TooltipTrigger>
-              <TooltipContent 
-                className="max-w-md" 
-                side="top"
-                sideOffset={8}
-              >
+              <TooltipContent className="max-w-md" side="top" sideOffset={8}>
                 <div className="text-sm wrap-break-word">{mediaLinks}</div>
               </TooltipContent>
             </Tooltip>
@@ -220,9 +218,9 @@ export function DrillsDataTable({
           return (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="h-8 w-8 p-0"
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -230,7 +228,10 @@ export function DrillsDataTable({
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+              <DropdownMenuContent
+                align="end"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation();
@@ -363,15 +364,15 @@ export function DrillsDataTable({
                     className="cursor-pointer hover:bg-muted/50 transition-colors"
                     onClick={() => router.push(`/library/${drill.id}`)}
                   >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
                 );
               })
             ) : (
@@ -396,9 +397,9 @@ export function DrillsDataTable({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination 
-        table={table} 
-        totalRows={globalFilter ? filteredRowCount : totalRows} 
+      <DataTablePagination
+        table={table}
+        totalRows={globalFilter ? filteredRowCount : totalRows}
       />
     </div>
   );

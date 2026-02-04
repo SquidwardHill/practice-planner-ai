@@ -13,35 +13,27 @@ export async function GET(
   try {
     const supabase = await createClient();
 
-    // Check authentication
     const {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { id } = await params;
 
-    // Fetch drill
     const { data: drill, error: fetchError } = await supabase
       .from("drills")
-      .select("*")
+      .select("*, categories(id, name)")
       .eq("id", id)
       .eq("user_id", user.id)
       .single();
 
     if (fetchError) {
       if (fetchError.code === "PGRST116") {
-        return NextResponse.json(
-          { error: "Drill not found" },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: "Drill not found" }, { status: 404 });
       }
       console.error("Error fetching drill:", fetchError);
       return NextResponse.json(
@@ -81,10 +73,7 @@ export async function PATCH(
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { id } = await params;
@@ -98,15 +87,13 @@ export async function PATCH(
       .single();
 
     if (fetchError || !existing) {
-      return NextResponse.json(
-        { error: "Drill not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Drill not found" }, { status: 404 });
     }
 
     // Parse request body
     const body = await request.json();
-    const { category, name, minutes, notes, media_links } = body as UpdateDrillInput;
+    const { category_id, name, minutes, notes, media_links } =
+      body as UpdateDrillInput;
 
     // Build update object (only include provided fields)
     const updates: Record<string, unknown> = {};
@@ -128,7 +115,8 @@ export async function PATCH(
     if (name !== undefined) updates.name = name.trim();
     if (minutes !== undefined) updates.minutes = minutes;
     if (notes !== undefined) updates.notes = notes?.trim() || null;
-    if (media_links !== undefined) updates.media_links = media_links?.trim() || null;
+    if (media_links !== undefined)
+      updates.media_links = media_links?.trim() || null;
 
     // If name is being updated, check for duplicates
     if (updates.name && updates.name !== existing.name) {
@@ -196,10 +184,7 @@ export async function DELETE(
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { id } = await params;
@@ -213,40 +198,52 @@ export async function DELETE(
       .single();
 
     if (fetchError || !existing) {
-      return NextResponse.json(
-        { error: "Drill not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Drill not found" }, { status: 404 });
     }
 
     // Delete associated media files from storage if they exist
     if (existing.media_links) {
       const BUCKET_NAME = "Drill Media";
-      const mediaUrls = existing.media_links.split(",").map((link: string) => link.trim());
-      
+      const mediaUrls = existing.media_links
+        .split(",")
+        .map((link: string) => link.trim());
+
       for (const url of mediaUrls) {
         try {
           // Extract file path from URL
           // URL format: https://{project}.supabase.co/storage/v1/object/public/{bucket}/{path}
           const urlParts = url.split("/");
-          const bucketIndex = urlParts.findIndex((part: string) => part === "public");
-          
+          const bucketIndex = urlParts.findIndex(
+            (part: string) => part === "public"
+          );
+
           if (bucketIndex > 0 && bucketIndex < urlParts.length - 1) {
             const bucketName = urlParts[bucketIndex + 1];
             const filePath = urlParts.slice(bucketIndex + 2).join("/");
-            
+
             // Only delete if file is in user's folder and bucket matches
-            if (bucketName === BUCKET_NAME && filePath.startsWith(`${user.id}/`)) {
+            if (
+              bucketName === BUCKET_NAME &&
+              filePath.startsWith(`${user.id}/`)
+            ) {
               const { error: storageError } = await supabase.storage
                 .from(BUCKET_NAME)
                 .remove([filePath]);
-              
+
               if (storageError) {
                 // If bucket not found, log but don't fail the drill deletion
-                if (storageError.message?.includes("bucket") || storageError.message?.includes("not found")) {
-                  console.warn(`Bucket "${BUCKET_NAME}" not found or inaccessible. Skipping file deletion for ${filePath}`);
+                if (
+                  storageError.message?.includes("bucket") ||
+                  storageError.message?.includes("not found")
+                ) {
+                  console.warn(
+                    `Bucket "${BUCKET_NAME}" not found or inaccessible. Skipping file deletion for ${filePath}`
+                  );
                 } else {
-                  console.error(`Error deleting media file ${filePath}:`, storageError);
+                  console.error(
+                    `Error deleting media file ${filePath}:`,
+                    storageError
+                  );
                 }
                 // Continue with drill deletion even if file deletion fails
               }
@@ -274,7 +271,10 @@ export async function DELETE(
       );
     }
 
-    return NextResponse.json({ success: true, message: "Drill deleted successfully" });
+    return NextResponse.json({
+      success: true,
+      message: "Drill deleted successfully",
+    });
   } catch (error) {
     console.error("Unexpected error deleting drill:", error);
     return NextResponse.json(
