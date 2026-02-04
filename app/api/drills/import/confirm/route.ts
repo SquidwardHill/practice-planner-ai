@@ -28,22 +28,60 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No rows provided" }, { status: 400 });
     }
 
-    // Transform import rows to database format
+    // Collect distinct category names and ensure they exist (get or create)
+    const categoryNames = [
+      ...new Set(
+        rows.map(
+          (row) => (row.Category && row.Category.trim()) || "Uncategorized"
+        )
+      ),
+    ];
+    const categoryIdByName: Record<string, string> = {};
+
+    for (const name of categoryNames) {
+      const { data: existing } = await supabase
+        .from("categories")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("name", name)
+        .single();
+
+      if (existing) {
+        categoryIdByName[name] = existing.id;
+      } else {
+        const { data: created, error: createErr } = await supabase
+          .from("categories")
+          .insert({ user_id: user.id, name })
+          .select("id")
+          .single();
+        if (createErr || !created) continue;
+        categoryIdByName[name] = created.id;
+      }
+    }
+
+    // Default category for missing/invalid names
+    const defaultCategoryId =
+      categoryIdByName["Uncategorized"] ?? Object.values(categoryIdByName)[0];
+
+    // Transform import rows to database format (with category_id)
     const drillsToInsert = rows.map((row) => {
-      // Parse minutes: default to 5 if not provided or invalid
-      let minutes = 5; // Default value
+      let minutes = 5;
       if (row.Minutes !== undefined && row.Minutes !== null) {
         if (typeof row.Minutes === "string") {
           const parsed = parseInt(row.Minutes, 10);
-          minutes = isNaN(parsed) ? 2 : parsed;
+          minutes = isNaN(parsed) ? 5 : parsed;
         } else if (typeof row.Minutes === "number" && !isNaN(row.Minutes)) {
           minutes = row.Minutes;
         }
       }
 
+      const categoryName =
+        (row.Category && row.Category.trim()) || "Uncategorized";
+      const category_id = categoryIdByName[categoryName] ?? defaultCategoryId;
+
       return {
         user_id: user.id,
-        category: row.Category || "",
+        category_id,
         name: row.Name || "",
         minutes,
         notes: row.Notes || null,
@@ -63,7 +101,7 @@ export async function POST(request: NextRequest) {
       .eq("user_id", user.id);
 
     const existingNames = new Set(
-      (existingDrills.data || []).map((d) => d.name.toLowerCase()),
+      (existingDrills.data || []).map((d) => d.name.toLowerCase())
     );
 
     // Filter out duplicates (based on name) - current MVP behavior: skip duplicates
@@ -124,7 +162,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Successfully imported ${imported} drill${imported !== 1 ? "s" : ""}`,
+      message: `Successfully imported ${imported} drill${
+        imported !== 1 ? "s" : ""
+      }`,
       imported,
       skipped,
       errors: errors.length > 0 ? errors : undefined,
@@ -137,7 +177,7 @@ export async function POST(request: NextRequest) {
         message:
           error instanceof Error ? error.message : "Unknown error occurred",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

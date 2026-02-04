@@ -39,10 +39,10 @@ export default async function DrillDetailPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  // Fetch drill
+  // Fetch drill with category name
   const { data: drill, error } = await supabase
     .from("drills")
-    .select("*")
+    .select("*, categories(id, name)")
     .eq("id", id)
     .eq("user_id", user.id)
     .single();
@@ -78,7 +78,7 @@ export default async function DrillDetailPage({
 
     // Pattern 1: youtube.com/watch?v=VIDEO_ID or youtu.be/VIDEO_ID
     const watchMatch = url.match(
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|m\.youtube\.com\/watch\?v=)([a-zA-Z0-9_-]{11})/,
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|m\.youtube\.com\/watch\?v=)([a-zA-Z0-9_-]{11})/
     );
     if (watchMatch && watchMatch[1]) {
       return `https://www.youtube.com/embed/${watchMatch[1]}`;
@@ -96,7 +96,7 @@ export default async function DrillDetailPage({
   };
 
   const getFileType = (
-    url: string,
+    url: string
   ): "image" | "video" | "youtube" | "other" => {
     if (isYouTubeUrl(url)) {
       return "youtube";
@@ -113,16 +113,16 @@ export default async function DrillDetailPage({
 
   // Filter media links by type
   const images = mediaLinks.filter(
-    (url: string) => getFileType(url) === "image",
+    (url: string) => getFileType(url) === "image"
   );
   const youtubeVideos = mediaLinks.filter(
-    (url: string) => getFileType(url) === "youtube",
+    (url: string) => getFileType(url) === "youtube"
   );
   const videos = mediaLinks.filter(
-    (url: string) => getFileType(url) === "video",
+    (url: string) => getFileType(url) === "video"
   );
   const otherFiles = mediaLinks.filter(
-    (url: string) => getFileType(url) === "other",
+    (url: string) => getFileType(url) === "other"
   );
 
   const getFileName = (url: string): string => {
@@ -166,7 +166,7 @@ export default async function DrillDetailPage({
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <Badge variant="secondary" className="text-xs">
-                  {drill.category}
+                  {drill.categories?.name ?? "—"}
                 </Badge>
                 {minutesInt > 0 && (
                   <Badge
@@ -204,7 +204,9 @@ export default async function DrillDetailPage({
                 Media
                 <Badge variant="outline" className="text-xs">
                   {mediaLinks.length > 0
-                    ? `${mediaLinks.length} ${mediaLinks.length === 1 ? "reference" : "references"}`
+                    ? `${mediaLinks.length} ${
+                        mediaLinks.length === 1 ? "reference" : "references"
+                      }`
                     : "No media referenced"}
                 </Badge>
               </CardTitle>

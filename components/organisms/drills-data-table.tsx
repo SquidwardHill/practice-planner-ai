@@ -103,6 +103,7 @@ export function DrillsDataTable({
     () => [
       {
         accessorKey: "category",
+        accessorFn: (row) => row.categories?.name ?? "—",
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title="Category" />
         ),
@@ -273,12 +274,12 @@ export function DrillsDataTable({
     globalFilterFn: (row, columnId, filterValue) => {
       const search = filterValue.toLowerCase();
       const drill = row.original;
-      
+
       // Search across name, category, and notes
       const name = drill.name?.toLowerCase() || "";
-      const category = drill.category?.toLowerCase() || "";
+      const category = drill.categories?.name?.toLowerCase() || "";
       const notes = drill.notes?.toLowerCase() || "";
-      
+
       return (
         name.includes(search) ||
         category.includes(search) ||

@@ -109,8 +109,22 @@ export async function PATCH(
     const { category, name, minutes, notes, media_links } = body as UpdateDrillInput;
 
     // Build update object (only include provided fields)
-    const updates: Partial<UpdateDrillInput> = {};
-    if (category !== undefined) updates.category = category.trim();
+    const updates: Record<string, unknown> = {};
+    if (category_id !== undefined) {
+      const { data: cat } = await supabase
+        .from("categories")
+        .select("id")
+        .eq("id", category_id)
+        .eq("user_id", user.id)
+        .single();
+      if (!cat) {
+        return NextResponse.json(
+          { error: "Category not found or access denied" },
+          { status: 404 }
+        );
+      }
+      updates.category_id = category_id;
+    }
     if (name !== undefined) updates.name = name.trim();
     if (minutes !== undefined) updates.minutes = minutes;
     if (notes !== undefined) updates.notes = notes?.trim() || null;

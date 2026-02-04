@@ -8,18 +8,45 @@ import { type Drill } from "@/lib/types/drill";
 // - Edge Runtime: 25s to start response, can stream for up to 300s total
 export const runtime = "edge";
 
-function formatDrillList(drills: Drill[]): string {
+function formatDrillList(
+  drills: Array<Drill & { categories?: { name: string } | null }>
+): string {
   if (drills.length === 0) {
     return "No drills available in the library.";
   }
 
   return drills
     .map((drill, index) => {
+      const categoryName = drill.categories?.name ?? "—";
       const minutes = drill.minutes ? ` | ${drill.minutes} mins` : "";
       const notes = drill.notes ? ` - ${drill.notes}` : "";
-      return `${index + 1}. ${drill.name} (${drill.category}${minutes})${notes}`;
+      return `${index + 1}. ${drill.name} (${categoryName}${minutes})${notes}`;
     })
     .join("\n");
+}
+
+/**
+ * Extract requested duration in minutes from the user's prompt.
+ * Matches patterns like "30 minute", "30 min", "90 minutes", "1.5 hour", "1 hour".
+ * Returns null if no duration is found.
+ */
+function extractRequestedDurationMinutes(prompt: string): number | null {
+  const normalized = prompt.toLowerCase().trim();
+  // e.g. "30 minute", "30 minutes", "30 min"
+  const minMatch = normalized.match(
+    /(\d+(?:\.\d+)?)\s*(?:minute|minutes|min)\b/
+  );
+  if (minMatch) {
+    const n = parseFloat(minMatch[1]);
+    return n > 0 && n <= 300 ? Math.round(n) : null;
+  }
+  // e.g. "1 hour", "1.5 hours"
+  const hourMatch = normalized.match(/(\d+(?:\.\d+)?)\s*(?:hour|hours|hr)\b/);
+  if (hourMatch) {
+    const n = parseFloat(hourMatch[1]);
+    return n > 0 && n <= 5 ? Math.round(n * 60) : null;
+  }
+  return null;
 }
 
 function buildSystemPrompt(drillList: string): string {
@@ -33,7 +60,7 @@ When a user requests a practice plan, you must:
 1. Only select drills from the list above
 2. Organize them logically (warmup first, then main drills, then scrimmage/live play, then rest)
 3. Calculate time slots starting from 0:00
-4. Ensure the total duration matches the user's request
+4. CRITICAL: The total duration MUST match the user's request exactly. If they ask for 30 minutes, the plan must be 30 minutes—the sum of all block durations must equal that number. total_duration_minutes in your response must equal that number. Do not exceed or fall short.
 5. The time_slot should be formatted as "start_time - end_time" where times are in MM:SS format. Calculate each block's start time based on the previous block's end time.
 6. Use the exact drill names and categories from the list above`;
 }
@@ -71,18 +98,15 @@ export async function POST(req: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Fetch user's drills from database
+    // Fetch user's drills with category name
     const { data: drills, error: drillsError } = await supabase
       .from("drills")
-      .select("*")
+      .select("*, categories(id, name)")
       .eq("user_id", user.id)
-      .order("category", { ascending: true })
+      .order("category_id", { ascending: true })
       .order("name", { ascending: true });
 
     if (drillsError) {
@@ -100,7 +124,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error: "No drills found",
-          message: "Please add drills to your library before generating a practice plan.",
+          message:
+            "Please add drills to your library before generating a practice plan.",
         },
         { status: 400 }
       );
@@ -110,6 +135,12 @@ export async function POST(req: NextRequest) {
     const drillList = formatDrillList(drills);
     const systemPrompt = buildSystemPrompt(drillList);
 
+    const requestedMinutes = extractRequestedDurationMinutes(prompt);
+    const durationInstruction =
+      requestedMinutes != null
+        ? ` CRITICAL: The user asked for a ${requestedMinutes}-minute plan. You MUST create a plan where the sum of all block durations equals exactly ${requestedMinutes} minutes, and total_duration_minutes must be ${requestedMinutes}. Do not use more or fewer minutes.`
+        : "";
+
     if (!process.env.OPENAI_API_KEY) {
       console.error("OPENAI_API_KEY is not set in environment");
       return NextResponse.json(
@@ -118,13 +149,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log(`Starting streamObject generation with ${drills.length} drills from user library...`);
+    console.log(
+      `Starting streamObject generation with ${
+        drills.length
+      } drills from user library${
+        requestedMinutes != null ? ` (requested ${requestedMinutes} min)` : ""
+      }...`
+    );
 
     try {
       const result = streamObject({
         model: openai("gpt-4o"),
         system: systemPrompt,
-        prompt: `Generate a basketball practice plan based on this request: ${prompt}`,
+        prompt: `Generate a basketball practice plan based on this request: ${prompt}.${durationInstruction}`,
         schema: practicePlanSchema,
         temperature: 0.7,
       });
@@ -140,7 +177,10 @@ export async function POST(req: NextRequest) {
   } catch (error: unknown) {
     console.error("Error generating practice plan:", error);
 
-    const err = error as { name?: string; data?: { error?: { code?: string } } };
+    const err = error as {
+      name?: string;
+      data?: { error?: { code?: string } };
+    };
     if (
       err?.name === "AI_APICallError" ||
       err?.data?.error?.code === "invalid_api_key"
