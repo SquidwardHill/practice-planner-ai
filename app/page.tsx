@@ -1,52 +1,75 @@
+import Link from "next/link";
 import { getAuthState } from "@/lib/supabase/auth-helpers";
-import { Library, ArrowRight, Dribbble } from "lucide-react";
-import { Greeting } from "@/components/atoms/greeting";
-import { dashboardFeatures } from "@/lib/data/features";
-import { FeatureCardsSection } from "@/components/molecules/feature-cards-section";
+import { ArrowRight, Dribbble } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { Button } from "@/components/ui/button";
+import { DashboardSummaryCards } from "@/components/molecules/dashboard-summary-cards";
 import { DashboardCalendar } from "@/components/molecules/calendar-practice-schedule";
-import { type Drill } from "@/lib/types/drill";
-import { H2, H3 } from "@/components/atoms/typography";
+import { AI_NAME } from "@/lib/config/branding";
 import { HeroSection } from "@/components/molecules/section-hero";
 import { SectionPitch } from "@/components/molecules/section-pitch";
 import { TitleWithAccent } from "@/components/molecules/title-with-accent";
 import { SectionCta } from "@/components/molecules/section-cta";
-import { AI_NAME } from "@/lib/config/branding";
-import { DividerSection } from "@/components/atoms/divider-section";
+import { FeatureCardsSection } from "@/components/molecules/feature-cards-section";
+import { dashboardFeatures } from "@/lib/data/features";
 
-export default async function Home({
-  data: drills,
-  error,
-  count,
-}: {
-  data: Drill[];
-  error: Error | null;
-  count: number;
-}) {
+export default async function Home() {
   const { user, access } = await getAuthState();
 
-  // If authenticated AND has access, show internal dashboard
+  // If authenticated AND has access, show internal dashboard with real stats
   if (user && access.hasAccess) {
+    const supabase = await createClient();
+
+    const [
+      { count: drillCount },
+      { data: plans, count: plansCount },
+      { count: scheduledCount },
+      { count: categoriesCount },
+    ] = await Promise.all([
+      supabase
+        .from("drills")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id),
+      supabase
+        .from("practice_plans")
+        .select("id, practice_title, created_at", { count: "exact" })
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(5),
+      supabase
+        .from("scheduled_practices")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id),
+      supabase
+        .from("categories")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id),
+    ]);
+
+    const drillTotal = drillCount ?? 0;
+    const plansTotal = plansCount ?? 0;
+
     return (
-      <div className="container mx-auto px-4 py-10 max-w-6xl mt-6">
-        {/* Features Section */}
-        <SectionPitch
-          title={
-            <H2>
-              <Greeting firstName={user.full_name} />
-            </H2>
-          }
-          description={`What's on the docket today? ${AI_NAME} is on stand-by whenever you're ready to start planning.`}
-          ctaLink="/library"
-          ctaText="Start building"
-          ctaButtonVariant="default"
-        />
-
-        <FeatureCardsSection features={dashboardFeatures} hasAccess={true} />
-        <DividerSection />
-
-        <section className="mt-10">
-          <DashboardCalendar />
-        </section>
+      <div className="bg-background relative flex max-w-6xl mx-auto flex-1 flex-col min-h-0">
+        <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-6">
+          <h1 className="text-lg font-semibold md:text-xl">Dashboard</h1>
+          <Link href="/planner">
+            <Button size="sm">Quick Create</Button>
+          </Link>
+        </header>
+        <div className="flex flex-1 flex-col gap-6 p-6">
+          <DashboardSummaryCards
+            plansCount={plansTotal}
+            scheduledCount={scheduledCount ?? 0}
+            drillCount={drillTotal}
+            categoriesCount={categoriesCount ?? 0}
+            aiName={AI_NAME}
+            className="mb-8"
+          />
+          <section id="calendar" className="scroll-mt-8">
+            <DashboardCalendar scheduledCount={scheduledCount ?? 0} />
+          </section>
+        </div>
       </div>
     );
   }
