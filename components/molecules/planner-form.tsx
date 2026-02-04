@@ -524,6 +524,7 @@ export function PlannerForm() {
               type="submit"
               size="default"
               disabled={isLoading || !input.trim()}
+              aria-busy={isLoading}
               className="mt-2"
             >
               <SparklesIcon saturated={true} />
@@ -597,6 +598,7 @@ export function PlannerForm() {
               type="button"
               onClick={handleFinalizeSave}
               disabled={isSaving}
+              aria-busy={isSaving}
               className="gap-2 shrink-0"
             >
               <Save className="h-4 w-4" />
@@ -614,11 +616,13 @@ export function PlannerForm() {
                   onDragLeave={handleDragLeave}
                   onDrop={(e) => handleDrop(e, index)}
                   onDragEnd={handleDragEnd}
-                  className={`border-l-4 border-primary pl-2 pr-4 py-3 bg-muted/30 rounded-r-lg group flex items-start gap-2 transition-colors ${
+                  className={`border-l-4 border-primary pl-2 pr-4 py-3 bg-muted/30 rounded-r-lg group flex items-start gap-2 transition-colors cursor-grab active:cursor-grabbing ${
                     dragOverIndex === index
                       ? "ring-2 ring-primary/50 ring-inset"
                       : ""
-                  } ${draggedIndex === index ? "opacity-50" : ""}`}
+                  } ${
+                    draggedIndex === index ? "opacity-50 cursor-grabbing" : ""
+                  }`}
                 >
                   <div
                     className="mt-1 shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground touch-none"

@@ -7,8 +7,8 @@ import { AI_NAME } from "@/lib/config/branding";
 const EXAMPLES = [
   "Create a 90-minute varsity basketball practice focusing on transition defense and conditioning.",
   "Plan a 60-minute shooting workout with progression from form to game-speed.",
-  "Design a 45-minute defensive fundamentals session for middle school.",
-  "I need a 75-minute practice that mixes ball handling, passing, and fast break.",
+  "Make a 45-minute defensive fundamentals session for middle school.",
+  "75-minute practice that mixes ball handling, passing, and fast break.",
   "Build a 90-minute practice: warm-up, shell drill, then scrimmage.",
 ];
 
@@ -48,7 +48,7 @@ export function AskAiTypewriter() {
       <TitleWithAccent prefix="Ask" accent={AI_NAME} suffix="" />
       <div
         id="ask-ai"
-        className="min-h-[2.5em] flex items-center justify-center text-muted-foreground text-base sm:text-xl mt-1 overflow-hidden"
+        className="min-h-[2.5em] flex items-center justify-center text-muted-foreground text-base sm:text-lg mt-1 overflow-hidden"
         aria-live="polite"
       >
         <span
