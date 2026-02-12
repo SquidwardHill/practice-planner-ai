@@ -162,6 +162,11 @@
     box-shadow: 1px -5px 5px #4886ff17, 0px -16px 20px #1b69ff0a;
   }
 
+  /* Muted blue glow that follows the text (for nav active state) */
+  .text-glow-primary-muted {
+    text-shadow: 0 0 12px rgb(27 105 255 / 0.4), 0 0 24px rgb(27 105 255 / 0.2);
+  }
+
   /* Subtle fade + vertical slide for rotating copy */
   @keyframes ask-ai-fade-slide-in {
     from {

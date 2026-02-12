@@ -3,17 +3,18 @@
 import { useState, useEffect, useRef } from "react";
 import { TitleWithAccent } from "@/components/molecules/title-with-accent";
 import { AI_NAME } from "@/lib/config/branding";
+import { LucideMessageSquareQuote } from "lucide-react";
 
 const EXAMPLES = [
-  "Create a 90-minute varsity basketball practice focusing on transition defense and conditioning.",
-  "Plan a 60-minute shooting workout with progression from form to game-speed.",
-  "Make a 45-minute defensive fundamentals session for middle school.",
+  "Create a 90-minute practice plan focusing on transition defense.",
+  "60-minute shooting workout that progresses from form to game-speed.",
+  "Plan a 45-minute defensive fundamentals session for middle school.",
   "75-minute practice that mixes ball handling, passing, and fast break.",
   "Build a 90-minute practice: warm-up, shell drill, then scrimmage.",
 ];
 
-const ROTATE_MS = 4000;
-const FADE_OUT_MS = 700;
+const ROTATE_MS = 5000;
+const FADE_OUT_MS = 800;
 
 export function AskAiTypewriter() {
   const [index, setIndex] = useState(0);
@@ -48,7 +49,7 @@ export function AskAiTypewriter() {
       <TitleWithAccent prefix="Ask" accent={AI_NAME} suffix="" />
       <div
         id="ask-ai"
-        className="min-h-[2.5em] flex items-center justify-center text-muted-foreground text-base sm:text-lg mt-1 overflow-hidden"
+        className="min-h-[2.5em] flex items-center justify-center text-muted-foreground text-sm lg:text-base font-mono mt-1 overflow-hidden"
         aria-live="polite"
       >
         <span
@@ -57,6 +58,7 @@ export function AskAiTypewriter() {
             isLeaving ? "animate-ask-ai-out" : "animate-ask-ai-in"
           }`}
         >
+          <LucideMessageSquareQuote className="size-6 inline-block mr-1 text-primary-muted" />{" "}
           {EXAMPLES[index]}
         </span>
       </div>

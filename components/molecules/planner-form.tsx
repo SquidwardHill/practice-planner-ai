@@ -16,10 +16,10 @@ import {
   X,
   Save,
   GripVertical,
+  Sparkle,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { PRACTICE_PLAN_STORAGE_KEY } from "@/lib/storage-keys";
-import { SparklesIcon } from "@/components/atoms/sparkles";
 
 interface PracticeBlock {
   time_slot: string;
@@ -527,7 +527,7 @@ export function PlannerForm() {
               aria-busy={isLoading}
               className="mt-2"
             >
-              <SparklesIcon saturated={true} />
+              <Sparkle className="size-4" />
               {isLoading ? "Generating..." : "Generate Practice Plan"}
             </Button>
           </form>

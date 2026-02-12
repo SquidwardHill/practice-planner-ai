@@ -42,11 +42,11 @@ export function DrillImportModal({
   const handleFileSelect = (selectedFile: File | null) => {
     if (!selectedFile) return;
 
-    // Validate file type - only .xls supported
+    // Validate file type - .xlsx (Excel 2007+) supported
     const validTypes = [
-      "application/vnd.ms-excel", // .xls
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     ];
-    const validExtensions = [".xls"];
+    const validExtensions = [".xlsx"];
 
     const fileExtension = selectedFile.name
       .toLowerCase()
@@ -57,7 +57,7 @@ export function DrillImportModal({
       !validExtensions.includes(fileExtension)
     ) {
       alert(
-        "Invalid file type. Please upload a .xls file exported from PracticePlannerLive."
+        "Invalid file type. Please upload a .xlsx file. If you have a .xls file, open it in Excel and save as .xlsx."
       );
       return;
     }
@@ -204,7 +204,7 @@ export function DrillImportModal({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".xls,application/vnd.ms-excel"
+                accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 onChange={handleFileInputChange}
                 className="hidden"
                 id="file-upload"
@@ -221,9 +221,7 @@ export function DrillImportModal({
                     <P className="font-medium">
                       Drag and drop your file here, or click to browse
                     </P>
-                    <Small>
-                      Supports .xls files from PracticePlannerLive (max 10MB)
-                    </Small>
+                    <Small>Supports .xlsx files (max 10MB)</Small>
                   </div>
                   <Button
                     type="button"
@@ -242,9 +240,7 @@ export function DrillImportModal({
                     </div>
                     <div className="flex-1 text-left">
                       <P className="font-medium">{file.name}</P>
-                      <Small>
-                        {(file.size / 1024).toFixed(2)} KB
-                      </Small>
+                      <Small>{(file.size / 1024).toFixed(2)} KB</Small>
                     </div>
                     <Button
                       type="button"

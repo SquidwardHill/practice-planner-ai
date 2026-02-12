@@ -3,13 +3,35 @@ import {
   SubscriptionStatus,
   type SubscriptionStatusType,
 } from "@/lib/types/subscription";
-import { User } from "lucide-react";
+import {
+  BadgeCheck,
+  FlaskConical,
+  BadgeAlert,
+  BadgeX,
+  CircleDashed,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
+
+function getStatusIcon(status: string): LucideIcon {
+  switch (status) {
+    case SubscriptionStatus.ACTIVE:
+      return BadgeCheck;
+    case SubscriptionStatus.TRIAL:
+      return FlaskConical;
+    case SubscriptionStatus.EXPIRED:
+      return BadgeAlert;
+    case SubscriptionStatus.CANCELLED:
+      return BadgeX;
+    case SubscriptionStatus.UNSET:
+    default:
+      return CircleDashed;
+  }
+}
 
 interface SubscriptionStatusBadgeProps {
   status: SubscriptionStatusType | string | null | undefined;
   className?: string;
-  iconOnly?: boolean;
 }
 
 function getStatusBadgeVariant(
@@ -32,46 +54,37 @@ function getStatusBadgeVariant(
 function getStatusLabel(status: string): string {
   switch (status) {
     case SubscriptionStatus.ACTIVE:
-      return "Active";
+      return "active";
     case SubscriptionStatus.TRIAL:
-      return "Trial";
+      return "trial";
     case SubscriptionStatus.EXPIRED:
-      return "Expired";
+      return "expired";
     case SubscriptionStatus.CANCELLED:
-      return "Cancelled";
+      return "cancelled";
     case SubscriptionStatus.UNSET:
     default:
-      return "Inactive";
+      return "inactive";
   }
 }
 
 export function SubscriptionStatusBadge({
   status,
   className,
-  iconOnly = false,
 }: SubscriptionStatusBadgeProps) {
   const normalizedStatus =
     (status as SubscriptionStatusType) || SubscriptionStatus.UNSET;
 
-  if (iconOnly) {
-    return (
-      <Badge
-        variant={getStatusBadgeVariant(normalizedStatus)}
-        className={cn("h-5 w-5 p-0 flex items-center justify-center", className)}
-        title={getStatusLabel(normalizedStatus)}
-      >
-        <User className="h-3 w-3" />
-      </Badge>
-    );
-  }
+  const Icon = getStatusIcon(normalizedStatus);
 
   return (
     <Badge
-      variant={getStatusBadgeVariant(normalizedStatus)}
-      className={cn("text-xs", className)}
+      className={cn(
+        "gap-0.5 text-xs outline outline-muted-foreground/10 bg-background px-1.5 py-0.25",
+        className
+      )}
     >
-      <User className="h-3 w-3 mr-1" />
-      <span className="font-medium font-mono tracking-tighter">
+      <Icon className="size-2.5 shrink-0 text-muted-foreground/90" />
+      <span className="text-[11px] font-thin font-mono tracking-tighter text-muted-foreground/90">
         {getStatusLabel(normalizedStatus)}
       </span>
     </Badge>

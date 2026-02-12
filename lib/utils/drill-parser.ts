@@ -1,40 +1,23 @@
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import * as iconv from "iconv-lite";
 import { type DrillImportRow } from "@/lib/types/drill";
 
 /**
- * Parse Excel file (.xls) and return array of drill rows
+ * Parse Excel file (.xlsx) and return array of drill rows
  * Works in both browser and Node.js/server environments
- *
- * Note: For Excel files (binary format), we use arrayBuffer() to read the raw binary data.
- * For text files (CSV, TXT), you would use file.text() which reads as UTF-8 by default:
- *   const text = await file.text(); // Automatically UTF-8 in modern browsers/Node.js
- *
- * The XLSX library handles the binary Excel format and extracts text from cells.
- * Encoding issues occur when Excel files were saved with Windows-1252 encoding
- * but are being interpreted as UTF-8, which we fix with iconv-lite.
  */
 export async function parseExcelFile(file: File): Promise<DrillImportRow[]> {
   try {
-    // For Excel files (binary format), read as ArrayBuffer
-    // For text files, you would use: await file.text() (reads as UTF-8)
     const arrayBuffer = await file.arrayBuffer();
 
     if (!arrayBuffer || arrayBuffer.byteLength === 0) {
       throw new Error("Failed to read file: No data received");
     }
 
-    // XLSX library handles encoding internally - let it auto-detect
-    // SheetJS automatically handles UTF-8 encoding/decoding when converting to JSON
-    // No need to specify codepage - the library detects it from the file
-    let workbook;
+    let workbook: ExcelJS.Workbook;
     try {
-      workbook = XLSX.read(arrayBuffer, {
-        type: "array",
-        // Let XLSX auto-detect encoding - it handles UTF-8 internally
-        // Only specify options that affect parsing behavior
-        cellDates: true, // Parse dates as Date objects
-      });
+      workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
     } catch (readError) {
       throw new Error(
         `Failed to parse Excel file. The file may be corrupted or in an unsupported format. ${
@@ -43,33 +26,53 @@ export async function parseExcelFile(file: File): Promise<DrillImportRow[]> {
       );
     }
 
-    if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+    const worksheet = workbook.worksheets[0];
+    if (!worksheet) {
       throw new Error("Excel file contains no sheets");
     }
 
-    const firstSheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[firstSheetName];
+    const headerRow = worksheet.getRow(1);
+    const headersByCol: Record<number, string> = {};
+    headerRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+      const text = cell.text ?? (cell.value != null ? String(cell.value) : "");
+      headersByCol[colNumber] = text.trim();
+    });
 
-    if (!worksheet) {
-      throw new Error("Failed to read the first sheet from the Excel file");
+    const rows: DrillImportRow[] = [];
+    for (let i = 2; i <= worksheet.rowCount; i++) {
+      const row = worksheet.getRow(i);
+      const rowObj: Record<string, unknown> = {};
+      let hasAnyValue = false;
+      row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+        const header = headersByCol[colNumber];
+        if (!header) return;
+        const val = cell.value;
+        if (val != null && val !== "") {
+          hasAnyValue = true;
+        }
+        const text = cell.text;
+        if (text !== undefined && text !== null) {
+          rowObj[header] = text;
+        } else if (typeof val === "number") {
+          rowObj[header] = val;
+        } else if (val == null || val === "") {
+          rowObj[header] = null;
+        } else {
+          rowObj[header] = String(val);
+        }
+      });
+      if (hasAnyValue) {
+        rows.push(rowObj as unknown as DrillImportRow);
+      }
     }
 
-    // Convert to JSON - XLSX handles UTF-8 encoding internally
-    // The library automatically decodes cell text with proper encoding
-    const jsonData = XLSX.utils.sheet_to_json(worksheet, {
-      defval: null, // Use null for empty cells
-      raw: false, // Convert all values to strings (XLSX handles encoding here)
-      blankrows: false, // Skip blank rows
-    }) as DrillImportRow[];
-
-    if (!jsonData || jsonData.length === 0) {
+    if (rows.length === 0) {
       throw new Error(
         "The Excel file appears to be empty or has no data rows. Please ensure the file contains drill data."
       );
     }
 
-    // Fix encoding issues in all string fields
-    const fixedData = jsonData.map((row) => ({
+    const fixedData = rows.map((row) => ({
       ...row,
       Category: fixEncoding(row.Category),
       Name: fixEncoding(row.Name),
@@ -88,16 +91,20 @@ export async function parseExcelFile(file: File): Promise<DrillImportRow[]> {
 }
 
 /**
- * Parse .xls file and return array of drill rows
+ * Parse .xlsx file and return array of drill rows
  */
 export async function parseDrillFile(file: File): Promise<DrillImportRow[]> {
   const fileName = file.name.toLowerCase();
   const fileType = file.type;
 
-  // Only support .xls files (PracticePlannerLive export format)
-  if (!fileName.endsWith(".xls") && fileType !== "application/vnd.ms-excel") {
+  const isXlsx =
+    fileName.endsWith(".xlsx") ||
+    fileType ===
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+  if (!isXlsx) {
     throw new Error(
-      "Unsupported file type. Please upload a .xls file exported from PracticePlannerLive."
+      "Unsupported file type. Please upload a .xlsx file (Excel 2007+). If you have a .xls file, open it in Excel and save as .xlsx."
     );
   }
 
@@ -167,7 +174,7 @@ export function fixEncoding(str: string | null | undefined): string {
   // Check if the string contains Windows-1252 encoding artifacts
   // These patterns indicate the string was incorrectly decoded
   const hasEncodingIssues = /â[€"'"œ"¢¦]|â€|â€™|â€œ|â€|â€¢|â€¦/.test(str);
-  
+
   // Also check for standalone "â" characters that are likely encoding issues
   // "â" (U+00E2) often appears when a dash or other character was mis-encoded
   const hasStandaloneA = /[^a-z]â[^a-z€"'"œ"¢¦]/.test(str);
@@ -179,12 +186,12 @@ export function fixEncoding(str: string | null | undefined): string {
     // then decode it correctly as Windows-1252
     const buffer = Buffer.from(str, "latin1");
     const converted = iconv.decode(buffer, "win1252");
-    
+
     // If conversion changed the string, use it (indicates encoding issue was fixed)
     if (converted !== str) {
       return converted;
     }
-    
+
     // If no change from iconv but we detected issues, try manual replacements
     if (hasEncodingIssues || hasStandaloneA) {
       return converted
@@ -202,7 +209,7 @@ export function fixEncoding(str: string | null | undefined): string {
         .replace(/â(?=\s)/g, "—") // "â" before space -> "—"
         .replace(/â/g, "—"); // catch-all: any remaining "â" -> "—"
     }
-    
+
     return converted;
   } catch (error) {
     // Fallback to manual replacement if iconv fails

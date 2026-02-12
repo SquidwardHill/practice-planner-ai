@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getAuthState } from "@/lib/supabase/auth-helpers";
-import { ArrowRight, Dribbble } from "lucide-react";
+import { ArrowRight, LineSquiggle, WandSparkles, Zap } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { DashboardSummaryCards } from "@/components/molecules/dashboard-summary-cards";
@@ -85,7 +85,7 @@ export default async function Home() {
           description={`Generate drills and organize your practice plans using natural, conversational prompts. You can focus on the big picture while ${AI_NAME} handles the details.`}
           buttonText="Give it a shot"
           buttonHref="/auth/sign-up"
-          buttonIcon={Dribbble}
+          buttonIcon={LineSquiggle}
           secondaryButtonText="Sign in"
           secondaryButtonHref="/auth/login"
         />

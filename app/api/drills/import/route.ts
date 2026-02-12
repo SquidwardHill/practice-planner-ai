@@ -32,15 +32,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    // Validate file type - only .xls supported
+    // Validate file type - .xlsx (Excel 2007+) supported
     const fileName = file.name.toLowerCase();
-    const isValidExtension = fileName.endsWith(".xls");
+    const isValidExtension = fileName.endsWith(".xlsx");
 
     if (!isValidExtension) {
       return NextResponse.json(
         {
           error:
-            "Invalid file type. Please upload a .xls file exported from PracticePlannerLive.",
+            "Invalid file type. Please upload a .xlsx file. If you have a .xls file, open it in Excel and save as .xlsx.",
         },
         { status: 400 }
       );
