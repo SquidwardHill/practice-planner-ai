@@ -152,7 +152,7 @@ export default function MigrationGuidePage() {
                       <H4>Export from PracticePlannerLive</H4>
                       <P className="text-muted-foreground">
                         Log into your PracticePlannerLive account and export
-                        your drill list. Save or export as .xlsx (Excel 2007+).
+                        your drill list. Export as .xls or save as .xlsx (Excel 2007+).
                         Make sure you download the complete drill list with all
                         categories.
                       </P>

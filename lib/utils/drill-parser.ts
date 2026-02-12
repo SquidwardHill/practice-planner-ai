@@ -1,10 +1,10 @@
 import ExcelJS from "exceljs";
+import * as XLSX from "xlsx";
 import * as iconv from "iconv-lite";
 import { type DrillImportRow } from "@/lib/types/drill";
 
 /**
- * Parse Excel file (.xlsx) and return array of drill rows
- * Works in both browser and Node.js/server environments
+ * Parse .xlsx file and return array of drill rows (uses ExcelJS)
  */
 export async function parseExcelFile(file: File): Promise<DrillImportRow[]> {
   try {
@@ -91,24 +91,79 @@ export async function parseExcelFile(file: File): Promise<DrillImportRow[]> {
 }
 
 /**
- * Parse .xlsx file and return array of drill rows
+ * Parse legacy .xls file and return array of drill rows (uses SheetJS/xlsx)
+ */
+async function parseXlsFile(file: File): Promise<DrillImportRow[]> {
+  const arrayBuffer = await file.arrayBuffer();
+  if (!arrayBuffer || arrayBuffer.byteLength === 0) {
+    throw new Error("Failed to read file: No data received");
+  }
+  let workbook: XLSX.WorkBook;
+  try {
+    workbook = XLSX.read(arrayBuffer, {
+      type: "array",
+      cellDates: true,
+    });
+  } catch (readError) {
+    throw new Error(
+      `Failed to parse .xls file. The file may be corrupted or in an unsupported format. ${
+        readError instanceof Error ? readError.message : ""
+      }`
+    );
+  }
+  if (!workbook.SheetNames?.length) {
+    throw new Error("Excel file contains no sheets");
+  }
+  const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+  if (!worksheet) {
+    throw new Error("Failed to read the first sheet from the Excel file");
+  }
+  const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+    defval: null,
+    raw: false,
+    blankrows: false,
+  }) as DrillImportRow[];
+  if (!jsonData?.length) {
+    throw new Error(
+      "The Excel file appears to be empty or has no data rows. Please ensure the file contains drill data."
+    );
+  }
+  return jsonData.map((row) => ({
+    ...row,
+    Category: fixEncoding(row.Category),
+    Name: fixEncoding(row.Name),
+    Notes: row.Notes ? fixEncoding(row.Notes) : undefined,
+    "Media Links": row["Media Links"]
+      ? fixEncoding(row["Media Links"])
+      : undefined,
+  }));
+}
+
+/**
+ * Parse .xls or .xlsx file and return array of drill rows
  */
 export async function parseDrillFile(file: File): Promise<DrillImportRow[]> {
   const fileName = file.name.toLowerCase();
   const fileType = file.type;
+
+  const isXls =
+    fileName.endsWith(".xls") ||
+    fileType === "application/vnd.ms-excel";
 
   const isXlsx =
     fileName.endsWith(".xlsx") ||
     fileType ===
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
-  if (!isXlsx) {
-    throw new Error(
-      "Unsupported file type. Please upload a .xlsx file (Excel 2007+). If you have a .xls file, open it in Excel and save as .xlsx."
-    );
+  if (isXls) {
+    return parseXlsFile(file);
   }
-
-  return parseExcelFile(file);
+  if (isXlsx) {
+    return parseExcelFile(file);
+  }
+  throw new Error(
+    "Unsupported file type. Please upload a .xls or .xlsx file (e.g. from PracticePlannerLive or our Excel template)."
+  );
 }
 
 /**

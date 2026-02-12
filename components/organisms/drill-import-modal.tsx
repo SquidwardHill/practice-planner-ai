@@ -42,11 +42,12 @@ export function DrillImportModal({
   const handleFileSelect = (selectedFile: File | null) => {
     if (!selectedFile) return;
 
-    // Validate file type - .xlsx (Excel 2007+) supported
+    // Validate file type - .xls and .xlsx supported
     const validTypes = [
+      "application/vnd.ms-excel",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     ];
-    const validExtensions = [".xlsx"];
+    const validExtensions = [".xls", ".xlsx"];
 
     const fileExtension = selectedFile.name
       .toLowerCase()
@@ -57,7 +58,7 @@ export function DrillImportModal({
       !validExtensions.includes(fileExtension)
     ) {
       alert(
-        "Invalid file type. Please upload a .xlsx file. If you have a .xls file, open it in Excel and save as .xlsx."
+        "Invalid file type. Please upload a .xls or .xlsx file (e.g. from PracticePlannerLive or our Excel template)."
       );
       return;
     }
@@ -204,7 +205,7 @@ export function DrillImportModal({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 onChange={handleFileInputChange}
                 className="hidden"
                 id="file-upload"
@@ -221,7 +222,7 @@ export function DrillImportModal({
                     <P className="font-medium">
                       Drag and drop your file here, or click to browse
                     </P>
-                    <Small>Supports .xlsx files (max 10MB)</Small>
+                    <Small>Supports .xls and .xlsx files (max 10MB)</Small>
                   </div>
                   <Button
                     type="button"
