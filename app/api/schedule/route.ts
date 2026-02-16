@@ -22,19 +22,29 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const fromParam = searchParams.get("from");
     const toParam = searchParams.get("to");
+    const planIdParam = searchParams.get("plan_id");
+    const futureOnly = searchParams.get("future_only") === "1";
 
-    // Default to current month if no range
     const now = new Date();
-    const from =
-      fromParam ??
-      new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
-    const to =
-      toParam ??
-      new Date(now.getFullYear(), now.getMonth() + 1, 0)
-        .toISOString()
-        .slice(0, 10);
+    const today = now.toISOString().slice(0, 10);
 
-    const { data: schedule, error: fetchError } = await supabase
+    let from: string;
+    let to: string;
+    if (planIdParam && futureOnly) {
+      from = today;
+      to = new Date(now.getFullYear() + 1, 11, 31).toISOString().slice(0, 10);
+    } else {
+      from =
+        fromParam ??
+        new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+      to =
+        toParam ??
+        new Date(now.getFullYear(), now.getMonth() + 1, 0)
+          .toISOString()
+          .slice(0, 10);
+    }
+
+    let query = supabase
       .from("scheduled_practices")
       .select(
         `
@@ -53,6 +63,12 @@ export async function GET(request: NextRequest) {
       .gte("scheduled_date", from)
       .lte("scheduled_date", to)
       .order("scheduled_date", { ascending: true });
+
+    if (planIdParam) {
+      query = query.eq("practice_plan_id", planIdParam);
+    }
+
+    const { data: schedule, error: fetchError } = await query;
 
     if (fetchError) {
       console.error("Error fetching schedule:", fetchError);
