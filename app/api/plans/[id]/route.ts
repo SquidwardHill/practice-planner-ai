@@ -16,6 +16,59 @@ interface UpdatePlanBody {
 }
 
 /**
+ * GET /api/plans/[id]
+ * Fetch a single practice plan with full blocks (must belong to authenticated user)
+ */
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id } = await params;
+
+    const { data: plan, error } = await supabase
+      .from("practice_plans")
+      .select("id, practice_title, total_duration_minutes, blocks, created_at")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .single();
+
+    if (error) {
+      if (error.code === "PGRST116") {
+        return NextResponse.json({ error: "Plan not found" }, { status: 404 });
+      }
+      console.error("Error fetching plan:", error);
+      return NextResponse.json(
+        { error: "Failed to fetch plan", details: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(plan);
+  } catch (err) {
+    console.error("Unexpected error fetching plan:", err);
+    return NextResponse.json(
+      {
+        error: "An unexpected error occurred",
+        details: err instanceof Error ? err.message : String(err),
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/**
  * PATCH /api/plans/[id]
  * Update an existing practice plan (must belong to authenticated user)
  */

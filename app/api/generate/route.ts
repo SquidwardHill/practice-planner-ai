@@ -79,11 +79,45 @@ const practicePlanSchema = z.object({
   ),
 });
 
+function formatExistingPlanForPrompt(plan: {
+  practice_title: string;
+  total_duration_minutes: number;
+  blocks: Array<{
+    time_slot: string;
+    drill_name: string;
+    category: string;
+    duration: number;
+    notes?: string;
+  }>;
+}): string {
+  const blocksText = plan.blocks
+    .map(
+      (b) =>
+        `- ${b.time_slot} | ${b.drill_name} (${b.category}) ${b.duration} min${b.notes ? ` — ${b.notes}` : ""}`
+    )
+    .join("\n");
+  return `Title: ${plan.practice_title}\nTotal: ${plan.total_duration_minutes} minutes\n\nBlocks:\n${blocksText}`;
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { prompt } = await req.json();
+    const body = await req.json();
+    const { prompt, existingPlan } = body as {
+      prompt?: string;
+      existingPlan?: {
+        practice_title: string;
+        total_duration_minutes: number;
+        blocks: Array<{
+          time_slot: string;
+          drill_name: string;
+          category: string;
+          duration: number;
+          notes?: string;
+        }>;
+      };
+    };
 
-    if (!prompt) {
+    if (!prompt || typeof prompt !== "string") {
       return NextResponse.json(
         { error: "Prompt is required" },
         { status: 400 }
@@ -141,6 +175,14 @@ export async function POST(req: NextRequest) {
         ? ` CRITICAL: The user asked for a ${requestedMinutes}-minute plan. You MUST create a plan where the sum of all block durations equals exactly ${requestedMinutes} minutes, and total_duration_minutes must be ${requestedMinutes}. Do not use more or fewer minutes.`
         : "";
 
+    const existingPlanContext =
+      existingPlan &&
+      existingPlan.practice_title &&
+      Array.isArray(existingPlan.blocks) &&
+      existingPlan.blocks.length > 0
+        ? `\n\nThe user is editing an existing plan. Here is the current plan they want to modify or build on:\n\n${formatExistingPlanForPrompt(existingPlan)}\n\nApply the user's request to this plan (e.g. add a section, remove something, change duration, reorder). You MUST still only use drills from the library list above. Return the complete modified plan.`
+        : "";
+
     if (!process.env.OPENAI_API_KEY) {
       console.error("OPENAI_API_KEY is not set in environment");
       return NextResponse.json(
@@ -161,7 +203,7 @@ export async function POST(req: NextRequest) {
       const result = streamObject({
         model: openai("gpt-4o"),
         system: systemPrompt,
-        prompt: `Generate a basketball practice plan based on this request: ${prompt}.${durationInstruction}`,
+        prompt: `Generate a basketball practice plan based on this request: ${prompt}.${durationInstruction}${existingPlanContext}`,
         schema: practicePlanSchema,
         temperature: 0.7,
       });

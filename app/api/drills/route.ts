@@ -3,6 +3,50 @@ import { createClient } from "@/lib/supabase/server";
 import { type CreateDrillInput } from "@/lib/types/drill";
 
 /**
+ * GET /api/drills
+ * List drills for the authenticated user (with category name)
+ */
+export async function GET() {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { data: drills, error } = await supabase
+      .from("drills")
+      .select("id, name, minutes, notes, category_id, categories(id, name)")
+      .eq("user_id", user.id)
+      .order("category_id", { ascending: true })
+      .order("name", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching drills:", error);
+      return NextResponse.json(
+        { error: "Failed to fetch drills", details: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(drills ?? []);
+  } catch (err) {
+    console.error("Unexpected error in GET /api/drills:", err);
+    return NextResponse.json(
+      {
+        error: "An unexpected error occurred",
+        details: err instanceof Error ? err.message : String(err),
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/**
  * POST /api/drills
  * Create a new drill for the authenticated user
  */
