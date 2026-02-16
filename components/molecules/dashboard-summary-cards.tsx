@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { H2 } from "@/components/atoms/typography";
 
 export interface SummaryStat {
   value: string | number;
@@ -38,14 +39,14 @@ function SummaryCard({
     <Card
       className={cn(
         "flex flex-col border-border bg-card text-card-foreground",
-        className
+        className,
       )}
     >
       <CardHeader className="pb-2">
-        <CardTitle className="text-xl font-bold tracking-tight">
-          {title}
+        <CardTitle>
+          <H2>{title}</H2>
         </CardTitle>
-        <CardDescription className="text-sm text-muted-foreground leading-relaxed">
+        <CardDescription className="text-base text-muted-foreground leading-relaxed">
           {description}
         </CardDescription>
       </CardHeader>
@@ -70,7 +71,7 @@ function SummaryCard({
         </div>
         <div className="mt-6 flex justify-end">
           <Link href={ctaHref}>
-            <Button variant="outline" size="sm" className="gap-1.5">
+            <Button variant="outline" size="lg" className="gap-1.5">
               {ctaLabel}
               <ArrowRight className="h-3.5 w-3.5" />
             </Button>

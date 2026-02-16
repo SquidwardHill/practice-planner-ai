@@ -51,12 +51,6 @@ export default async function Home() {
 
     return (
       <div className="bg-background relative flex max-w-6xl mx-auto flex-1 flex-col min-h-0">
-        <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-6">
-          <h1 className="text-lg font-semibold md:text-xl">Dashboard</h1>
-          <Link href="/planner">
-            <Button size="sm">Quick Create</Button>
-          </Link>
-        </header>
         <div className="flex flex-1 flex-col gap-6 p-6">
           <DashboardSummaryCards
             plansCount={plansTotal}

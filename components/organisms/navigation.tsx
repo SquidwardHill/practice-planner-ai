@@ -98,17 +98,17 @@ export function Navigation({ useLogoFull = false }: { useLogoFull?: boolean }) {
                           "flex items-center gap-2 text-base font-light transition-colors py-4 no-underline cursor-pointer bg-transparent border-none",
                           pathname === "/profile"
                             ? "text-foreground"
-                            : "text-muted-foreground hover:text-primary saturate-105"
+                            : "text-muted-foreground hover:text-primary saturate-105",
                         )}
                       >
-                        <span
-                          className={cn(
-                            "relative flex items-center gap-1 rounded-md px-1",
-                            pathname === "/profile" &&
-                              "text-foreground text-shadow-lg text-shadow-primary-muted"
-                          )}
-                        >
-                          <span>Account</span>
+                        <span className="relative flex items-center gap-1 rounded-md px-1">
+                          <span
+                            className={cn(
+                              pathname === "/profile" && "text-primary-muted",
+                            )}
+                          >
+                            Account
+                          </span>
                           <ChevronDown className="size-3.5 text-muted-foreground" />
                         </span>
                       </button>
@@ -157,8 +157,6 @@ export function Navigation({ useLogoFull = false }: { useLogoFull?: boolean }) {
                     !isActive &&
                       "text-muted-foreground hover:text-primary saturate-105",
                     isLocked && "opacity-50 cursor-not-allowed",
-                    isActive &&
-                      "text-foreground underline decoration-wavy decoration-primary underline-offset-10"
                   )}
                   onClick={(e) => {
                     if (isLocked) {
@@ -171,11 +169,7 @@ export function Navigation({ useLogoFull = false }: { useLogoFull?: boolean }) {
                     <Icon className="size-3.5 text-primary-muted" />
                   ) : null}
 
-                  <span
-                    className={cn(
-                      isActive && "text-shadow-md text-shadow-primary/30"
-                    )}
-                  >
+                  <span className={cn(isActive && "text-primary-muted")}>
                     {item.label}
                   </span>
 
