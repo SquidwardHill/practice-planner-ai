@@ -75,7 +75,19 @@ npm run status
 - `npm run supabase:start` - Start local Supabase
 - `npm run supabase:stop` - Stop local Supabase
 - `npm run supabase:status` - Check Supabase status
-- `npm run supabase:migrate` - Run migrations
+- `npm run supabase:migrate` - Run migrations (local: `db reset`)
+
+### Supabase (Production)
+- `npm run supabase:push` - Push pending migrations to the **linked** remote project
+- `npm run supabase:push:all` - Same, but apply all local migrations even if they are dated before the last remote one (use when the CLI says "Found local migration files to be inserted before the last migration on remote database")
+
+**First-time setup for prod migrations:**
+1. Install Supabase CLI and log in: `supabase login`
+2. Link this repo to your project: `supabase link --project-ref <PROJECT_REF>`  
+   (Project ref is in Dashboard → Settings → General.)
+3. When prompted, enter your **database password** (Dashboard → Settings → Database).
+4. Run: `npm run supabase:push` (or `supabase db push`).  
+   This applies all pending files in `supabase/migrations/` to the remote DB.
 
 ### Utilities
 - `npm run seed` - Seed test users (auto-confirmed)
