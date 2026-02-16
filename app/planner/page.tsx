@@ -2,16 +2,23 @@ import { redirect } from "next/navigation";
 import { getAuthState } from "@/lib/supabase/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 import { PlannerContent } from "./planner-content";
-import { AskAiTypewriter } from "@/components/molecules/ask-ai-typewriter";
-import { PRODUCT_NAME_BASE } from "@/lib/config/branding";
 import type { PracticePlanRow } from "@/components/organisms/practice-plans-data-table";
 
-export default async function PlannerPage() {
+interface PlannerPageProps {
+  searchParams: Promise<{ tab?: string; clear?: string }>;
+}
+
+export default async function PlannerPage({ searchParams }: PlannerPageProps) {
   const { user } = await getAuthState();
 
   if (!user) {
     redirect("/auth/login");
   }
+
+  const { tab, clear } = await searchParams;
+  const initialTab =
+    tab === "saved" ? "saved" : ("generate" as "generate" | "saved");
+  const clearDraft = clear === "1";
 
   const supabase = await createClient();
   const { data: plans, error } = await supabase
@@ -29,7 +36,12 @@ export default async function PlannerPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
-      <PlannerContent plans={planList} totalPlans={totalPlans} />
+      <PlannerContent
+        plans={planList}
+        totalPlans={totalPlans}
+        initialTab={initialTab}
+        clearDraft={clearDraft}
+      />
     </div>
   );
 }

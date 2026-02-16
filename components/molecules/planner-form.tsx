@@ -48,7 +48,7 @@ function recalcTimeSlots(blocks: PracticeBlock[]): PracticeBlock[] {
 /** Update the duration number in the plan title to match current total (e.g. "30-Minute ..." → "45-Minute ..."). */
 function titleWithDuration(
   originalTitle: string,
-  totalMinutes: number
+  totalMinutes: number,
 ): string {
   const match = originalTitle.match(/^\d+(\s*[-–—]?\s*[Mm]in(?:ute)?s?)?/);
   if (match) {
@@ -71,7 +71,7 @@ interface StoredPlanPayload {
 
 function parseStoredPlan(
   raw: string,
-  currentUserId: string | null
+  currentUserId: string | null,
 ): { plan: PracticePlan; savedPlanId: string | null } | null {
   if (!currentUserId) return null;
   try {
@@ -105,7 +105,12 @@ function parseStoredPlan(
   }
 }
 
-export function PlannerForm() {
+interface PlannerFormProps {
+  /** When true, clear localStorage draft and do not restore (e.g. when returning from plan editor) */
+  clearDraft?: boolean;
+}
+
+export function PlannerForm({ clearDraft = false }: PlannerFormProps) {
   const router = useRouter();
   const [practicePlan, setPracticePlan] = useState<PracticePlan | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -117,9 +122,28 @@ export function PlannerForm() {
   const [editDraft, setEditDraft] = useState<PracticeBlock | null>(null);
   const [userId, setUserId] = useState<string | null | undefined>(undefined);
   const [savedPlanId, setSavedPlanId] = useState<string | null>(null);
+  const [planCreatedAt, setPlanCreatedAt] = useState<string | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const autoSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const planContainerRef = useRef<HTMLDivElement | null>(null);
+  const successHideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (!saveSuccess) return;
+    successHideTimeoutRef.current = setTimeout(
+      () => setSaveSuccess(false),
+      5000,
+    );
+    return () => {
+      if (successHideTimeoutRef.current) {
+        clearTimeout(successHideTimeoutRef.current);
+        successHideTimeoutRef.current = null;
+      }
+    };
+  }, [saveSuccess]);
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
     e.dataTransfer.setData("text/plain", String(index));
@@ -170,9 +194,19 @@ export function PlannerForm() {
     });
   }, []);
 
-  // Restore draft from localStorage only when it belongs to the current user (after user is resolved)
+  // When returning from plan editor, clear cached draft so no plan shows
   useEffect(() => {
-    if (typeof window === "undefined" || userId === undefined) return;
+    if (!clearDraft || typeof window === "undefined") return;
+    localStorage.removeItem(PRACTICE_PLAN_STORAGE_KEY);
+    setPracticePlan(null);
+    setSavedPlanId(null);
+    setPlanCreatedAt(null);
+  }, [clearDraft]);
+
+  // Restore draft from localStorage only when it belongs to the current user (after user is resolved) and we're not clearing
+  useEffect(() => {
+    if (typeof window === "undefined" || userId === undefined || clearDraft)
+      return;
     const stored = localStorage.getItem(PRACTICE_PLAN_STORAGE_KEY);
     if (!stored) return;
     const parsed = parseStoredPlan(stored, userId);
@@ -182,7 +216,7 @@ export function PlannerForm() {
     } else {
       localStorage.removeItem(PRACTICE_PLAN_STORAGE_KEY);
     }
-  }, [userId]);
+  }, [userId, clearDraft]);
 
   // Persist plan and savedPlanId to localStorage
   useEffect(() => {
@@ -241,7 +275,7 @@ export function PlannerForm() {
             const data = await res.json().catch(() => ({}));
             setError(
               (data.error as string) ||
-                "Failed to update plan. Changes may not be saved."
+                "Failed to update plan. Changes may not be saved.",
             );
           } else {
             setError(null);
@@ -256,11 +290,15 @@ export function PlannerForm() {
           if (!res.ok) {
             const data = await res.json().catch(() => ({}));
             setError(
-              (data.error as string) || "Failed to save plan. Try again."
+              (data.error as string) || "Failed to save plan. Try again.",
             );
           } else {
-            const data = (await res.json()) as { id?: string };
+            const data = (await res.json()) as {
+              id?: string;
+              created_at?: string;
+            };
             if (data?.id) setSavedPlanId(data.id);
+            if (data?.created_at) setPlanCreatedAt(data.created_at);
             setError(null);
           }
         }
@@ -291,7 +329,7 @@ export function PlannerForm() {
         };
       });
     },
-    []
+    [],
   );
 
   const moveBlock = (index: number, direction: "up" | "down") => {
@@ -344,6 +382,20 @@ export function PlannerForm() {
     setEditDraft(null);
   };
 
+  const planBody = practicePlan
+    ? {
+        practice_title: practicePlan.practice_title,
+        total_duration_minutes: practicePlan.total_duration_minutes,
+        blocks: practicePlan.blocks.map((b) => ({
+          time_slot: b.time_slot,
+          drill_name: b.drill_name,
+          category: b.category,
+          duration: Number(b.duration),
+          notes: b.notes ?? "",
+        })),
+      }
+    : null;
+
   const handleFinalizeSave = async () => {
     if (!practicePlan) return;
     setError(null);
@@ -355,6 +407,7 @@ export function PlannerForm() {
         localStorage.removeItem(PRACTICE_PLAN_STORAGE_KEY);
         setPracticePlan(null);
         setSavedPlanId(null);
+        setPlanCreatedAt(null);
         setEditingIndex(null);
         setEditDraft(null);
         setSaveSuccess(true);
@@ -365,17 +418,7 @@ export function PlannerForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({
-          practice_title: practicePlan.practice_title,
-          total_duration_minutes: practicePlan.total_duration_minutes,
-          blocks: practicePlan.blocks.map((b) => ({
-            time_slot: b.time_slot,
-            drill_name: b.drill_name,
-            category: b.category,
-            duration: Number(b.duration),
-            notes: b.notes ?? "",
-          })),
-        }),
+        body: JSON.stringify(planBody),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -387,13 +430,14 @@ export function PlannerForm() {
       localStorage.removeItem(PRACTICE_PLAN_STORAGE_KEY);
       setPracticePlan(null);
       setSavedPlanId(null);
+      setPlanCreatedAt(null);
       setEditingIndex(null);
       setEditDraft(null);
       setSaveSuccess(true);
       router.refresh();
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to save plan. Try again."
+        err instanceof Error ? err.message : "Failed to save plan. Try again.",
       );
     } finally {
       setIsSaving(false);
@@ -404,11 +448,25 @@ export function PlannerForm() {
     e.preventDefault();
     setError(null);
     setSaveSuccess(false);
-    setPracticePlan(null);
-    setSavedPlanId(null);
     setEditingIndex(null);
     setEditDraft(null);
     setIsLoading(true);
+
+    const hadSavedPlanId = savedPlanId != null;
+    const existingPlanForApi =
+      practicePlan && practicePlan.blocks?.length > 0
+        ? {
+            practice_title: practicePlan.practice_title,
+            total_duration_minutes: practicePlan.total_duration_minutes,
+            blocks: practicePlan.blocks.map((b) => ({
+              time_slot: b.time_slot,
+              drill_name: b.drill_name,
+              category: b.category,
+              duration: b.duration,
+              notes: b.notes ?? "",
+            })),
+          }
+        : undefined;
 
     try {
       const response = await fetch("/api/generate", {
@@ -416,7 +474,10 @@ export function PlannerForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ prompt: input }),
+        body: JSON.stringify({
+          prompt: input,
+          ...(existingPlanForApi && { existingPlan: existingPlanForApi }),
+        }),
       });
 
       if (!response.ok) {
@@ -452,7 +513,7 @@ export function PlannerForm() {
 
         if (!jsonText.trim()) {
           throw new Error(
-            "Empty response from server - the stream completed but no data was received"
+            "Empty response from server - the stream completed but no data was received",
           );
         }
 
@@ -464,10 +525,10 @@ export function PlannerForm() {
             "JSON parse error:",
             parseError,
             "Received text:",
-            jsonText
+            jsonText,
           );
           throw new Error(
-            "The response was incomplete. This may happen if the generation takes too long. Please try again with a shorter practice duration or simpler request."
+            "The response was incomplete. This may happen if the generation takes too long. Please try again with a shorter practice duration or simpler request.",
           );
         }
 
@@ -481,7 +542,7 @@ export function PlannerForm() {
 
         const blocksWithSlots = recalcTimeSlots(data.blocks);
         const total = blocksWithSlots.reduce((s, b) => s + b.duration, 0);
-        setSavedPlanId(null);
+        if (!hadSavedPlanId) setSavedPlanId(null);
         setPracticePlan({
           ...data,
           blocks: blocksWithSlots,
@@ -497,7 +558,7 @@ export function PlannerForm() {
       setError(
         err instanceof Error
           ? err.message
-          : "An error occurred. Please try again."
+          : "An error occurred. Please try again.",
       );
     } finally {
       setIsLoading(false);
@@ -528,7 +589,7 @@ export function PlannerForm() {
               className="mt-2"
             >
               <Sparkle className="size-4" />
-              {isLoading ? "Generating..." : "Generate Practice Plan"}
+              {isLoading ? "Generating..." : "Generate"}
             </Button>
           </form>
         </div>
@@ -537,15 +598,6 @@ export function PlannerForm() {
       {error && (
         <div className="p-4 border border-destructive/50 rounded-lg bg-destructive/5">
           <Small className="text-destructive">{error}</Small>
-        </div>
-      )}
-
-      {saveSuccess && (
-        <div className="p-4 border border-green-500/50 rounded-lg bg-green-500/10">
-          <Small className="text-green-700 dark:text-green-400">
-            Plan saved successfully. You can create a new plan or view saved
-            plans later.
-          </Small>
         </div>
       )}
 
@@ -581,29 +633,30 @@ export function PlannerForm() {
       )}
 
       {practicePlan && !isLoading && (
-        <div className="p-6 border rounded-lg">
-          <div className="mb-4 flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <H2 className="mb-1">
+        <div
+          ref={planContainerRef}
+          className="p-6 border rounded-lg scroll-mt-4"
+        >
+          <div className="mb-4">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 mb-1">
+              <H2>
                 {titleWithDuration(
                   practicePlan.practice_title,
-                  practicePlan.total_duration_minutes
+                  practicePlan.total_duration_minutes,
                 )}
               </H2>
-              <P className="text-muted-foreground">
-                Total Duration: {practicePlan.total_duration_minutes} minutes
-              </P>
+              {planCreatedAt && (
+                <Small className="text-muted-foreground shrink-0">
+                  Created{" "}
+                  {new Date(planCreatedAt).toLocaleDateString(undefined, {
+                    dateStyle: "medium",
+                  })}
+                </Small>
+              )}
             </div>
-            <Button
-              type="button"
-              onClick={handleFinalizeSave}
-              disabled={isSaving}
-              aria-busy={isSaving}
-              className="gap-2 shrink-0"
-            >
-              <Save className="h-4 w-4" />
-              {isSaving ? "Saving..." : "Finalize & Save"}
-            </Button>
+            <P className="text-muted-foreground">
+              Total Duration: {practicePlan.total_duration_minutes} minutes
+            </P>
           </div>
           <div>
             <div className="space-y-4">
@@ -640,7 +693,7 @@ export function PlannerForm() {
                               value={editDraft.drill_name}
                               onChange={(e) =>
                                 setEditDraft((d) =>
-                                  d ? { ...d, drill_name: e.target.value } : d
+                                  d ? { ...d, drill_name: e.target.value } : d,
                                 )
                               }
                               className="h-8 text-sm"
@@ -652,7 +705,7 @@ export function PlannerForm() {
                               value={editDraft.category}
                               onChange={(e) =>
                                 setEditDraft((d) =>
-                                  d ? { ...d, category: e.target.value } : d
+                                  d ? { ...d, category: e.target.value } : d,
                                 )
                               }
                               className="h-8 text-sm"
@@ -668,7 +721,7 @@ export function PlannerForm() {
                                 const v = parseInt(e.target.value, 10);
                                 if (!isNaN(v) && v >= 1)
                                   setEditDraft((d) =>
-                                    d ? { ...d, duration: v } : d
+                                    d ? { ...d, duration: v } : d,
                                   );
                               }}
                               className="h-8 text-sm"
@@ -687,7 +740,7 @@ export function PlannerForm() {
                             value={editDraft.notes}
                             onChange={(e) =>
                               setEditDraft((d) =>
-                                d ? { ...d, notes: e.target.value } : d
+                                d ? { ...d, notes: e.target.value } : d,
                               )
                             }
                           />
@@ -790,6 +843,27 @@ export function PlannerForm() {
               ))}
             </div>
           </div>
+          <div className="mt-6 pt-4 border-t flex justify-end">
+            <Button
+              type="button"
+              onClick={handleFinalizeSave}
+              disabled={isSaving}
+              aria-busy={isSaving}
+              className="gap-2"
+            >
+              <Save className="h-4 w-4" />
+              {isSaving ? "Saving..." : "Finalize & Save"}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {saveSuccess && (
+        <div className="p-4 border border-green-500/50 rounded-lg bg-green-500/10">
+          <Small className="text-green-700 dark:text-green-400">
+            Plan saved successfully. You can create a new plan or view saved
+            plans later.
+          </Small>
         </div>
       )}
     </div>

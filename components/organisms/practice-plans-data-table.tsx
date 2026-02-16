@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import {
   flexRender,
   getCoreRowModel,
@@ -30,15 +29,27 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Calendar as CalendarUi } from "@/components/ui/calendar";
 import {
+  CheckCircle2,
   MoreHorizontal,
+  Pencil,
   Trash2,
   Search,
   X,
   SearchX,
   Calendar,
+  Loader2,
 } from "lucide-react";
 import {
   Empty,
@@ -55,10 +66,12 @@ export interface PracticePlanRow {
   created_at: string;
 }
 
-interface PracticePlansDataTableProps {
+export interface PracticePlansDataTableProps {
   data: PracticePlanRow[];
   totalRows: number;
   onDelete?: (plan: PracticePlanRow) => void;
+  /** When a row is clicked, open it for editing (e.g. switch to Generate tab with plan loaded) */
+  onSelectPlan?: (plan: PracticePlanRow) => void;
 }
 
 function formatPlanDate(iso: string): string {
@@ -74,6 +87,7 @@ export function PracticePlansDataTable({
   data,
   totalRows,
   onDelete,
+  onSelectPlan,
 }: PracticePlansDataTableProps) {
   const router = useRouter();
   const [sorting, setSorting] = React.useState<SortingState>([
@@ -84,6 +98,74 @@ export function PracticePlansDataTable({
   );
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
+  const [scheduleModalOpen, setScheduleModalOpen] = React.useState(false);
+  const [schedulePlan, setSchedulePlan] = React.useState<PracticePlanRow | null>(
+    null,
+  );
+  const [scheduleDate, setScheduleDate] = React.useState<Date | undefined>(
+    undefined,
+  );
+  const [scheduling, setScheduling] = React.useState(false);
+  const [scheduleSuccessMessage, setScheduleSuccessMessage] = React.useState<
+    string | null
+  >(null);
+
+  const today = React.useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
+
+  const handleScheduleClick = (plan: PracticePlanRow) => {
+    setSchedulePlan(plan);
+    setScheduleDate(undefined);
+    setScheduleModalOpen(true);
+  };
+
+  const handleScheduleConfirm = async () => {
+    if (!schedulePlan || !scheduleDate) return;
+    const dateKey = scheduleDate.toISOString().slice(0, 10);
+    setScheduling(true);
+    try {
+      const res = await fetch("/api/schedule", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({
+          practice_plan_id: schedulePlan.id,
+          scheduled_date: dateKey,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(
+          (data as { error?: string }).error ?? "Failed to schedule plan",
+        );
+      }
+      const formattedDate = scheduleDate.toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      });
+      setScheduleSuccessMessage(
+        `Successfully scheduled ${schedulePlan.practice_title} for ${formattedDate}`,
+      );
+      window.setTimeout(() => {
+        setScheduleModalOpen(false);
+        setSchedulePlan(null);
+        setScheduleDate(undefined);
+        setScheduleSuccessMessage(null);
+        router.refresh();
+      }, 1800);
+    } catch (err) {
+      console.error(err);
+      alert(
+        err instanceof Error ? err.message : "Failed to schedule. Try again.",
+      );
+    } finally {
+      setScheduling(false);
+    }
+  };
 
   const handleDelete = async (plan: PracticePlanRow) => {
     if (
@@ -185,11 +267,25 @@ export function PracticePlansDataTable({
                 align="end"
                 onClick={(e) => e.stopPropagation()}
               >
-                <DropdownMenuItem asChild>
-                  <Link href="/#calendar">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    Schedule
-                  </Link>
+                {onSelectPlan && (
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectPlan(plan);
+                    }}
+                  >
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleScheduleClick(plan);
+                  }}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  Schedule
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={(e) => {
@@ -293,10 +389,26 @@ export function PracticePlansDataTable({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="hover:bg-muted/50 transition-colors"
+                  className={
+                    onSelectPlan
+                      ? "cursor-pointer hover:bg-muted/50 transition-colors"
+                      : "hover:bg-muted/50 transition-colors"
+                  }
+                  onClick={
+                    onSelectPlan
+                      ? () => onSelectPlan(row.original)
+                      : undefined
+                  }
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      onClick={
+                        cell.column.id === "actions" && onSelectPlan
+                          ? (e) => e.stopPropagation()
+                          : undefined
+                      }
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -331,6 +443,70 @@ export function PracticePlansDataTable({
         table={table}
         totalRows={globalFilter ? filteredRowCount : totalRows}
       />
+
+      <Dialog
+        open={scheduleModalOpen}
+        onOpenChange={(open) => {
+          setScheduleModalOpen(open);
+          if (!open) {
+            setScheduleSuccessMessage(null);
+            setSchedulePlan(null);
+            setScheduleDate(undefined);
+          }
+        }}
+      >
+        <DialogContent className="max-w-sm">
+          {scheduleSuccessMessage ? (
+            <div className="flex flex-col items-center gap-3 py-4">
+              <CheckCircle2 className="h-10 w-10 text-green-600" />
+              <p className="text-center text-sm text-foreground">
+                {scheduleSuccessMessage}
+              </p>
+            </div>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle>Schedule plan</DialogTitle>
+                <DialogDescription>
+                  {schedulePlan
+                    ? `Choose a date to add "${schedulePlan.practice_title}" to your calendar.`
+                    : "Choose a date."}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex justify-center py-2">
+                <CalendarUi
+                  mode="single"
+                  selected={scheduleDate}
+                  onSelect={setScheduleDate}
+                  disabled={(date) => date < today}
+                  initialFocus
+                />
+              </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setScheduleModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleScheduleConfirm}
+                  disabled={!scheduleDate || scheduling}
+                >
+                  {scheduling ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Scheduling…
+                    </>
+                  ) : (
+                    "Add to schedule"
+                  )}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
