@@ -9,17 +9,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useState, useEffect, useCallback } from "react";
-import { H3, P, Small } from "@/components/atoms/typography";
+import { H2, H3, P, Small } from "@/components/atoms/typography";
 import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { Calendar as CalendarIcon, ArrowUpRight, Loader2 } from "lucide-react";
+import {
+  Calendar as CalendarIcon,
+  ArrowUpRight,
+  ChevronDown,
+  Loader2,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ScheduleEntry = {
@@ -63,6 +67,8 @@ export function DashboardCalendar({
   const [loading, setLoading] = useState(false);
   const [scheduling, setScheduling] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState<string>("");
+  const [planPopoverOpen, setPlanPopoverOpen] = useState(false);
+  const [planSearchQuery, setPlanSearchQuery] = useState("");
 
   const from = new Date(month.getFullYear(), month.getMonth(), 1)
     .toISOString()
@@ -84,7 +90,7 @@ export function DashboardCalendar({
           res.status,
           (data as { error?: string; details?: string })?.error ??
             res.statusText,
-          (data as { details?: string })?.details
+          (data as { details?: string })?.details,
         );
         setSchedule([]);
         return;
@@ -118,8 +124,18 @@ export function DashboardCalendar({
     if (selectedDate && plans.length === 0) fetchPlans();
   }, [selectedDate, plans.length, fetchPlans]);
 
+  const planSearchLower = planSearchQuery.trim().toLowerCase();
+  const filteredPlans = planSearchLower
+    ? plans.filter(
+        (p) =>
+          p.practice_title.toLowerCase().includes(planSearchLower) ||
+          String(p.total_duration_minutes).includes(planSearchQuery.trim()),
+      )
+    : plans;
+
+  const selectedPlan = plans.find((p) => p.id === selectedPlanId);
   const scheduledDates = schedule.map((s) =>
-    parseScheduleDate(s.scheduled_date)
+    parseScheduleDate(s.scheduled_date),
   );
   const selectedEntry = selectedDate
     ? schedule.find((e) => e.scheduled_date === toDateKey(selectedDate))
@@ -178,16 +194,12 @@ export function DashboardCalendar({
         />
       </div>
 
-      <Card className="flex-1 min-w-0 flex flex-col">
+      <Card className="flex-1 min-w-0 flex flex-col gap-2">
         <CardHeader className="pb-2">
-          <CardTitle className="text-xl font-bold tracking-tight">
-            Upcoming practices
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-1 flex-col pt-0">
-          <div className="border-t border-border pt-4 space-y-4">
+          <CardTitle className="text-xl font-bold tracking-tight flex justify-between items-center">
+            <H2>Upcoming practices</H2>
             {selectedDate && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-lg font-bold text-muted-foreground">
                 {selectedDate.toLocaleDateString("en-US", {
                   weekday: "long",
                   month: "long",
@@ -195,6 +207,10 @@ export function DashboardCalendar({
                 })}
               </p>
             )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-1 flex-col pt-0">
+          <div className="border-t border-border pt-4 space-y-4">
             {loading && schedule.length === 0 ? (
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -203,7 +219,10 @@ export function DashboardCalendar({
             ) : selectedDate ? (
               selectedEntry ? (
                 <div className="space-y-3">
-                  <div className="p-3 rounded-lg border bg-muted/30">
+                  <Link
+                    href={`/planner/${selectedEntry.practice_plan_id}`}
+                    className="block p-3 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors"
+                  >
                     {selectedEntry.practice_plans && (
                       <>
                         <p className="font-medium">
@@ -214,17 +233,14 @@ export function DashboardCalendar({
                           min
                         </Small>
                         <div className="mt-2 flex items-center gap-2">
-                          <Link
-                            href="/planner"
-                            className="text-sm font-medium text-primary hover:underline inline-flex items-center gap-1"
-                          >
-                            View plan
+                          <span className="text-sm font-medium text-primary inline-flex items-center gap-1">
+                            Open in planner
                             <ArrowUpRight className="h-3.5 w-3.5" />
-                          </Link>
+                          </span>
                         </div>
                       </>
                     )}
-                  </div>
+                  </Link>
                   <Button
                     variant="outline"
                     size="sm"
@@ -236,25 +252,74 @@ export function DashboardCalendar({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <P className="text-muted-foreground text-sm">
+                  <P className="text-muted-foreground text-base">
                     No practice scheduled for this date. Pick a plan to attach.
                   </P>
-                  <Select
-                    value={selectedPlanId}
-                    onValueChange={setSelectedPlanId}
-                    disabled={plans.length === 0}
+                  <Popover
+                    open={planPopoverOpen}
+                    onOpenChange={(open) => {
+                      setPlanPopoverOpen(open);
+                      if (!open) setPlanSearchQuery("");
+                    }}
                   >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Choose a plan…" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {plans.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>
-                          {p.practice_title} ({p.total_duration_minutes} min)
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={planPopoverOpen}
+                        className="w-full justify-between font-normal"
+                        disabled={plans.length === 0}
+                      >
+                        <span className="truncate">
+                          {selectedPlan
+                            ? `${selectedPlan.practice_title} (${selectedPlan.total_duration_minutes} min)`
+                            : "Choose a plan…"}
+                        </span>
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-(--radix-popover-trigger-width) p-0"
+                      align="start"
+                    >
+                      <div className="border-b p-2">
+                        <Input
+                          placeholder="Type to search…"
+                          value={planSearchQuery}
+                          onChange={(e) => setPlanSearchQuery(e.target.value)}
+                          className="h-8"
+                          autoFocus
+                        />
+                      </div>
+                      <div className="max-h-[min(16rem,50vh)] overflow-auto p-1">
+                        {filteredPlans.length === 0 ? (
+                          <p className="py-4 text-center text-sm text-muted-foreground">
+                            No plans match.
+                          </p>
+                        ) : (
+                          filteredPlans.map((p) => (
+                            <button
+                              key={p.id}
+                              type="button"
+                              className={cn(
+                                "flex w-full cursor-pointer items-center rounded-sm py-2 pl-2 pr-2 text-left text-sm outline-none hover:bg-accent hover:text-accent-foreground",
+                                selectedPlanId === p.id &&
+                                  "bg-accent text-accent-foreground",
+                              )}
+                              onClick={() => {
+                                setSelectedPlanId(p.id);
+                                setPlanPopoverOpen(false);
+                                setPlanSearchQuery("");
+                              }}
+                            >
+                              {p.practice_title} ({p.total_duration_minutes}{" "}
+                              min)
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                   {plans.length === 0 && !loading && (
                     <Small className="text-muted-foreground">
                       No saved plans yet. Create one in the{" "}
@@ -284,7 +349,7 @@ export function DashboardCalendar({
                 </div>
               )
             ) : (
-              <P className="text-muted-foreground text-sm">
+              <P className="text-muted-foreground text-base">
                 Pick a date on the calendar to get started.
               </P>
             )}
