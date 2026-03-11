@@ -44,6 +44,18 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
+/** Fix common UTF-8 mojibake in category names (e.g. from DB encoding issues). */
+function fixCategoryDisplayName(name: string): string {
+  return name
+    .replace(/â‚¬/g, "€")
+    .replace(/â€™/g, "'")
+    .replace(/â€"/g, "—")
+    .replace(/â€"/g, "–")
+    .replace(/â€œ/g, '"')
+    .replace(/â€\u009D/g, '"')
+    .replace(/â¬/g, "–");
+}
+
 interface DrillFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -494,7 +506,7 @@ export function DrillFormDialog({
                   <SelectContent>
                     {categories.map((cat) => (
                       <SelectItem key={cat.id} value={cat.id}>
-                        {cat.name}
+                        {fixCategoryDisplayName(cat.name)}
                       </SelectItem>
                     ))}
                     {!categoriesLoading && categories.length === 0 && (
@@ -635,7 +647,7 @@ export function DrillFormDialog({
                 ref={fileInputRef}
                 type="file"
                 multiple
-                accept="image/*,video/*,.pdf"
+                accept="image/*,.pdf"
                 onChange={handleFileSelect}
                 className="hidden"
                 id="media-upload"
@@ -652,7 +664,7 @@ export function DrillFormDialog({
                     : "Click to upload or drag and drop"}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  Images, videos, or PDFs (max 50MB each)
+                  Images or PDFs (max 50MB each)
                 </span>
               </label>
             </div>

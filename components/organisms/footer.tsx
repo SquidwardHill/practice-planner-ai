@@ -1,8 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Logo } from "@/components/atoms/logo";
 import { P, Small } from "@/components/atoms/typography";
 import { PRODUCT_NAME } from "@/lib/config/branding";
 import { cn } from "@/lib/utils";
+import { useUserAccess } from "@/hooks/useUserAccess";
+import { createClient } from "@/lib/supabase/client";
+import { hasValidSubscription } from "@/lib/types/access-control";
 
 interface FooterLink {
   label: string;
@@ -39,6 +45,15 @@ const footerSections: FooterSection[] = [
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const router = useRouter();
+  const { isAuthenticated, subscriptionStatus } = useUserAccess();
+  const hasSubscription = hasValidSubscription(subscriptionStatus);
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/auth/login");
+  };
 
   return (
     <footer className="border-t border-border/40 bg-background mt-8">
@@ -85,18 +100,38 @@ export function Footer() {
               © {currentYear} {PRODUCT_NAME}. All rights reserved.
             </Small>
             <div className="flex items-center gap-4">
-              <Link
-                href="/auth/login"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/auth/sign-up"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Sign up
-              </Link>
+              {isAuthenticated ? (
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Sign out
+                </button>
+              ) : (
+                <>
+                  <Link
+                    href="/auth/login"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    href="/auth/sign-up"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Sign up
+                  </Link>
+                </>
+              )}
+              {!hasSubscription && (
+                <Link
+                  href={isAuthenticated ? "/profile" : "/auth/sign-up"}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Free trial
+                </Link>
+              )}
             </div>
           </div>
         </div>

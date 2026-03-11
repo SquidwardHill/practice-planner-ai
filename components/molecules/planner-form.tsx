@@ -576,7 +576,7 @@ export function PlannerForm({ clearDraft = false }: PlannerFormProps) {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Example: Create a 90-minute varsity basketball practice focusing on transition defense and conditioning."
-                className="flex min-h-[100px] w-full glow-primary rounded-md border border-input bg-transparent p-4 text-base shadow-xs placeholder:text-muted-foreground/70 dark:bg-input/30 transition-[color,box-shadow] focus-visible:outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 resize-none text-center"
+                className="flex min-h-[100px] w-full glow-primary rounded-md border border-input bg-transparent p-4 text-base shadow-xs placeholder:text-muted-foreground/70 dark:bg-input/30 transition-[color,box-shadow] focus-visible:outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 resize-none text-left"
                 rows={4}
                 disabled={isLoading}
               />

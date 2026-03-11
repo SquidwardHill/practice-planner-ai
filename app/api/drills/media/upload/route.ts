@@ -8,10 +8,6 @@ const ALLOWED_TYPES = [
   "image/png",
   "image/gif",
   "image/webp",
-  "video/mp4",
-  "video/mpeg",
-  "video/quicktime",
-  "video/webm",
   "application/pdf",
 ];
 
@@ -78,7 +74,7 @@ export async function POST(request: NextRequest) {
       // Check file type
       if (!ALLOWED_TYPES.includes(file.type)) {
         errors.push(
-          `${file.name}: File type not supported. Allowed types: images, videos, PDFs`,
+          `${file.name}: File type not supported. Allowed types: images, PDFs`,
         );
         continue;
       }

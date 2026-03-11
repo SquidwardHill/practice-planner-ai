@@ -133,7 +133,9 @@ export function DrillsDataTable({
           return (
             <Tooltip delayDuration={300}>
               <TooltipTrigger asChild>
-                <div className="max-w-[200px] truncate cursor-help">{name}</div>
+                <div className="max-w-[200px] truncate cursor-help text-foreground hover:text-foreground">
+                  {name}
+                </div>
               </TooltipTrigger>
               <TooltipContent className="max-w-md" side="top" sideOffset={8}>
                 <div className="text-sm">{name}</div>

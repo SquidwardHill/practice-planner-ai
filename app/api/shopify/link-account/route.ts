@@ -156,6 +156,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    console.log("[shopify/link-account] Linked", {
+      userId: user.id,
+      email: user.email,
+      shopifyCustomerId,
+      subscriptionStatus,
+    });
+
     return NextResponse.json({
       linked: true,
       shopifyCustomerId,

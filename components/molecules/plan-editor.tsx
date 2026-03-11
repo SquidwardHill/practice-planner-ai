@@ -98,6 +98,8 @@ export function PlanEditor({ planId }: PlanEditorProps) {
     Date | undefined
   >(undefined);
   const [scheduling, setScheduling] = useState(false);
+  const [titleEditing, setTitleEditing] = useState(false);
+  const titleInputRef = useRef<HTMLInputElement>(null);
   const autoSaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const successHideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
@@ -513,12 +515,41 @@ export function PlanEditor({ planId }: PlanEditorProps) {
           <div className="p-6 border rounded-lg">
             <div className="mb-4">
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 mb-1">
-                <H2>
-                  {titleWithDuration(
-                    practicePlan.practice_title,
-                    practicePlan.total_duration_minutes,
-                  )}
-                </H2>
+                {titleEditing ? (
+                  <Input
+                    ref={titleInputRef}
+                    value={practicePlan.practice_title}
+                    onChange={(e) =>
+                      setPracticePlan((prev) =>
+                        prev
+                          ? { ...prev, practice_title: e.target.value }
+                          : null,
+                      )
+                    }
+                    onBlur={() => {
+                      setTitleEditing(false);
+                      handleUpdateCurrentPlan();
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.currentTarget.blur();
+                      }
+                    }}
+                    className="text-xl font-semibold h-9 max-w-md"
+                    autoFocus
+                  />
+                ) : (
+                  <H2
+                    className="cursor-pointer hover:text-primary/90 transition-colors rounded px-1 -mx-1"
+                    onClick={() => setTitleEditing(true)}
+                    title="Click to rename plan"
+                  >
+                    {titleWithDuration(
+                      practicePlan.practice_title,
+                      practicePlan.total_duration_minutes,
+                    )}
+                  </H2>
+                )}
                 {planCreatedAt && (
                   <Small className="text-muted-foreground shrink-0">
                     Created{" "}
