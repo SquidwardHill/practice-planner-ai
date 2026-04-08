@@ -274,14 +274,14 @@ export function DrillsDataTable({
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
-    globalFilterFn: (row, columnId, filterValue) => {
-      const search = filterValue.toLowerCase();
-      const drill = row.original;
+    globalFilterFn: (row, _columnId, filterValue) => {
+      const search = String(filterValue ?? "").trim().toLowerCase();
+      if (!search) return true;
 
-      // Search across name, category, and notes
-      const name = drill.name?.toLowerCase() || "";
-      const category = drill.categories?.name?.toLowerCase() || "";
-      const notes = drill.notes?.toLowerCase() || "";
+      // Use the same values rendered by the table accessors/cells.
+      const name = String(row.getValue("name") ?? "").toLowerCase();
+      const category = String(row.getValue("category") ?? "").toLowerCase();
+      const notes = String(row.getValue("notes") ?? "").toLowerCase();
 
       return (
         name.includes(search) ||
