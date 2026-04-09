@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/shadcn/ui/badge";
 import {
   SubscriptionStatus,
   type SubscriptionStatusType,
@@ -35,7 +35,7 @@ interface SubscriptionStatusBadgeProps {
 }
 
 function getStatusBadgeVariant(
-  status: string
+  status: string,
 ): "default" | "secondary" | "destructive" | "outline" {
   switch (status) {
     case SubscriptionStatus.ACTIVE:
@@ -80,7 +80,7 @@ export function SubscriptionStatusBadge({
     <Badge
       className={cn(
         "gap-0.5 text-xs outline outline-muted-foreground/10 bg-background px-1.5 py-0.25",
-        className
+        className,
       )}
     >
       <Icon className="size-2.5 shrink-0 text-muted-foreground/90" />

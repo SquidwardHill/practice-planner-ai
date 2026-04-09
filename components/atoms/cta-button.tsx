@@ -1,8 +1,8 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/shadcn/ui/button";
 import Link from "next/link";
 import { ArrowRight, type LucideIcon } from "lucide-react";
 import { type VariantProps } from "class-variance-authority";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/shadcn/ui/button";
 
 interface CtaButtonProps {
   href: string;
@@ -24,12 +24,11 @@ export function CtaButton({
   linkClassName,
 }: CtaButtonProps) {
   return (
-    <Link href={href} className={linkClassName}>
-      <Button variant={variant} size={size} className={className}>
+    <Button variant={variant} size={size} className={className} asChild>
+      <Link href={href} className={linkClassName}>
         {text}
         <Icon className="h-4 w-4" />
-      </Button>
-    </Link>
+      </Link>
+    </Button>
   );
 }
-

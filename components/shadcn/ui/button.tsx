@@ -61,8 +61,14 @@ function Button({
       title={guarded ? "Subscription required" : undefined}
       {...props}
     >
-      {children}
-      {guarded && <Lock className="h-4 w-4" />}
+      {asChild ? (
+        children
+      ) : (
+        <>
+          {children}
+          {guarded && <Lock className="h-4 w-4" />}
+        </>
+      )}
     </Comp>
   );
 }

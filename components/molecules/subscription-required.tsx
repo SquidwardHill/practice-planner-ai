@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/shadcn/ui/button";
 import { ExternalLink } from "lucide-react";
 import { P } from "@/components/atoms/typography";
 import Image from "next/image";
@@ -31,16 +31,16 @@ export function SubscriptionRequired({
             {additionalMessage}
           </P>
         )}
-        <a
-          href={SHOPIFY_SUBSCRIPTION_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Button size="default">
+        <Button size="default" asChild>
+          <a
+            href={SHOPIFY_SUBSCRIPTION_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             View Plans
             <ExternalLink className="h-4 w-4" />
-          </Button>
-        </a>
+          </a>
+        </Button>
       </div>
     </div>
   );

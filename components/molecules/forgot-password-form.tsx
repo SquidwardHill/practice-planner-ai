@@ -2,16 +2,16 @@
 
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/shadcn/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@/components/shadcn/ui/card";
+import { Input } from "@/components/shadcn/ui/input";
+import { Label } from "@/components/shadcn/ui/label";
 import Link from "next/link";
 import { useState } from "react";
 import { Small, P } from "@/components/atoms/typography";
@@ -84,7 +84,12 @@ export function ForgotPasswordForm({
                   />
                 </div>
                 {error && <Small className="text-destructive">{error}</Small>}
-                <Button type="submit" size="default" className="w-full" disabled={isLoading}>
+                <Button
+                  type="submit"
+                  size="default"
+                  className="w-full"
+                  disabled={isLoading}
+                >
                   {isLoading ? "Sending..." : "Send reset email"}
                 </Button>
               </div>

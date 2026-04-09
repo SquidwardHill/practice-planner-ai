@@ -3,14 +3,14 @@ import { getAuthState } from "@/lib/supabase/auth-helpers";
 import { createClient } from "@/lib/supabase/server";
 import { type Drill } from "@/lib/types/drill";
 import { H1, H2, H4, P } from "@/components/atoms/typography";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/shadcn/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/shadcn/ui/card";
 import {
   ArrowLeft,
   FileText,
@@ -20,7 +20,7 @@ import {
   Link2,
 } from "lucide-react";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/shadcn/ui/badge";
 import { DrillEditButton } from "@/components/molecules/drill-edit-button";
 
 interface DrillDetailPageProps {
@@ -78,7 +78,7 @@ export default async function DrillDetailPage({
 
     // Pattern 1: youtube.com/watch?v=VIDEO_ID or youtu.be/VIDEO_ID
     const watchMatch = url.match(
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|m\.youtube\.com\/watch\?v=)([a-zA-Z0-9_-]{11})/
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|m\.youtube\.com\/watch\?v=)([a-zA-Z0-9_-]{11})/,
     );
     if (watchMatch && watchMatch[1]) {
       return `https://www.youtube.com/embed/${watchMatch[1]}`;
@@ -96,7 +96,7 @@ export default async function DrillDetailPage({
   };
 
   const getFileType = (
-    url: string
+    url: string,
   ): "image" | "video" | "youtube" | "other" => {
     if (isYouTubeUrl(url)) {
       return "youtube";
@@ -113,16 +113,16 @@ export default async function DrillDetailPage({
 
   // Filter media links by type
   const images = mediaLinks.filter(
-    (url: string) => getFileType(url) === "image"
+    (url: string) => getFileType(url) === "image",
   );
   const youtubeVideos = mediaLinks.filter(
-    (url: string) => getFileType(url) === "youtube"
+    (url: string) => getFileType(url) === "youtube",
   );
   const videos = mediaLinks.filter(
-    (url: string) => getFileType(url) === "video"
+    (url: string) => getFileType(url) === "video",
   );
   const otherFiles = mediaLinks.filter(
-    (url: string) => getFileType(url) === "other"
+    (url: string) => getFileType(url) === "other",
   );
 
   const getFileName = (url: string): string => {
@@ -150,12 +150,12 @@ export default async function DrillDetailPage({
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="flex items-center justify-between mb-12">
-        <Link href="/library">
-          <Button variant="ghost">
+        <Button variant="ghost" asChild>
+          <Link href="/library">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Library
-          </Button>
-        </Link>
+          </Link>
+        </Button>
         <DrillEditButton drill={drill} />
       </div>
 

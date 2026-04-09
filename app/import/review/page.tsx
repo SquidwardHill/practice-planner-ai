@@ -8,8 +8,8 @@ import {
   ItemDescription,
   ItemMedia,
   ItemTitle,
-} from "@/components/ui/item";
-import { Button } from "@/components/ui/button";
+} from "@/components/shadcn/ui/item";
+import { Button } from "@/components/shadcn/ui/button";
 import {
   Table,
   TableBody,
@@ -17,10 +17,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { ButtonGroup } from "@/components/ui/button-group";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/shadcn/ui/table";
+import { Input } from "@/components/shadcn/ui/input";
+import { ButtonGroup } from "@/components/shadcn/ui/button-group";
+import { Badge } from "@/components/shadcn/ui/badge";
 import {
   CheckCircle2,
   XCircle,
@@ -46,7 +46,7 @@ import {
   BreadcrumbLink,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+} from "@/components/shadcn/ui/breadcrumb";
 import Link from "next/link";
 import { H1, H3, P, Small } from "@/components/atoms/typography";
 

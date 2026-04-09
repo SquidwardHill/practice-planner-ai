@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/shadcn/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -10,9 +10,9 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
+} from "@/components/shadcn/ui/sheet";
 import { Users, LogOut, Database, Trash2, Code } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/components/shadcn/ui/separator";
 import { PRACTICE_PLAN_STORAGE_KEY } from "@/lib/storage-keys";
 
 // Test users from seed script
@@ -102,7 +102,7 @@ export function DevUserSwitcher() {
       } else {
         const errorData = await response.json();
         alert(
-          `❌ Failed to switch user: ${errorData.error || "Unknown error"}`
+          `❌ Failed to switch user: ${errorData.error || "Unknown error"}`,
         );
       }
     } catch (error) {
@@ -162,7 +162,7 @@ export function DevUserSwitcher() {
   const handleClearDrills = async () => {
     if (
       !confirm(
-        "⚠️ Are you sure you want to delete ALL drills for the current user? This cannot be undone."
+        "⚠️ Are you sure you want to delete ALL drills for the current user? This cannot be undone.",
       )
     ) {
       return;

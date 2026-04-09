@@ -8,14 +8,14 @@ import {
   ChevronsRight,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/shadcn/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/shadcn/ui/select";
 import { Small } from "@/components/atoms/typography";
 
 interface DataTablePaginationProps<TData> {
@@ -34,7 +34,7 @@ export function DataTablePagination<TData>({
   const endRow = Math.min(
     (table.getState().pagination.pageIndex + 1) *
       table.getState().pagination.pageSize,
-    totalRows
+    totalRows,
   );
 
   return (

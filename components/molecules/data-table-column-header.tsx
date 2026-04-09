@@ -4,17 +4,19 @@ import { type Column } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ChevronsUpDown, EyeOff } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/shadcn/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/shadcn/ui/dropdown-menu";
 
-interface DataTableColumnHeaderProps<TData, TValue>
-  extends React.HTMLAttributes<HTMLDivElement> {
+interface DataTableColumnHeaderProps<
+  TData,
+  TValue,
+> extends React.HTMLAttributes<HTMLDivElement> {
   column: Column<TData, TValue>;
   title: string;
 }
@@ -31,18 +33,23 @@ export function DataTableColumnHeader<TData, TValue>({
   const isSorted = column.getIsSorted() !== false;
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={cn("flex items-center gap-2 mx-2", className)}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
             size="sm"
             className={cn(
-              "data-[state=open]:bg-accent -ml-3 h-8 transition-all duration-200",
-              isSorted && "bg-primary/10 text-primary hover:bg-primary/15"
+              "data-[state=open]:bg-accent -ml-3 h-8 transition-all duration-200 hover:text-primary/80",
+              isSorted && "bg-primary/10 text-primary hover:bg-primary/15",
             )}
           >
-            <span className={cn("transition-colors duration-200", isSorted && "font-medium")}>
+            <span
+              className={cn(
+                "transition-colors duration-200",
+                isSorted && "font-medium",
+              )}
+            >
               {title}
             </span>
             {column.getIsSorted() === "desc" ? (

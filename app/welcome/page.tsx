@@ -5,8 +5,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from "@/components/shadcn/ui/card";
+import { Button } from "@/components/shadcn/ui/button";
 import Link from "next/link";
 import { Calendar } from "lucide-react";
 import { isValidSubscription } from "@/lib/types/subscription";
@@ -39,10 +39,7 @@ export default async function WelcomePage() {
         </Lead>
       </div>
 
-      <FeatureGrid
-        features={allFeatures}
-        hasAccess={hasAccess ?? false}
-      />
+      <FeatureGrid features={allFeatures} hasAccess={hasAccess ?? false} />
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
@@ -65,21 +62,27 @@ export default async function WelcomePage() {
                   />
                 )}
                 {subscription?.hasLinkedAccount && (
-                  <Link href="/profile">
-                    <Button variant="outline" size="default" className="w-full">
-                      Get Started with Free Trial
-                    </Button>
-                  </Link>
+                  <Button
+                    variant="outline"
+                    size="default"
+                    className="w-full"
+                    asChild
+                  >
+                    <Link href="/profile">Get Started with Free Trial</Link>
+                  </Button>
                 )}
               </div>
             )}
             {hasAccess && (
               <div className="pt-4">
-                <Link href="/">
-                  <Button variant="outline" size="default" className="w-full">
-                    Go to Home
-                  </Button>
-                </Link>
+                <Button
+                  variant="outline"
+                  size="default"
+                  className="w-full"
+                  asChild
+                >
+                  <Link href="/">Go to Home</Link>
+                </Button>
               </div>
             )}
           </CardContent>
@@ -89,9 +92,7 @@ export default async function WelcomePage() {
           <div className="aspect-video bg-muted flex items-center justify-center">
             <div className="text-center p-8">
               <Calendar className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-              <P className="text-muted-foreground">
-                Graphic placeholder
-              </P>
+              <P className="text-muted-foreground">Graphic placeholder</P>
             </div>
           </div>
         </Card>

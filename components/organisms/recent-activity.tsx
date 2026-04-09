@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/shadcn/ui/button";
 import { History, Clock, LucideIcon } from "lucide-react";
 import { H3, P, Small } from "@/components/atoms/typography";
 import {
@@ -8,7 +8,7 @@ import {
   EmptyMedia,
   EmptyTitle,
   EmptyDescription,
-} from "@/components/ui/empty";
+} from "@/components/shadcn/ui/empty";
 
 export interface ActivityItem {
   type: string;
@@ -80,11 +80,9 @@ export function RecentActivity({
         </div>
       )}
       <div className="px-6">
-        <Link href={viewAllHref}>
-          <Button variant="outline" size="default" className="w-full">
-            {viewAllText}
-          </Button>
-        </Link>
+        <Button variant="outline" size="default" className="w-full" asChild>
+          <Link href={viewAllHref}>{viewAllText}</Link>
+        </Button>
       </div>
     </div>
   );

@@ -9,18 +9,18 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from "@/components/shadcn/ui/dialog";
+import { Button } from "@/components/shadcn/ui/button";
+import { Input } from "@/components/shadcn/ui/input";
+import { Label } from "@/components/shadcn/ui/label";
+import { Textarea } from "@/components/shadcn/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/shadcn/ui/select";
 import {
   type Drill,
   type CreateDrillInput,
@@ -41,7 +41,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/components/shadcn/ui/popover";
 import { cn } from "@/lib/utils";
 
 /** Fix common UTF-8 mojibake in category names (e.g. from DB encoding issues). */
@@ -228,7 +228,7 @@ export function DrillFormDialog({
 
   const updatePendingFileName = (index: number, name: string) => {
     setPendingFiles((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, name } : item))
+      prev.map((item, i) => (i === index ? { ...item, name } : item)),
     );
   };
 
@@ -331,19 +331,19 @@ export function DrillFormDialog({
 
   const updateYoutubeLinkName = (index: number, name: string) => {
     setYoutubeLinks((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, name } : item))
+      prev.map((item, i) => (i === index ? { ...item, name } : item)),
     );
   };
 
   const updateOtherLinkName = (index: number, name: string) => {
     setOtherLinks((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, name } : item))
+      prev.map((item, i) => (i === index ? { ...item, name } : item)),
     );
   };
 
   const updateUploadedFileName = (index: number, name: string) => {
     setUploadedFiles((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, name } : item))
+      prev.map((item, i) => (i === index ? { ...item, name } : item)),
     );
   };
 
@@ -430,7 +430,7 @@ export function DrillFormDialog({
           setAddCategoryError("A category with this name already exists.");
         } else {
           setAddCategoryError(
-            (data as { error?: string })?.error ?? "Failed to create category."
+            (data as { error?: string })?.error ?? "Failed to create category.",
           );
         }
         return;
@@ -640,7 +640,7 @@ export function DrillFormDialog({
                 "relative border-2 border-dashed rounded-lg p-4 text-center transition-colors",
                 isDragging
                   ? "border-primary bg-primary/5"
-                  : "border-muted-foreground/25 hover:border-muted-foreground/50"
+                  : "border-muted-foreground/25 hover:border-muted-foreground/50",
               )}
             >
               <input
@@ -919,8 +919,8 @@ export function DrillFormDialog({
                   ? "Updating..."
                   : "Creating..."
                 : isEditing
-                ? "Update Drill"
-                : "Create Drill"}
+                  ? "Update Drill"
+                  : "Create Drill"}
             </Button>
           </DialogFooter>
         </form>

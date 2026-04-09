@@ -1,8 +1,8 @@
 "use client";
 
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
-import { TableHead } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import { TableHead } from "@/components/shadcn/ui/table";
+import { Button } from "@/components/shadcn/ui/button";
 import { cn } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 

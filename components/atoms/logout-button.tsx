@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/shadcn/ui/button";
 import { useRouter } from "next/navigation";
 import { PRACTICE_PLAN_STORAGE_KEY } from "@/lib/storage-keys";
 

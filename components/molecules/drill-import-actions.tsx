@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/shadcn/ui/button";
 import { Upload } from "lucide-react";
 import { DrillImportModal } from "@/components/organisms/drill-import-modal";
 

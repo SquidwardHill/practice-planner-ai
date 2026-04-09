@@ -15,12 +15,12 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from "@/components/shadcn/ui/sidebar";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+} from "@/components/shadcn/ui/collapsible";
 
 interface DocItem {
   title: string;
@@ -61,7 +61,7 @@ export function DocsSidebar() {
         }
       });
       return initial;
-    }
+    },
   );
 
   const toggleCategory = (label: string) => {
@@ -91,7 +91,7 @@ export function DocsSidebar() {
         {docCategories.map((category) => {
           const isOpen = openCategories[category.label] ?? false;
           const hasActiveItem = category.items.some(
-            (item) => item.href === pathname
+            (item) => item.href === pathname,
           );
 
           return (

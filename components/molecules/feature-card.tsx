@@ -5,7 +5,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/shadcn/ui/card";
 import { LucideIcon, ArrowRight, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -25,12 +25,14 @@ export function FeatureCard({
   hasAccess = true,
 }: FeatureCardProps) {
   const cardContent = (
-    <Card className={cn(
-      "flex flex-col relative group transition-all cursor-pointer",
-      hasAccess 
-        ? "hover:border-primary/50 hover:shadow-md" 
-        : "opacity-60 cursor-not-allowed"
-    )}>
+    <Card
+      className={cn(
+        "flex flex-col relative group transition-all cursor-pointer",
+        hasAccess
+          ? "hover:border-primary/50 hover:shadow-md"
+          : "opacity-60 cursor-not-allowed",
+      )}
+    >
       <CardHeader className="flex-1">
         <CardTitle className="flex items-center gap-2">
           <Icon className="h-5 w-5" />

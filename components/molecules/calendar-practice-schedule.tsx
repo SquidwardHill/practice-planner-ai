@@ -1,22 +1,22 @@
 "use client";
 
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar } from "@/components/shadcn/ui/calendar";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/shadcn/ui/card";
 import { useState, useEffect, useCallback } from "react";
 import { H2, H3, P, Small } from "@/components/atoms/typography";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/shadcn/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
+} from "@/components/shadcn/ui/popover";
+import { Input } from "@/components/shadcn/ui/input";
 import Link from "next/link";
 import {
   Calendar as CalendarIcon,

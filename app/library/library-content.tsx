@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/shadcn/ui/button";
 import { DrillsDataTable } from "@/components/organisms/drills-data-table";
 import { Plus, Lock, BookOpen } from "lucide-react";
 import { type Drill } from "@/lib/types/drill";
@@ -19,7 +19,7 @@ import {
   EmptyTitle,
   EmptyDescription,
   EmptyContent,
-} from "@/components/ui/empty";
+} from "@/components/shadcn/ui/empty";
 
 interface LibraryContentProps {
   drills: Drill[];
@@ -46,7 +46,7 @@ export function LibraryContent({ drills, totalDrills }: LibraryContentProps) {
   const handleDelete = async (drill: Drill) => {
     if (
       !confirm(
-        `Are you sure you want to delete "${drill.name}"? This action cannot be undone.`
+        `Are you sure you want to delete "${drill.name}"? This action cannot be undone.`,
       )
     ) {
       return;
@@ -65,9 +65,7 @@ export function LibraryContent({ drills, totalDrills }: LibraryContentProps) {
 
       router.refresh();
     } catch (error) {
-      alert(
-        error instanceof Error ? error.message : "Failed to delete drill"
-      );
+      alert(error instanceof Error ? error.message : "Failed to delete drill");
     } finally {
       setDeletingId(null);
     }
@@ -83,9 +81,7 @@ export function LibraryContent({ drills, totalDrills }: LibraryContentProps) {
         <div>
           <H1 className="mb-2">Drill Library</H1>
           {totalDrills === 0 ? (
-            <Lead>
-              Your drill library is empty
-            </Lead>
+            <Lead>Your drill library is empty</Lead>
           ) : (
             <P className="text-muted-foreground mt-1 flex gap-2 items-center">
               {totalDrills} drills in your library
@@ -101,7 +97,11 @@ export function LibraryContent({ drills, totalDrills }: LibraryContentProps) {
               </Button>
             }
           >
-            <Button variant="default" size="default" onClick={handleCreateClick}>
+            <Button
+              variant="default"
+              size="default"
+              onClick={handleCreateClick}
+            >
               Create Drill
               <Plus className="h-4 w-4" />
             </Button>
@@ -123,7 +123,8 @@ export function LibraryContent({ drills, totalDrills }: LibraryContentProps) {
               </EmptyMedia>
               <EmptyTitle>Your drill library is empty</EmptyTitle>
               <EmptyDescription>
-                Import drills from PracticePlannerLive or create your first drill to get started.
+                Import drills from PracticePlannerLive or create your first
+                drill to get started.
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>

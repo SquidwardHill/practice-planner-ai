@@ -6,8 +6,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+} from "@/components/shadcn/ui/card";
+import { Button } from "@/components/shadcn/ui/button";
 import { CheckCircle2, Library, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import {
@@ -17,7 +17,7 @@ import {
   BreadcrumbLink,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+} from "@/components/shadcn/ui/breadcrumb";
 import { H1, H3, P, Small } from "@/components/atoms/typography";
 
 interface ImportSuccessPageProps {
@@ -89,18 +89,18 @@ export default async function ImportSuccessPage({
       </div>
 
       <div className="flex gap-4 justify-center">
-        <Link href="/library">
-          <Button size="lg">
+        <Button size="lg" asChild>
+          <Link href="/library">
             Go to Library
             <Library className=" h-4 w-4" />
-          </Button>
-        </Link>
-        <Link href="/">
-          <Button variant="outline" size="lg">
+          </Link>
+        </Button>
+        <Button variant="outline" size="lg" asChild>
+          <Link href="/">
             Back to Dashboard
             <ArrowRight className="   h-4 w-4" />
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
     </div>
   );

@@ -3,10 +3,10 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/shadcn/ui/button";
+import { Input } from "@/components/shadcn/ui/input";
+import { Label } from "@/components/shadcn/ui/label";
+import { Textarea } from "@/components/shadcn/ui/textarea";
 import { H2, P, Small } from "@/components/atoms/typography";
 import {
   ChevronUp,
@@ -21,7 +21,7 @@ import {
   Plus,
   Calendar as CalendarIcon,
 } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar } from "@/components/shadcn/ui/calendar";
 import { AddDrillFromLibraryDialog } from "@/components/molecules/add-drill-from-library-dialog";
 import {
   Dialog,
@@ -30,7 +30,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/shadcn/ui/dialog";
 
 interface PracticeBlock {
   time_slot: string;
@@ -171,10 +171,9 @@ export function PlanEditor({ planId }: PlanEditorProps) {
   useEffect(() => {
     if (!planId || !practicePlan) return;
     let cancelled = false;
-    fetch(
-      `/api/schedule?plan_id=${encodeURIComponent(planId)}&future_only=1`,
-      { credentials: "same-origin" }
-    )
+    fetch(`/api/schedule?plan_id=${encodeURIComponent(planId)}&future_only=1`, {
+      credentials: "same-origin",
+    })
       .then((res) => (res.ok ? res.json() : []))
       .then((data: { id: string; scheduled_date: string }[]) => {
         if (!cancelled && Array.isArray(data)) {
@@ -830,8 +829,8 @@ export function PlanEditor({ planId }: PlanEditorProps) {
                           )
                           .join(", ")
                       : `${futureScheduleEntries.length} future dates`}
-                  . Would you like to update the schedule to use the new plan, or
-                  keep the current plan on these dates?
+                  . Would you like to update the schedule to use the new plan,
+                  or keep the current plan on these dates?
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter className="gap-2 sm:gap-0">

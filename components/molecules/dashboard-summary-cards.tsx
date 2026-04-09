@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/shadcn/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/shadcn/ui/card";
 import { cn } from "@/lib/utils";
 import { H2 } from "@/components/atoms/typography";
 
@@ -70,12 +70,12 @@ function SummaryCard({
           ))}
         </div>
         <div className="mt-6 flex justify-end">
-          <Link href={ctaHref}>
-            <Button variant="outline" size="lg" className="gap-1.5">
+          <Button variant="outline" size="lg" className="gap-1.5" asChild>
+            <Link href={ctaHref}>
               {ctaLabel}
               <ArrowRight className="h-3.5 w-3.5" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </CardContent>
     </Card>

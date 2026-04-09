@@ -1,6 +1,6 @@
 import { getAuthState } from "@/lib/supabase/auth-helpers";
 import { redirect } from "next/navigation";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/shadcn/ui/sidebar";
 import { DocsSidebar } from "@/components/organisms/docs-sidebar";
 
 export default async function DocsLayout({

@@ -8,7 +8,12 @@ import { AppFeature } from "@/components/organisms/access-control";
 import { useUserAccess } from "@/hooks/useUserAccess";
 import { SubscriptionRequired } from "@/components/molecules/subscription-required";
 import { PracticePlansDataTable } from "@/components/organisms/practice-plans-data-table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/shadcn/ui/tabs";
 import { PRODUCT_NAME_BASE } from "@/lib/config/branding";
 import type { PracticePlanRow } from "@/components/organisms/practice-plans-data-table";
 import { Sparkles, FileText } from "lucide-react";

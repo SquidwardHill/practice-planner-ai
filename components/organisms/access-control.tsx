@@ -10,7 +10,7 @@
 import { ReactNode } from "react";
 import { useUserAccess } from "@/hooks/useUserAccess";
 import Link from "next/link";
-import { Button } from "../ui/button";
+import { Button } from "../shadcn/ui/button";
 import { ExternalLink } from "lucide-react";
 import { H2, H3, P, Small } from "@/components/atoms/typography";
 
@@ -144,9 +144,7 @@ export function AppFeature({ children, subscribePrompt }: AppFeatureProps) {
       {subscribePrompt || (
         <div className="flex flex-col items-center justify-center min-h-[400px] space-y-6 p-8 text-center">
           <div className="space-y-2">
-            <H2>
-              Subscribe to Access This Feature
-            </H2>
+            <H2>Subscribe to Access This Feature</H2>
             <P className="text-muted-foreground max-w-md">
               {isAuthenticated
                 ? "Get full access to all features with a subscription"
@@ -155,20 +153,24 @@ export function AppFeature({ children, subscribePrompt }: AppFeatureProps) {
           </div>
           <div className="flex gap-4">
             {!isAuthenticated && (
-              <Link href="/auth/signup">
-                <Button size="default">Sign Up</Button>
-              </Link>
+              <Button size="default" asChild>
+                <Link href="/auth/sign-up">Sign Up</Link>
+              </Button>
             )}
-            <a
-              href={SHOPIFY_SUBSCRIPTION_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Button
+              variant={isAuthenticated ? "default" : "outline"}
+              size="default"
+              asChild
             >
-              <Button variant={isAuthenticated ? "default" : "outline"} size="default">
+              <a
+                href={SHOPIFY_SUBSCRIPTION_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 View Plans
                 <ExternalLink className="h-4 w-4" />
-              </Button>
-            </a>
+              </a>
+            </Button>
           </div>
         </div>
       )}
@@ -203,19 +205,17 @@ export function MarketingWrapper({ children, preview }: MarketingWrapperProps) {
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="bg-background/95 backdrop-blur-sm border rounded-lg p-6 space-y-4 text-center max-w-md">
               <H3>Subscribe to Unlock</H3>
-              <Small>
-                Get full access to all features with a free trial
-              </Small>
-              <a
-                href={SHOPIFY_SUBSCRIPTION_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button size="default">
+              <Small>Get full access to all features with a free trial</Small>
+              <Button size="default" asChild>
+                <a
+                  href={SHOPIFY_SUBSCRIPTION_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Start Free Trial
                   <ExternalLink className="h-4 w-4" />
-                </Button>
-              </a>
+                </a>
+              </Button>
             </div>
           </div>
         </>

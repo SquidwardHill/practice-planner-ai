@@ -6,9 +6,9 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+} from "@/components/shadcn/ui/dialog";
+import { Button } from "@/components/shadcn/ui/button";
+import { Input } from "@/components/shadcn/ui/input";
 import { Small } from "@/components/atoms/typography";
 import { Search, BookOpen } from "lucide-react";
 
@@ -65,7 +65,7 @@ export function AddDrillFromLibraryDialog({
     return drills.filter(
       (d) =>
         d.name.toLowerCase().includes(q) ||
-        (d.categories?.name ?? "").toLowerCase().includes(q)
+        (d.categories?.name ?? "").toLowerCase().includes(q),
     );
   }, [drills, search]);
 
@@ -95,9 +95,7 @@ export function AddDrillFromLibraryDialog({
               className="pl-9"
             />
           </div>
-          {error && (
-            <Small className="text-destructive">{error}</Small>
-          )}
+          {error && <Small className="text-destructive">{error}</Small>}
           {loading ? (
             <div className="flex-1 flex items-center justify-center py-8">
               <Small className="text-muted-foreground">Loading drills...</Small>

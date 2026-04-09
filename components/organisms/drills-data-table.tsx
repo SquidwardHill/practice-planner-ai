@@ -21,7 +21,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/shadcn/ui/table";
 import { DataTableColumnHeader } from "@/components/molecules/data-table-column-header";
 import { DataTablePagination } from "@/components/molecules/data-table-pagination";
 import {
@@ -29,9 +29,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+} from "@/components/shadcn/ui/dropdown-menu";
+import { Button } from "@/components/shadcn/ui/button";
+import { Input } from "@/components/shadcn/ui/input";
 import {
   MoreHorizontal,
   Pencil,
@@ -44,14 +44,14 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/components/shadcn/ui/tooltip";
 import {
   Empty,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
   EmptyDescription,
-} from "@/components/ui/empty";
+} from "@/components/shadcn/ui/empty";
 
 interface DrillsDataTableProps {
   data: Drill[];
@@ -73,7 +73,7 @@ export function DrillsDataTable({
     { id: "name", desc: false },
   ]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
+    [],
   );
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
@@ -81,7 +81,7 @@ export function DrillsDataTable({
   const handleDelete = async (drill: Drill) => {
     if (
       !confirm(
-        `Are you sure you want to delete "${drill.name}"? This action cannot be undone.`
+        `Are you sure you want to delete "${drill.name}"? This action cannot be undone.`,
       )
     ) {
       return;
@@ -261,7 +261,7 @@ export function DrillsDataTable({
         },
       },
     ],
-    [onEdit, deletingId]
+    [onEdit, deletingId],
   );
 
   const table = useReactTable({
@@ -275,7 +275,9 @@ export function DrillsDataTable({
     onColumnFiltersChange: setColumnFilters,
     onGlobalFilterChange: setGlobalFilter,
     globalFilterFn: (row, _columnId, filterValue) => {
-      const search = String(filterValue ?? "").trim().toLowerCase();
+      const search = String(filterValue ?? "")
+        .trim()
+        .toLowerCase();
       if (!search) return true;
 
       // Use the same values rendered by the table accessors/cells.
@@ -320,7 +322,7 @@ export function DrillsDataTable({
             <Button
               variant="ghost"
               size="sm"
-              className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
+              className="absolute right-1 top-1/2 h-7 w-7  p-0"
               onClick={() => setGlobalFilter("")}
             >
               <X className="h-4 w-4" />
@@ -342,12 +344,12 @@ export function DrillsDataTable({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead className="mx-2" key={header.id}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -370,7 +372,7 @@ export function DrillsDataTable({
                       <TableCell key={cell.id}>
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )}
                       </TableCell>
                     ))}

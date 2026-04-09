@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/shadcn/ui/button";
 import { DrillFormDialog } from "@/components/molecules/drill-form-dialog";
 import { type Drill } from "@/lib/types/drill";
 import { Pencil } from "lucide-react";

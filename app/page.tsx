@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getAuthState } from "@/lib/supabase/auth-helpers";
 import { ArrowRight, LineSquiggle, WandSparkles, Zap } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/shadcn/ui/button";
 import { DashboardSummaryCards } from "@/components/molecules/dashboard-summary-cards";
 import { DashboardCalendar } from "@/components/molecules/calendar-practice-schedule";
 import { AI_NAME } from "@/lib/config/branding";

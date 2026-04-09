@@ -8,10 +8,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@/components/shadcn/ui/dialog";
+import { Button } from "@/components/shadcn/ui/button";
+import { Input } from "@/components/shadcn/ui/input";
+import { Label } from "@/components/shadcn/ui/label";
 import {
   Upload,
   FileText,
@@ -58,7 +58,7 @@ export function DrillImportModal({
       !validExtensions.includes(fileExtension)
     ) {
       alert(
-        "Invalid file type. Please upload a .xls or .xlsx file (e.g. from PracticePlannerLive or our Excel template)."
+        "Invalid file type. Please upload a .xls or .xlsx file (e.g. from PracticePlannerLive or our Excel template).",
       );
       return;
     }
@@ -127,11 +127,11 @@ export function DrillImportModal({
         } catch (jsonError) {
           // If response is not JSON, use status text
           throw new Error(
-            `Upload failed: ${response.statusText || "Unknown error"}`
+            `Upload failed: ${response.statusText || "Unknown error"}`,
           );
         }
         throw new Error(
-          errorData.message || errorData.error || "Upload failed"
+          errorData.message || errorData.error || "Upload failed",
         );
       }
 
@@ -147,7 +147,7 @@ export function DrillImportModal({
         JSON.stringify({
           rows: data.rows,
           summary: data.summary,
-        })
+        }),
       );
 
       // Close modal and redirect to review page
@@ -199,7 +199,7 @@ export function DrillImportModal({
                 isDragging
                   ? "border-primary bg-primary/5"
                   : "border-muted-foreground/25 hover:border-muted-foreground/50",
-                file && "border-primary bg-primary/5"
+                file && "border-primary bg-primary/5",
               )}
             >
               <input

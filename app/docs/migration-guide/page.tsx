@@ -7,13 +7,13 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/shadcn/ui/card";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
+} from "@/components/shadcn/ui/accordion";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -21,7 +21,7 @@ import {
   BreadcrumbLink,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+} from "@/components/shadcn/ui/breadcrumb";
 import { CheckCircle2, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { MigrationGuideCTA } from "@/components/molecules/migration-guide-cta";
@@ -152,9 +152,9 @@ export default function MigrationGuidePage() {
                       <H4>Export from PracticePlannerLive</H4>
                       <P className="text-muted-foreground">
                         Log into your PracticePlannerLive account and export
-                        your drill list. Export as .xls or save as .xlsx (Excel 2007+).
-                        Make sure you download the complete drill list with all
-                        categories.
+                        your drill list. Export as .xls or save as .xlsx (Excel
+                        2007+). Make sure you download the complete drill list
+                        with all categories.
                       </P>
                     </div>
                   </div>

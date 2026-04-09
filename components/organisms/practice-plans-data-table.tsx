@@ -20,7 +20,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/shadcn/ui/table";
 import { DataTableColumnHeader } from "@/components/molecules/data-table-column-header";
 import { DataTablePagination } from "@/components/molecules/data-table-pagination";
 import {
@@ -28,7 +28,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/shadcn/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -36,10 +36,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Calendar as CalendarUi } from "@/components/ui/calendar";
+} from "@/components/shadcn/ui/dialog";
+import { Button } from "@/components/shadcn/ui/button";
+import { Input } from "@/components/shadcn/ui/input";
+import { Calendar as CalendarUi } from "@/components/shadcn/ui/calendar";
 import {
   CheckCircle2,
   MoreHorizontal,
@@ -57,7 +57,7 @@ import {
   EmptyMedia,
   EmptyTitle,
   EmptyDescription,
-} from "@/components/ui/empty";
+} from "@/components/shadcn/ui/empty";
 
 export interface PracticePlanRow {
   id: string;
@@ -94,14 +94,13 @@ export function PracticePlansDataTable({
     { id: "created_at", desc: true },
   ]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
+    [],
   );
   const [globalFilter, setGlobalFilter] = React.useState("");
   const [deletingId, setDeletingId] = React.useState<string | null>(null);
   const [scheduleModalOpen, setScheduleModalOpen] = React.useState(false);
-  const [schedulePlan, setSchedulePlan] = React.useState<PracticePlanRow | null>(
-    null,
-  );
+  const [schedulePlan, setSchedulePlan] =
+    React.useState<PracticePlanRow | null>(null);
   const [scheduleDate, setScheduleDate] = React.useState<Date | undefined>(
     undefined,
   );
@@ -170,7 +169,7 @@ export function PracticePlansDataTable({
   const handleDelete = async (plan: PracticePlanRow) => {
     if (
       !confirm(
-        `Are you sure you want to delete "${plan.practice_title}"? This cannot be undone.`
+        `Are you sure you want to delete "${plan.practice_title}"? This cannot be undone.`,
       )
     ) {
       return;
@@ -191,7 +190,7 @@ export function PracticePlansDataTable({
       if (!response.ok) {
         const res = await response.json();
         throw new Error(
-          (res as { error?: string }).error ?? "Failed to delete plan"
+          (res as { error?: string }).error ?? "Failed to delete plan",
         );
       }
 
@@ -304,7 +303,7 @@ export function PracticePlansDataTable({
         },
       },
     ],
-    [deletingId]
+    [deletingId],
   );
 
   const table = useReactTable({
@@ -376,7 +375,7 @@ export function PracticePlansDataTable({
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 ))}
@@ -395,9 +394,7 @@ export function PracticePlansDataTable({
                       : "hover:bg-muted/50 transition-colors"
                   }
                   onClick={
-                    onSelectPlan
-                      ? () => onSelectPlan(row.original)
-                      : undefined
+                    onSelectPlan ? () => onSelectPlan(row.original) : undefined
                   }
                 >
                   {row.getVisibleCells().map((cell) => (
@@ -411,7 +408,7 @@ export function PracticePlansDataTable({
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}

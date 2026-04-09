@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Lock, Sparkles, ChevronDown, User, LogOut } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/shadcn/ui/button";
 import { cn } from "@/lib/utils";
 import { SubscriptionStatusBadge } from "@/components/atoms/subscription-status-badge";
 import { useUserAccess } from "@/hooks/useUserAccess";
@@ -15,7 +15,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/shadcn/ui/dropdown-menu";
 import { createClient } from "@/lib/supabase/client";
 import { PRACTICE_PLAN_STORAGE_KEY } from "@/lib/storage-keys";
 
@@ -181,20 +181,17 @@ export function Navigation({ useLogoFull = false }: { useLogoFull?: boolean }) {
             {/* Auth Actions */}
             {!isAuthenticated && (
               <div className="flex items-center gap-2">
-                <Link href="/auth/login">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-sm font-medium"
-                  >
-                    Sign in
-                  </Button>
-                </Link>
-                <Link href="/auth/sign-up">
-                  <Button size="sm" className="text-sm font-medium">
-                    Sign up
-                  </Button>
-                </Link>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-sm font-medium"
+                  asChild
+                >
+                  <Link href="/auth/login">Sign in</Link>
+                </Button>
+                <Button size="sm" className="text-sm font-medium" asChild>
+                  <Link href="/auth/sign-up">Sign up</Link>
+                </Button>
               </div>
             )}
           </div>

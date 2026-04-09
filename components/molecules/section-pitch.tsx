@@ -3,7 +3,7 @@ import { CtaButton } from "@/components/atoms/cta-button";
 import { ArrowRight, type LucideIcon } from "lucide-react";
 import { type ReactNode } from "react";
 import { type VariantProps } from "class-variance-authority";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/shadcn/ui/button";
 
 interface SectionPitchProps {
   title: ReactNode;

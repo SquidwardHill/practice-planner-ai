@@ -6,7 +6,7 @@ import { SubscriptionStatus } from "@/lib/types/subscription";
 import { H1, P, Small } from "@/components/atoms/typography";
 import { ShopifyLinkAccount } from "@/components/organisms/shopify-link-account";
 import { CheckCircle2, XCircle } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/shadcn/ui/badge";
 import { PRODUCT_NAME } from "@/lib/config/branding";
 import { InfoField } from "@/components/molecules/info-field";
 import { InfoSection } from "@/components/molecules/info-section";

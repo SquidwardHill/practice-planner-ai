@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/shadcn/ui/button";
+import { Input } from "@/components/shadcn/ui/input";
+import { Label } from "@/components/shadcn/ui/label";
+import { Textarea } from "@/components/shadcn/ui/textarea";
 import { Send, CheckCircle2 } from "lucide-react";
 import { H3, P, Small } from "@/components/atoms/typography";
 
@@ -77,7 +77,12 @@ export function HelpForm() {
               required
             />
           </div>
-          <Button type="submit" size="default" className="w-full" disabled={isSubmitting}>
+          <Button
+            type="submit"
+            size="default"
+            className="w-full"
+            disabled={isSubmitting}
+          >
             {isSubmitting ? (
               "Sending..."
             ) : (

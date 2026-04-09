@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/shadcn/ui/button";
+import { Input } from "@/components/shadcn/ui/input";
+import { Label } from "@/components/shadcn/ui/label";
 import { P, Small } from "@/components/atoms/typography";
 import { Link2, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -117,7 +117,7 @@ export function ShopifyLinkAccount({
       <div
         className={cn(
           "flex items-center gap-2 p-4 bg-primary/10 rounded-lg border border-primary/20",
-          className
+          className,
         )}
       >
         <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
