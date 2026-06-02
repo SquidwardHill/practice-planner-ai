@@ -2,9 +2,6 @@ import { NextRequest } from "next/server";
 
 const mockGetUser = jest.fn();
 const mockMaybeSingle = jest.fn();
-const mockEq2 = jest.fn();
-const mockEq1 = jest.fn();
-const mockSelect = jest.fn();
 const mockFrom = jest.fn();
 const mockUpsert = jest.fn();
 
@@ -60,8 +57,11 @@ function setupSupabaseChains() {
 }
 
 describe("POST /api/drills/import/youtube", () => {
+  const originalFetch = global.fetch;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    delete process.env.TRANSCRIPT_PROXY_URL;
     mockGetUser.mockResolvedValue({
       data: { user: { id: "user-1" } },
       error: null,
@@ -81,6 +81,10 @@ describe("POST /api/drills/import/youtube", () => {
       },
     ]);
     setupSupabaseChains();
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
   });
 
   it("returns 401 when not authenticated", async () => {
@@ -129,5 +133,82 @@ describe("POST /api/drills/import/youtube", () => {
     expect(body.cached).toBe(false);
     expect(mockExtract).toHaveBeenCalled();
     expect(mockUpsert).toHaveBeenCalled();
+  });
+
+  it("uses fallback transcript parser when primary fetch fails", async () => {
+    mockFetchTranscript.mockRejectedValueOnce(
+      new Error("Transcript is disabled on this video"),
+    );
+
+    const watchHtml = `
+      <html><body><script>
+      var ytInitialPlayerResponse = {"captions":{"playerCaptionsTracklistRenderer":{"captionTracks":[{"baseUrl":"https://captions.test/track","languageCode":"en"}]}}};
+      </script></body></html>
+    `;
+    const captionsXml = `
+      <transcript>
+        <text start="0.0" dur="2.0">Warm up layups</text>
+      </transcript>
+    `;
+
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(watchHtml, { status: 200 }),
+      )
+      .mockResolvedValueOnce(
+        new Response(captionsXml, { status: 200 }),
+      ) as unknown as typeof fetch;
+
+    const req = new NextRequest("http://localhost/api/drills/import/youtube", {
+      method: "POST",
+      body: JSON.stringify({ url: "https://youtu.be/dQw4w9WgXcQ" }),
+    });
+    const res = await POST(req);
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(body.rows).toHaveLength(1);
+    expect(mockExtract).toHaveBeenCalled();
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("uses proxy fallback when direct methods fail and proxy is configured", async () => {
+    process.env.TRANSCRIPT_PROXY_URL = "https://proxy.test/transcript";
+    mockFetchTranscript.mockRejectedValueOnce(
+      new Error("Transcript is disabled on this video"),
+    );
+
+    const watchHtmlWithoutCaptions = `
+      <html><body><script>
+      var ytInitialPlayerResponse = {"videoDetails":{"videoId":"dQw4w9WgXcQ"}};
+      </script></body></html>
+    `;
+
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(new Response(watchHtmlWithoutCaptions, { status: 200 }))
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            segments: [{ text: "Warm up layups", offset: 0, duration: 2000 }],
+          }),
+          { status: 200 },
+        ),
+      ) as unknown as typeof fetch;
+
+    const req = new NextRequest("http://localhost/api/drills/import/youtube", {
+      method: "POST",
+      body: JSON.stringify({ url: "https://youtu.be/dQw4w9WgXcQ" }),
+    });
+    const res = await POST(req);
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.success).toBe(true);
+    expect(body.rows).toHaveLength(1);
+    expect(mockExtract).toHaveBeenCalled();
+    expect(global.fetch).toHaveBeenCalledTimes(2);
   });
 });

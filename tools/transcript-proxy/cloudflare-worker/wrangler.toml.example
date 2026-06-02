@@ -1,0 +1,9 @@
+name = "pp-transcript-proxy"
+main = "worker.js"
+compatibility_date = "2026-06-02"
+
+[vars]
+# Optional shared secret. If set, requests must include:
+# x-transcript-proxy-token: <value>
+PROXY_TOKEN = "replace-me"
+

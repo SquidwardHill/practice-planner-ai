@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
 
     let segments: { text: string; offset: number; duration: number }[];
     try {
-      segments = await YoutubeTranscript.fetchTranscript(videoId);
+      segments = await fetchTranscriptWithFallback(videoId, watchUrl);
     } catch (e) {
       console.error("YouTube transcript fetch failed:", e);
       const message =
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: "Transcript unavailable",
-          message: `${message} This can happen if captions are disabled, the video is private, or YouTube is blocking automated requests.`,
+          message: `${message} This can happen if captions are disabled, the video is private, or YouTube is blocking cloud automated requests (common on serverless hosts).`,
         },
         { status: 422 },
       );
@@ -220,6 +220,316 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     );
   }
+}
+
+type TranscriptSegment = { text: string; offset: number; duration: number };
+const TRANSCRIPT_PROXY_TIMEOUT_MS = 12_000;
+
+async function fetchTranscriptWithFallback(
+  videoId: string,
+  watchUrl: string,
+): Promise<TranscriptSegment[]> {
+  try {
+    return await YoutubeTranscript.fetchTranscript(videoId);
+  } catch (primaryError) {
+    console.warn(
+      `[youtube import] Primary transcript fetch failed for ${videoId}; trying fallback parser.`,
+      primaryError,
+    );
+  }
+
+  try {
+    // Fallback approach:
+    // 1) Load watch page HTML
+    // 2) Read player response captions track metadata
+    // 3) Fetch caption XML directly from track baseUrl
+    const pageRes = await fetch(watchUrl, {
+      method: "GET",
+      headers: {
+        "User-Agent": "practice-planner-ai/1.0",
+        Accept: "text/html",
+      },
+      cache: "no-store",
+    });
+
+    if (!pageRes.ok) {
+      throw new Error(`Fallback watch page fetch failed (${pageRes.status}).`);
+    }
+
+    const html = await pageRes.text();
+    const playerResponse = extractPlayerResponseJson(html);
+    if (!playerResponse) {
+      throw new Error("Fallback parser could not read YouTube player response.");
+    }
+
+    const captionTracks =
+      playerResponse?.captions?.playerCaptionsTracklistRenderer?.captionTracks;
+    if (!Array.isArray(captionTracks) || captionTracks.length === 0) {
+      throw new Error("No caption tracks available for this video.");
+    }
+
+    const selectedTrack =
+      captionTracks.find(
+        (t) => t?.languageCode === "en" && t?.kind !== "asr",
+      ) ||
+      captionTracks.find((t) => t?.languageCode === "en") ||
+      captionTracks[0];
+
+    const baseUrl = selectedTrack?.baseUrl;
+    if (typeof baseUrl !== "string" || !baseUrl) {
+      throw new Error("Caption track URL missing from player response.");
+    }
+
+    const captionsRes = await fetch(baseUrl, {
+      method: "GET",
+      headers: {
+        "User-Agent": "practice-planner-ai/1.0",
+        Accept: "application/xml,text/xml,text/plain",
+      },
+      cache: "no-store",
+    });
+    if (!captionsRes.ok) {
+      throw new Error(`Caption track fetch failed (${captionsRes.status}).`);
+    }
+
+    const captionsXml = await captionsRes.text();
+    const parsed = parseCaptionXml(captionsXml);
+    if (!parsed.length) {
+      throw new Error("Fallback parser received an empty caption track.");
+    }
+
+    return parsed;
+  } catch (fallbackError) {
+    console.warn(
+      `[youtube import] Secondary transcript fallback failed for ${videoId}; trying proxy fallback if configured.`,
+      fallbackError,
+    );
+  }
+
+  const proxySegments = await fetchTranscriptViaProxy(videoId, watchUrl);
+  if (proxySegments?.length) {
+    return proxySegments;
+  }
+
+  throw new Error(
+    "Transcript could not be fetched from YouTube directly. Configure TRANSCRIPT_PROXY_URL for additional fallback.",
+  );
+}
+
+async function fetchTranscriptViaProxy(
+  videoId: string,
+  watchUrl: string,
+): Promise<TranscriptSegment[] | null> {
+  const proxyBase = process.env.TRANSCRIPT_PROXY_URL?.trim();
+  if (!proxyBase) return null;
+
+  let endpoint: URL;
+  try {
+    endpoint = new URL(proxyBase);
+  } catch {
+    console.error("Invalid TRANSCRIPT_PROXY_URL value:", proxyBase);
+    return null;
+  }
+
+  endpoint.searchParams.set("videoId", videoId);
+  endpoint.searchParams.set("url", watchUrl);
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), TRANSCRIPT_PROXY_TIMEOUT_MS);
+  try {
+    const proxyToken = process.env.TRANSCRIPT_PROXY_TOKEN?.trim();
+    const res = await fetch(endpoint.toString(), {
+      method: "GET",
+      headers: {
+        Accept: "application/json,text/plain",
+        ...(proxyToken
+          ? { "x-transcript-proxy-token": proxyToken }
+          : {}),
+      },
+      signal: controller.signal,
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      console.warn(
+        `[youtube import] Proxy transcript request failed (${res.status}).`,
+      );
+      return null;
+    }
+
+    const data = (await res.json()) as
+      | { segments?: unknown[]; transcript?: string }
+      | null;
+
+    if (!data) return null;
+
+    if (Array.isArray(data.segments)) {
+      const mapped = data.segments
+        .map((s) => coerceTranscriptSegment(s))
+        .filter((s): s is TranscriptSegment => Boolean(s));
+      return mapped.length ? mapped : null;
+    }
+
+    if (typeof data.transcript === "string" && data.transcript.trim()) {
+      return textTranscriptToSegments(data.transcript);
+    }
+    return null;
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.warn("[youtube import] Proxy transcript request error:", msg);
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function coerceTranscriptSegment(input: unknown): TranscriptSegment | null {
+  if (!input || typeof input !== "object") return null;
+  const obj = input as Record<string, unknown>;
+  const text = typeof obj.text === "string" ? obj.text.trim() : "";
+  if (!text) return null;
+
+  const offsetCandidate = obj.offset ?? obj.startMs ?? obj.start;
+  const durationCandidate = obj.duration ?? obj.durationMs ?? obj.dur;
+
+  const offset =
+    typeof offsetCandidate === "number"
+      ? offsetCandidate
+      : Number.parseFloat(String(offsetCandidate ?? "0"));
+  const duration =
+    typeof durationCandidate === "number"
+      ? durationCandidate
+      : Number.parseFloat(String(durationCandidate ?? "0"));
+
+  return {
+    text,
+    offset: Number.isFinite(offset) ? Math.max(0, Math.floor(offset)) : 0,
+    duration: Number.isFinite(duration) ? Math.max(0, Math.floor(duration)) : 0,
+  };
+}
+
+function textTranscriptToSegments(transcript: string): TranscriptSegment[] {
+  const lines = transcript
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+  return lines.map((line, idx) => ({
+    text: line,
+    offset: idx * 5_000,
+    duration: 5_000,
+  }));
+}
+
+type CaptionTrack = {
+  baseUrl?: string;
+  languageCode?: string;
+  kind?: string;
+};
+
+type PlayerResponseLike = {
+  captions?: {
+    playerCaptionsTracklistRenderer?: {
+      captionTracks?: CaptionTrack[];
+    };
+  };
+};
+
+function extractPlayerResponseJson(html: string): PlayerResponseLike | null {
+  // Most watch pages include:
+  // ytInitialPlayerResponse = {...};
+  const token = "ytInitialPlayerResponse";
+  const tokenIdx = html.indexOf(token);
+  if (tokenIdx < 0) return null;
+
+  const firstBraceIdx = html.indexOf("{", tokenIdx);
+  if (firstBraceIdx < 0) return null;
+
+  const jsonText = readBalancedJsonObject(html, firstBraceIdx);
+  if (!jsonText) return null;
+
+  try {
+    return JSON.parse(jsonText) as PlayerResponseLike;
+  } catch {
+    return null;
+  }
+}
+
+function readBalancedJsonObject(input: string, startIdx: number): string | null {
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+
+  for (let i = startIdx; i < input.length; i++) {
+    const ch = input[i];
+
+    if (inString) {
+      if (escape) {
+        escape = false;
+      } else if (ch === "\\") {
+        escape = true;
+      } else if (ch === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (ch === '"') {
+      inString = true;
+      continue;
+    }
+
+    if (ch === "{") depth++;
+    if (ch === "}") {
+      depth--;
+      if (depth === 0) {
+        return input.slice(startIdx, i + 1);
+      }
+    }
+  }
+  return null;
+}
+
+function parseCaptionXml(xml: string): TranscriptSegment[] {
+  const textNodes = xml.matchAll(/<text\b([^>]*)>([\s\S]*?)<\/text>/g);
+  const segments: TranscriptSegment[] = [];
+
+  for (const match of textNodes) {
+    const attrs = match[1] || "";
+    const rawText = match[2] || "";
+    const startMatch = attrs.match(/\bstart="([^"]+)"/);
+    const durMatch = attrs.match(/\bdur="([^"]+)"/);
+
+    const startSec = startMatch ? Number.parseFloat(startMatch[1]) : NaN;
+    const durSec = durMatch ? Number.parseFloat(durMatch[1]) : 0;
+    if (!Number.isFinite(startSec)) continue;
+
+    const text = decodeHtmlEntities(rawText)
+      .replace(/<[^>]*>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!text) continue;
+
+    segments.push({
+      text,
+      offset: Math.max(0, Math.floor(startSec * 1000)),
+      duration: Math.max(0, Math.floor(durSec * 1000)),
+    });
+  }
+
+  return segments;
+}
+
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#(\d+);/g, (_, dec) => {
+      const n = Number.parseInt(dec, 10);
+      return Number.isFinite(n) ? String.fromCharCode(n) : _;
+    });
 }
 
 async function buildImportResponse(
