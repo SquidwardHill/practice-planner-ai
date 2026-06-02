@@ -37,15 +37,7 @@ export default {
         return json({ error: "videoId and url are required" }, 400);
       }
 
-      // Primary: direct library path
-      try {
-        const segments = await fetchViaLibrary(videoId);
-        if (segments.length > 0) return json({ segments }, 200);
-      } catch (e) {
-        console.warn("library transcript fetch failed", e);
-      }
-
-      // Secondary: page + caption xml path
+      // Dependency-free path: watch page + caption xml path
       try {
         const segments = await fetchViaWatchPage(watchUrl);
         if (segments.length > 0) return json({ segments }, 200);
@@ -71,19 +63,6 @@ export default {
     }
   },
 };
-
-async function fetchViaLibrary(videoId) {
-  // Dynamic import keeps worker startup lean.
-  const { YoutubeTranscript } = await import("youtube-transcript");
-  const rows = await YoutubeTranscript.fetchTranscript(videoId);
-  return rows.map((r) => ({
-    text: String(r.text || "").trim(),
-    offset: Number.isFinite(r.offset) ? Math.max(0, Math.floor(r.offset)) : 0,
-    duration: Number.isFinite(r.duration)
-      ? Math.max(0, Math.floor(r.duration))
-      : 0,
-  }));
-}
 
 async function fetchViaWatchPage(watchUrl) {
   const pageRes = await fetch(watchUrl, {
