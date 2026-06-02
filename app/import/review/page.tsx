@@ -58,6 +58,10 @@ interface ImportReviewData {
     invalidRows: number;
     errors: Array<{ row: number; error: string }>;
   };
+  /** Present when drills came from YouTube smart import */
+  source?: "youtube";
+  videoUrl?: string;
+  cached?: boolean;
 }
 
 const PREVIEW_ROWS = 10; // Show first 10 rows for review
@@ -237,6 +241,24 @@ export default function ImportReviewPage() {
 
       <div className="mb-12">
         <H1 className="mb-8">Review Your Import</H1>
+        {reviewData.source === "youtube" && reviewData.videoUrl ? (
+          <div className="mb-6 max-w-2xl rounded-lg border border-border bg-muted/40 px-4 py-3">
+            <P className="text-sm font-medium text-foreground">
+              Drills extracted from YouTube
+              {reviewData.cached ? " (cached result)" : ""}
+            </P>
+            <Small className="mt-1 block">
+              <Link
+                href={reviewData.videoUrl}
+                className="text-primary underline underline-offset-2"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open source video
+              </Link>
+            </Small>
+          </div>
+        ) : null}
         {/* Summary Stats */}
         <div className="grid grid-cols-5 gap-2 mb-4 border rounded-lg px-4 py-2 max-w-2xl mt-4">
           <div className="col-span-1 border-r pr-2">

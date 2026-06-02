@@ -28,7 +28,7 @@ export function DrillImportActions({
           }
         }}
       >
-        Upload Drill List
+        Import drills
         {!guarded ? <Upload className="h-4 w-4" /> : null}
       </Button>
 

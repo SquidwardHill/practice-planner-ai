@@ -21,14 +21,14 @@ export function MigrationGuideCTA() {
             <div>
               <H3 className="mb-2">Ready to Import Your Drills?</H3>
               <P className="text-muted-foreground mb-4">
-                Upload your drill list file to get started.
+                Import from a spreadsheet or a YouTube video with captions.
               </P>
               <Button
                 onClick={() => setIsModalOpen(true)}
                 size="default"
                 guarded={!hasAccess}
               >
-                Upload Drill List
+                Import drills
                 <Upload className="h-4 w-4" />
               </Button>
             </div>

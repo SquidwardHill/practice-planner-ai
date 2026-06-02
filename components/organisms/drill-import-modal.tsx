@@ -16,14 +16,13 @@ import {
   Upload,
   FileText,
   X,
-  SaveIcon,
-  Save,
-  Import,
   FileUp,
+  Youtube,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { P, Small } from "@/components/atoms/typography";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/shadcn/ui/tabs";
 
 interface DrillImportModalProps {
   open: boolean;
@@ -37,7 +36,16 @@ export function DrillImportModal({
   const [file, setFile] = React.useState<File | null>(null);
   const [isDragging, setIsDragging] = React.useState(false);
   const [isUploading, setIsUploading] = React.useState(false);
+  const [youtubeUrl, setYoutubeUrl] = React.useState("");
+  const [forceYoutubeRefresh, setForceYoutubeRefresh] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    if (!open) {
+      setYoutubeUrl("");
+      setForceYoutubeRefresh(false);
+    }
+  }, [open]);
 
   const handleFileSelect = (selectedFile: File | null) => {
     if (!selectedFile) return;
@@ -166,17 +174,78 @@ export function DrillImportModal({
     }
   };
 
+  const handleYoutubeImport = async () => {
+    if (!youtubeUrl.trim()) return;
+
+    setIsUploading(true);
+    try {
+      const response = await fetch("/api/drills/import/youtube", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: youtubeUrl.trim(),
+          forceRefresh: forceYoutubeRefresh,
+        }),
+      });
+
+      if (!response.ok) {
+        let errorData: { message?: string; error?: string } = {};
+        try {
+          errorData = await response.json();
+        } catch {
+          throw new Error(
+            `Import failed: ${response.statusText || "Unknown error"}`,
+          );
+        }
+        throw new Error(
+          errorData.message || errorData.error || "YouTube import failed",
+        );
+      }
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || "YouTube import failed");
+      }
+
+      sessionStorage.setItem(
+        "importReviewData",
+        JSON.stringify({
+          rows: data.rows,
+          summary: data.summary,
+          source: "youtube",
+          videoUrl: data.videoUrl,
+          cached: Boolean(data.cached),
+        }),
+      );
+
+      onOpenChange(false);
+      setYoutubeUrl("");
+      setForceYoutubeRefresh(false);
+      window.location.href = "/import/review";
+    } catch (error) {
+      console.error("YouTube import error:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to import from YouTube. Please try again.";
+      alert(errorMessage);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Legacy Drill Migration</DialogTitle>
+          <DialogTitle>Import drills</DialogTitle>
           <DialogDescription>
-            Download your drill data from PracticePlannerLive. Your drills will
-            be automatically formatted and imported into your library.
+            Upload a spreadsheet from PracticePlannerLive, or paste a YouTube
+            link to extract drills from captions with AI—then review before
+            saving to your library.
           </DialogDescription>
           <P className="text-muted-foreground/75 pt-2">
-            {" "}
             Need more details? Check out our{" "}
             <Link
               className="text-accent/75 underline"
@@ -187,7 +256,19 @@ export function DrillImportModal({
           </P>
         </DialogHeader>
 
-        <div className="space-y-6 py-2">
+        <Tabs defaultValue="spreadsheet" className="py-2">
+          <TabsList className="w-full max-w-md">
+            <TabsTrigger value="spreadsheet" className="flex-1">
+              Spreadsheet
+            </TabsTrigger>
+            <TabsTrigger value="youtube" className="flex-1 gap-1.5">
+              <Youtube className="size-4 shrink-0" />
+              YouTube
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="spreadsheet" className="mt-4 space-y-6">
+        <div className="space-y-6">
           {/* File Upload Area */}
           <div className="space-y-2">
             <div
@@ -266,7 +347,7 @@ export function DrillImportModal({
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="gap-2 sm:gap-0">
           <Button
             type="button"
             variant="outline"
@@ -293,6 +374,64 @@ export function DrillImportModal({
             )}
           </Button>
         </DialogFooter>
+          </TabsContent>
+
+          <TabsContent value="youtube" className="mt-4 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="youtube-url">YouTube URL</Label>
+              <Input
+                id="youtube-url"
+                type="url"
+                placeholder="https://www.youtube.com/watch?v=…"
+                value={youtubeUrl}
+                onChange={(e) => setYoutubeUrl(e.target.value)}
+                disabled={isUploading}
+                autoComplete="off"
+              />
+              <Small className="text-muted-foreground">
+                We fetch captions, then AI suggests drill rows. You can edit
+                everything on the next screen before saving.
+              </Small>
+            </div>
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
+              <input
+                type="checkbox"
+                className="size-4 rounded border-input accent-primary"
+                checked={forceYoutubeRefresh}
+                onChange={(e) => setForceYoutubeRefresh(e.target.checked)}
+                disabled={isUploading}
+              />
+              Re-run AI (ignore saved cache for this video)
+            </label>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={isUploading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleYoutubeImport}
+                disabled={!youtubeUrl.trim() || isUploading}
+              >
+                {isUploading ? (
+                  <>
+                    Processing…
+                    <Upload className="h-4 w-4 animate-pulse" />
+                  </>
+                ) : (
+                  <>
+                    Extract drills
+                    <Youtube className="h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
