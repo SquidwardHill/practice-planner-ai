@@ -8,6 +8,13 @@ if (typeof global.TextEncoder === 'undefined') {
   global.TextDecoder = TextDecoder;
 }
 
+// Polyfill for MessagePort/MessageChannel (used by undici/cheerio in Jest)
+if (typeof global.MessagePort === 'undefined' || typeof global.MessageChannel === 'undefined') {
+  const { MessagePort, MessageChannel } = require('worker_threads');
+  global.MessagePort = MessagePort;
+  global.MessageChannel = MessageChannel;
+}
+
 // Polyfill for ReadableStream if not available
 if (typeof global.ReadableStream === 'undefined') {
   global.ReadableStream = class ReadableStream {

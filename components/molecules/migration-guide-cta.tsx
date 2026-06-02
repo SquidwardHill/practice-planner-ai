@@ -21,7 +21,8 @@ export function MigrationGuideCTA() {
             <div>
               <H3 className="mb-2">Ready to Import Your Drills?</H3>
               <P className="text-muted-foreground mb-4">
-                Import from a spreadsheet or a YouTube video with captions.
+                Import from a spreadsheet, a YouTube video with captions, or a web
+                page URL.
               </P>
               <Button
                 onClick={() => setIsModalOpen(true)}

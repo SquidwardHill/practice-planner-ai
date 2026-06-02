@@ -11,13 +11,14 @@ const customJestConfig = {
   testEnvironment: 'jsdom', // Use jsdom for React component tests
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
+    '^cheerio$': '<rootDir>/node_modules/cheerio/dist/commonjs/index.js',
   },
   testMatch: [
     '**/__tests__/**/*.test.[jt]s?(x)',
     '**/?(*.)+(spec|test).[jt]s?(x)',
   ],
   transformIgnorePatterns: [
-    '/node_modules/',
+    '/node_modules/(?!cheerio/)',
     '^.+\\.module\\.(css|sass|scss)$',
   ],
 }

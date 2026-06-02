@@ -18,6 +18,7 @@ import {
   X,
   FileUp,
   Youtube,
+  Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -38,12 +39,16 @@ export function DrillImportModal({
   const [isUploading, setIsUploading] = React.useState(false);
   const [youtubeUrl, setYoutubeUrl] = React.useState("");
   const [forceYoutubeRefresh, setForceYoutubeRefresh] = React.useState(false);
+  const [webUrl, setWebUrl] = React.useState("");
+  const [forceWebRefresh, setForceWebRefresh] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     if (!open) {
       setYoutubeUrl("");
       setForceYoutubeRefresh(false);
+      setWebUrl("");
+      setForceWebRefresh(false);
     }
   }, [open]);
 
@@ -235,6 +240,66 @@ export function DrillImportModal({
     }
   };
 
+  const handleWebImport = async () => {
+    if (!webUrl.trim()) return;
+
+    setIsUploading(true);
+    try {
+      const response = await fetch("/api/drills/import/web", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: webUrl.trim(),
+          forceRefresh: forceWebRefresh,
+        }),
+      });
+
+      if (!response.ok) {
+        let errorData: { message?: string; error?: string } = {};
+        try {
+          errorData = await response.json();
+        } catch {
+          throw new Error(
+            `Import failed: ${response.statusText || "Unknown error"}`,
+          );
+        }
+        throw new Error(
+          errorData.message || errorData.error || "Web import failed",
+        );
+      }
+
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || "Web import failed");
+      }
+
+      sessionStorage.setItem(
+        "importReviewData",
+        JSON.stringify({
+          rows: data.rows,
+          summary: data.summary,
+          source: "web",
+          videoUrl: data.videoUrl,
+          cached: Boolean(data.cached),
+        }),
+      );
+
+      onOpenChange(false);
+      setWebUrl("");
+      setForceWebRefresh(false);
+      window.location.href = "/import/review";
+    } catch (error) {
+      console.error("Web import error:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to import from Web. Please try again.";
+      alert(errorMessage);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
@@ -242,7 +307,7 @@ export function DrillImportModal({
           <DialogTitle>Import drills</DialogTitle>
           <DialogDescription>
             Upload a spreadsheet from PracticePlannerLive, or paste a YouTube
-            link to extract drills from captions with AI—then review before
+            or web page URL to extract drills with AI—then review before
             saving to your library.
           </DialogDescription>
           <P className="text-muted-foreground/75 pt-2">
@@ -260,6 +325,10 @@ export function DrillImportModal({
           <TabsList className="w-full max-w-md">
             <TabsTrigger value="spreadsheet" className="flex-1">
               Spreadsheet
+            </TabsTrigger>
+            <TabsTrigger value="web" className="flex-1 gap-1.5">
+              <Globe className="size-4 shrink-0" />
+              Web
             </TabsTrigger>
             <TabsTrigger value="youtube" className="flex-1 gap-1.5">
               <Youtube className="size-4 shrink-0" />
@@ -374,6 +443,63 @@ export function DrillImportModal({
             )}
           </Button>
         </DialogFooter>
+          </TabsContent>
+
+          <TabsContent value="web" className="mt-4 space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="web-url">Web page URL</Label>
+              <Input
+                id="web-url"
+                type="url"
+                placeholder="https://example.com/basketball-drills"
+                value={webUrl}
+                onChange={(e) => setWebUrl(e.target.value)}
+                disabled={isUploading}
+                autoComplete="off"
+              />
+              <Small className="text-muted-foreground">
+                We fetch the page, extract main readable text, then AI
+                suggests drill rows. You can edit everything on the next
+                screen before saving.
+              </Small>
+            </div>
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
+              <input
+                type="checkbox"
+                className="size-4 rounded border-input accent-primary"
+                checked={forceWebRefresh}
+                onChange={(e) => setForceWebRefresh(e.target.checked)}
+                disabled={isUploading}
+              />
+              Re-run AI (ignore saved cache for this page)
+            </label>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={isUploading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleWebImport}
+                disabled={!webUrl.trim() || isUploading}
+              >
+                {isUploading ? (
+                  <>
+                    Processing…
+                    <Upload className="h-4 w-4 animate-pulse" />
+                  </>
+                ) : (
+                  <>
+                    Extract drills
+                    <Globe className="h-4 w-4" />
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
           </TabsContent>
 
           <TabsContent value="youtube" className="mt-4 space-y-4">

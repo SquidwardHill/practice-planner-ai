@@ -58,8 +58,8 @@ interface ImportReviewData {
     invalidRows: number;
     errors: Array<{ row: number; error: string }>;
   };
-  /** Present when drills came from YouTube smart import */
-  source?: "youtube";
+  /** Present when drills came from a smart import (YouTube or Web). */
+  source?: "youtube" | "web";
   videoUrl?: string;
   cached?: boolean;
 }
@@ -255,6 +255,24 @@ export default function ImportReviewPage() {
                 rel="noopener noreferrer"
               >
                 Open source video
+              </Link>
+            </Small>
+          </div>
+        ) : null}
+        {reviewData.source === "web" && reviewData.videoUrl ? (
+          <div className="mb-6 max-w-2xl rounded-lg border border-border bg-muted/40 px-4 py-3">
+            <P className="text-sm font-medium text-foreground">
+              Drills extracted from Web page
+              {reviewData.cached ? " (cached result)" : ""}
+            </P>
+            <Small className="mt-1 block">
+              <Link
+                href={reviewData.videoUrl}
+                className="text-primary underline underline-offset-2"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open source page
               </Link>
             </Small>
           </div>
